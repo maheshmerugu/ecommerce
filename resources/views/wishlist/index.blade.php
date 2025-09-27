@@ -81,7 +81,7 @@
                             <!-- Product Image -->
                             <div class="relative aspect-square bg-gray-100 overflow-hidden">
                                 @if($item->product->images && $item->product->images->count() > 0)
-                                    <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}" 
+                                    <img src="{{ asset('public/storage/' . $item->product->images->first()->image_path) }}" 
                                          alt="{{ $item->product->name }}" 
                                          class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
                                 @else

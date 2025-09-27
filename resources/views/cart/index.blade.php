@@ -75,7 +75,7 @@
                                     <div class="flex-shrink-0">
                                         <a href="{{ route('products.show', $item->product->slug) }}">
                                             @if($item->product->images && $item->product->images->count() > 0)
-                                                <img src="{{ product_image_url($item->product->images->first()->image_path) }}" 
+                                                <img src="{{ asset('public/storage/' . $item->product->images->first()->image_path) }}" 
                                                     alt="{{ $item->product->name }}" 
                                                     class="w-20 h-20 md:w-24 md:h-24 object-contain rounded border">
                                             @else

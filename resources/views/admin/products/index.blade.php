@@ -64,7 +64,7 @@
                         <tr>
                             <td>
                                 @if($product->image)
-                                    <img src="{{ product_image_url($product->image) }}" 
+                                    <img src="{{ asset('public/storage/' . $product->image) }}" 
                                          alt="{{ $product->name }}" 
                                          class="img-thumbnail" 
                                          style="width: 50px; height: 50px; object-fit: cover;">

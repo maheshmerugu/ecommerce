@@ -295,7 +295,7 @@
                             @foreach($product->images as $image)
                                 <div class="col-6 mb-3">
                                     <div class="position-relative">
-                                        <img src="{{ asset('storage/' . $image->image_path) }}" 
+                                        <img src="{{ asset('public/storage/' . $image->image_path) }}" 
                                              alt="{{ $image->alt_text }}" 
                                              class="img-fluid img-thumbnail">
                                         @if($image->is_main)

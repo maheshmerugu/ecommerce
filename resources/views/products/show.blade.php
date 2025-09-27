@@ -239,14 +239,14 @@
                                 // Add main product image first
                                 if($product->image) {
                                     $images->push([
-                                        'thumb' => asset('storage/' . $product->image),
-                                        'full' => asset('storage/' . $product->image),
+                                        'thumb' => asset('public/storage/' . $product->image),
+                                        'full' => asset('public/storage/' . $product->image),
                                         'alt' => $product->name . ' - Main Image'
                                     ]);
                                 } elseif($product->images && $product->images->count() > 0) {
                                     $images->push([
-                                        'thumb' => asset('storage/' . $product->images->first()->image_path),
-                                        'full' => asset('storage/' . $product->images->first()->image_path),
+                                        'thumb' => asset('public/storage/' . $product->images->first()->image_path),
+                                        'full' => asset('public/storage/' . $product->images->first()->image_path),
                                         'alt' => $product->name . ' - Main Image'
                                     ]);
                                 }
@@ -256,8 +256,8 @@
                                     $imageIndex = 2; // Start from 2 since main image is 1
                                     foreach($product->images->skip(1)->take(3) as $img) {
                                         $images->push([
-                                            'thumb' => asset('storage/' . $img->image_path),
-                                            'full' => asset('storage/' . $img->image_path),
+                                            'thumb' => asset('public/storage/' . $img->image_path),
+                                            'full' => asset('public/storage/' . $img->image_path),
                                             'alt' => $product->name . ' - Image ' . $imageIndex
                                         ]);
                                         $imageIndex++;
@@ -436,7 +436,7 @@
                     <a href="{{ route('products.show', $relatedProduct->slug) }}" class="block">
                         <div class="aspect-square bg-gray-100 relative overflow-hidden">
                             @if($relatedProduct->images && $relatedProduct->images->count() > 0)
-                                <img src="{{ asset('storage/' . $relatedProduct->images->first()->image_path) }}" 
+                                <img src="{{ asset('public/storage/' . $relatedProduct->images->first()->image_path) }}" 
                                     alt="{{ $relatedProduct->name }}" 
                                     class="w-full h-full object-contain hover:scale-105 transition-transform duration-300">
                             @else

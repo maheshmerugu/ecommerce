@@ -349,7 +349,7 @@
                                     <a href="{{ route('products.show', $product->slug) }}" class="block">
                                         <div class="relative mb-3">
                                             @if($product->images && $product->images->count() > 0)
-                                            <img src="{{ product_image_url($product->images->first()->image_path) }}"
+                                            <img src="{{ asset('public/storage/' . $product->images->first()->image_path) }}"
                                                 alt="{{ $product->name }}"
                                                 class="w-full h-24 md:h-32 object-contain group-hover:scale-105 transition duration-300">
                                             @else
@@ -429,7 +429,7 @@
                             <a href="{{ route('products.show', $product->slug) }}" class="block">
                                 <div class="relative mb-3">
                                     @if($product->images && $product->images->count() > 0)
-                                    <img src="{{ product_image_url($product->images->first()->image_path) }}"
+                                    <img src="{{ asset('public/storage/' . $product->images->first()->image_path) }}"
                                         alt="{{ $product->name }}"
                                         class="w-full h-24 md:h-32 object-contain group-hover:scale-105 transition duration-300">
                                     @else

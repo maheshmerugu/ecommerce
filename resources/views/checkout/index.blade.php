@@ -4,9 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout - {{ config('app.name', 'Laravel') }}</title>
-    <script                                     <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}" 
-                                         alt="{{ $item->product->name }}" 
-                                         class="w-20 h-20 object-cover rounded border">="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
@@ -118,9 +116,14 @@
                                     <input type="radio" name="saved_address" value="{{ $address->id }}" 
                                         class="mr-3" onchange="fillAddress({{ json_encode($address) }})">
                                     <div class="flex-1">
-                                        <div class="font-medium">{{ $address->name }}</div>
-                                        <div class="text-sm text-gray-600">{{ $address->address }}, {{ $address->city }}, {{ $address->state }} - {{ $address->pincode }}</div>
+                                        <div class="font-medium">{{ $address->full_name }}</div>
+                                        <div class="text-sm text-gray-600">{{ $address->formatted_address }}</div>
+                                        @if($address->phone)
                                         <div class="text-sm text-gray-500">{{ $address->phone }}</div>
+                                        @endif
+                                        @if($address->is_default)
+                                        <div class="text-xs text-blue-600 font-medium">Default Address</div>
+                                        @endif
                                     </div>
                                 </label>
                                 @endforeach
@@ -130,6 +133,9 @@
                                     <input type="radio" name="saved_address" value="new" checked class="mr-2">
                                     <span class="text-sm">Use new address</span>
                                 </label>
+                            </div>
+                        </div>
+                        @endif
                             </div>
                         </div>
                         @else
@@ -226,7 +232,7 @@
                         <div class="flex items-center space-x-3">
                             <div class="flex-shrink-0">
                                 @if($item->product->images && $item->product->images->count() > 0)
-                                    <img src="{{ Storage::url($item->product->images->first()->image_path) }}" 
+                                    <img src="{{ asset('public/storage/' . $item->product->images->first()->image_path) }}" 
                                         alt="{{ $item->product->name }}" 
                                         class="w-12 h-12 object-cover rounded border">
                                 @else
@@ -316,12 +322,12 @@
         }
 
         function fillAddress(address) {
-            document.querySelector('input[name="customer_name"]').value = address.name;
-            document.querySelector('input[name="customer_phone"]').value = address.phone;
-            document.querySelector('textarea[name="shipping_address"]').value = address.address;
+            document.querySelector('input[name="customer_name"]').value = address.first_name + ' ' + address.last_name;
+            document.querySelector('input[name="customer_phone"]').value = address.phone || '';
+            document.querySelector('textarea[name="shipping_address"]').value = address.address_line_1 + (address.address_line_2 ? ', ' + address.address_line_2 : '');
             document.querySelector('input[name="shipping_city"]').value = address.city;
             document.querySelector('input[name="shipping_state"]').value = address.state;
-            document.querySelector('input[name="shipping_pincode"]').value = address.pincode;
+            document.querySelector('input[name="shipping_pincode"]').value = address.postal_code;
         }
 
         function processCheckout() {

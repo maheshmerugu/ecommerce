@@ -273,7 +273,7 @@
                     <div class="bg-white rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition duration-300">
                         <div class="relative">
                             @if($product->images->count() > 0)
-                                <img src="{{ product_image_url($product->images->first()->image_path) }}" 
+                                <img src="{{ asset('public/storage/' . $product->images->first()->image_path) }}" 
                                     alt="{{ $product->name }}" 
                                     class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
                             @else
