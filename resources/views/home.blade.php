@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>E-Commerce Store - Online Shopping for Electronics, Fashion, Home & More</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+    <!-- Swiper JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <style>
+        .gradient-bg {
+            background: linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%);
+        }
+
+        .deal-card:hover {
+            transform: translateY(-4px);
+        }
+
+        .category-icon {
+            transition: all 0.3s ease;
+        }
+
+        .category-icon:hover {
+            transform: scale(1.1);
+        }
+
+        .product-card {
+            transition: all 0.3s ease;
+        }
+
+        .product-card:hover {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+
+        .banner-slide {
+            min-height: 280px;
+        }
+        
+        /* Mobile specific improvements */
+        @media (max-width: 768px) {
+            .banner-slide { min-height: 200px; }
+            .container { padding-left: 1rem; padding-right: 1rem; }
+            .swiper-button-next, .swiper-button-prev { display: none !important; }
+            .swiper-pagination-bullet { width: 8px; height: 8px; }
+            .line-clamp-2 {
+                display: -webkit-box;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+                -webkit-box-orient: vertical;
+                overflow: hidden;
+            }
+            /* Hide elements on mobile for better space utilization */
+            .mobile-hide { display: none; }
+            /* Better touch targets */
+            .touch-target { min-height: 44px; min-width: 44px; }
+            /* Prevent horizontal scrolling */
+            body { overflow-x: hidden; }
+        }
+        
+        /* Tablet specific */
+        @media (min-width: 768px) and (max-width: 1024px) {
+            .banner-slide { min-height: 240px; }
+        }
+        
+        /* Desktop specific */
+        @media (min-width: 1024px) {
+            .mobile-only { display: none; }
+        }
+        
+        /* Ensure images don't overflow */
+        img { max-width: 100%; height: auto; }
+        
+        /* Better scrolling on mobile */
+        .swiper-container { padding: 0; }
+        .swiper-wrapper { align-items: stretch; }
+        
+        /* Smooth transitions */
+        * { 
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-100">
+    <!-- Top Header Bar -->
+    <div class="bg-blue-600 text-white text-xs py-1 hidden md:block">
+        <div class="container mx-auto px-4 flex justify-between items-center">
+            <div class="flex items-center space-x-4">
+                <span><i class="fas fa-truck mr-1"></i> Free delivery</span>
+                <span><i class="fas fa-undo mr-1"></i> Return policy</span>
+            </div>
+            <div class="flex items-center space-x-4">
+                @guest('customer')
+                <a href="{{ route('login') }}" class="hover:text-blue-200">Login</a>
+                <a href="{{ route('register') }}" class="hover:text-blue-200">Sign Up</a>
+                @endguest
+                @auth('customer')
+                <span>Welcome, {{ auth('customer')->user()->first_name }}!</span>
+                <a href="{{ route('customer.dashboard') }}" class="hover:text-blue-200">My Account</a>
+                <form action="{{ route('customer.logout') }}" method="POST" class="inline">
+                    @csrf
+                    <button type="submit" class="hover:text-blue-200">Logout</button>
+                </form>
+                @endauth
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="bg-white shadow-sm border-b">
+        <div class="container mx-auto px-4">
+            <div class="flex items-center justify-between py-3">
+                <!-- Mobile Menu Button -->
+                <div class="md:hidden">
+                    <button class="text-gray-600 hover:text-gray-900 focus:outline-none focus:text-gray-900" onclick="toggleMobileMenu()">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                </div>
+
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4 md:mr-8">
+                        <span class="hidden sm:inline">E-Commerce</span>
+                        <span class="sm:hidden">EC</span>
+                        <span class="text-xs text-gray-500 block -mt-1 hidden md:block">Explore Plus</span>
+                    </a>
+                </div>
+
+                <!-- Search Bar - Hidden on small screens -->
+                <div class="hidden md:flex flex-1 max-w-2xl mx-8">
+                    <form action="{{ route('products.index') }}" method="GET" class="relative w-full">
+                        <input type="text" name="search"
+                            placeholder="Search for products, brands and more"
+                            class="w-full px-4 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                        <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-blue-600">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Right Actions -->
+                <div class="flex items-center space-x-2 md:space-x-6">
+                    <!-- Mobile Search Icon -->
+                    <button class="md:hidden flex flex-col items-center text-gray-700 hover:text-blue-600" onclick="toggleSearchBar()">
+                        <i class="fas fa-search text-lg"></i>
+                        <span class="text-xs">Search</span>
+                    </button>
+
+                    @auth('customer')
+                    <a href="#" class="flex flex-col items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-user text-lg"></i>
+                        <span class="text-xs hidden sm:inline">Account</span>
+                    </a>
+                    @endauth
+
+                    <a href="{{ route('wishlist.index') }}" class="flex flex-col items-center text-gray-700 hover:text-blue-600 relative">
+                        <i class="fas fa-heart text-lg"></i>
+                        <span class="text-xs hidden sm:inline">Wishlist</span>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center wishlist-count">0</span>
+                    </a>
+
+                    <a href="{{ route('cart.index') }}" class="flex flex-col items-center text-gray-700 hover:text-blue-600 relative">
+                        <i class="fas fa-shopping-cart text-lg"></i>
+                        <span class="text-xs hidden sm:inline">Cart</span>
+                        <span class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center cart-count">0</span>
+                    </a>
+
+                    <a href="#" class="hidden md:flex flex-col items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-store text-lg"></i>
+                        <span class="text-xs">Seller</span>
+                    </a>
+
+                    <a href="#" class="hidden md:flex flex-col items-center text-gray-700 hover:text-blue-600">
+                        <i class="fas fa-ellipsis-v text-lg"></i>
+                        <span class="text-xs">More</span>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Mobile Search Bar (Hidden by default) -->
+            <div id="mobile-search" class="hidden md:hidden pb-3">
+                <form action="{{ route('products.index') }}" method="GET" class="relative">
+                    <input type="text" name="search"
+                        placeholder="Search for products, brands and more"
+                        class="w-full px-4 py-2 border border-gray-300 rounded-sm focus:outline-none focus:ring-1 focus:ring-blue-500 focus:border-blue-500">
+                    <button type="submit" class="absolute right-3 top-2.5 text-gray-400 hover:text-blue-600">
+                        <i class="fas fa-search"></i>
+                    </button>
+                </form>
+            </div>
+
+            <!-- Mobile Navigation Menu (Hidden by default) -->
+            <div id="mobile-menu" class="hidden md:hidden border-t border-gray-200 py-3">
+                <div class="flex flex-col space-y-3">
+                    @guest('customer')
+                    <a href="{{ route('login') }}" class="text-gray-700 hover:text-blue-600 py-2">Login</a>
+                    <a href="{{ route('register') }}" class="text-gray-700 hover:text-blue-600 py-2">Sign Up</a>
+                    @endguest
+                    @auth('customer')
+                    <a href="{{ route('customer.dashboard') }}" class="text-gray-700 hover:text-blue-600 py-2">My Account</a>
+                    <form action="{{ route('customer.logout') }}" method="POST">
+                        @csrf
+                        <button type="submit" class="text-gray-700 hover:text-blue-600 py-2 text-left">Logout</button>
+                    </form>
+                    @endauth
+                    <a href="#" class="text-gray-700 hover:text-blue-600 py-2">Become a Seller</a>
+                    <div class="flex items-center space-x-4 py-2 text-sm text-gray-600">
+                        <span><i class="fas fa-truck mr-1"></i> Free delivery</span>
+                        <span><i class="fas fa-undo mr-1"></i> Return policy</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <div class="container mx-auto px-3 md:px-4 py-2 md:py-4">
+        <!-- Main Content Area -->
+        <div class="w-full">
+            <!-- Hero Banner Carousel -->
+            <div class="bg-white rounded shadow-sm mb-3 md:mb-4 overflow-hidden">
+                <div class="swiper hero-swiper banner-slide">
+                    <div class="swiper-wrapper">
+                        <div class="swiper-slide bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
+                            <div class="w-full md:w-1/2 text-center md:text-left">
+                                <h2 class="text-2xl md:text-3xl font-bold mb-2">Super Sale!</h2>
+                                <p class="text-sm md:text-lg mb-4">Up to 70% off on Electronics</p>
+                                <a href="{{ route('products.index', ['category' => 'electronics']) }}"
+                                    class="bg-white text-blue-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
+                                    Shop Now
+                                </a>
+                            </div>
+                            <div class="hidden md:block w-1/2 text-right">
+                                <i class="fas fa-laptop text-6xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="swiper-slide bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
+                            <div class="w-full md:w-1/2 text-center md:text-left">
+                                <h2 class="text-2xl md:text-3xl font-bold mb-2">Fashion Week</h2>
+                                <p class="text-sm md:text-lg mb-4">Trending styles at best prices</p>
+                                <a href="{{ route('products.index', ['category' => 'clothing']) }}"
+                                    class="bg-white text-green-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
+                                    Explore
+                                </a>
+                            </div>
+                            <div class="hidden md:block w-1/2 text-right">
+                                <i class="fas fa-tshirt text-6xl opacity-30"></i>
+                            </div>
+                        </div>
+                        <div class="swiper-slide bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
+                            <div class="w-full md:w-1/2 text-center md:text-left">
+                                <h2 class="text-2xl md:text-3xl font-bold mb-2">Home Essentials</h2>
+                                <p class="text-sm md:text-lg mb-4">Transform your living space</p>
+                                <a href="{{ route('products.index', ['category' => 'home-garden']) }}"
+                                    class="bg-white text-orange-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
+                                    Discover
+                                </a>
+                            </div>
+                            <div class="hidden md:block w-1/2 text-right">
+                                <i class="fas fa-home text-6xl opacity-30"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="swiper-pagination"></div>
+                    <div class="swiper-button-next hidden md:block"></div>
+                    <div class="swiper-button-prev hidden md:block"></div>
+                </div>
+            </div>
+
+            <!-- Quick Categories Grid -->
+            @if($categories && $categories->count() > 0)
+            <div class="bg-white rounded shadow-sm mb-6 p-3 md:p-4">
+                <div class="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 md:gap-4">
+                    @foreach($categories->take(8) as $category)
+                    <a href="{{ route('products.index', ['category' => $category->slug]) }}"
+                        class="text-center group category-icon">
+                        <div class="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full mx-auto mb-2 flex items-center justify-center group-hover:from-blue-200 group-hover:to-blue-300 transition-all duration-300">
+                            <i class="fas fa-tag text-blue-600 text-sm md:text-xl"></i>
+                        </div>
+                        <span class="text-xs text-gray-700 group-hover:text-blue-600 font-medium block leading-tight">{{ Str::limit($category->name, 10) }}</span>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- Deal of the Day / Featured Products -->
+            @if($featuredProducts && $featuredProducts->count() > 0)
+            <div class="bg-white rounded shadow-sm mb-6">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center p-3 md:p-4 border-b">
+                    <div class="flex items-center mb-2 sm:mb-0">
+                        <h2 class="text-lg md:text-xl font-bold text-gray-800 mr-2">Deal of the Day</h2>
+                        <div class="hidden sm:flex items-center text-xs md:text-sm text-gray-600">
+                            <i class="fas fa-clock mr-1"></i>
+                            <span id="countdown" class="font-semibold text-red-600"></span>
+                        </div>
+                    </div>
+                    <div class="flex items-center space-x-4">
+                        <div class="sm:hidden flex items-center text-xs text-gray-600">
+                            <i class="fas fa-clock mr-1"></i>
+                            <span id="countdown-mobile" class="font-semibold text-red-600"></span>
+                        </div>
+                        <a href="{{ route('products.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold text-xs md:text-sm">
+                            View All <i class="fas fa-arrow-right ml-1"></i>
+                        </a>
+                    </div>
+                </div>
+
+                <div class="p-3 md:p-4">
+                    <div class="swiper featured-swiper">
+                        <div class="swiper-wrapper">
+                            @foreach($featuredProducts as $product)
+                            <div class="swiper-slide">
+                                <div class="product-card bg-white border border-gray-200 rounded p-3 md:p-4 group h-full">
+                                    <a href="{{ route('products.show', $product->slug) }}" class="block">
+                                        <div class="relative mb-3">
+                                            @if($product->images && $product->images->count() > 0)
+                                            <img src="{{ Storage::url($product->images->first()->image_path) }}"
+                                                alt="{{ $product->name }}"
+                                                class="w-full h-24 md:h-32 object-contain group-hover:scale-105 transition duration-300">
+                                            @else
+                                            <div class="w-full h-24 md:h-32 bg-gray-100 flex items-center justify-center rounded">
+                                                <i class="fas fa-image text-lg md:text-2xl text-gray-400"></i>
+                                            </div>
+                                            @endif
+
+                                            @if($product->special_price && $product->special_price < $product->price)
+                                                <div class="absolute top-1 left-1">
+                                                    <span class="bg-green-500 text-white px-1 md:px-2 py-1 rounded text-xs font-bold">
+                                                        {{ round((($product->price - $product->special_price) / $product->price) * 100) }}% OFF
+                                                    </span>
+                                                </div>
+                                                @endif
+
+                                                <div class="absolute top-1 right-1">
+                                                    <button class="w-6 h-6 md:w-8 md:h-8 bg-white rounded-full shadow-sm flex items-center justify-center hover:bg-red-50 group">
+                                                        <i class="fas fa-heart text-xs md:text-sm text-gray-400 group-hover:text-red-500"></i>
+                                                    </button>
+                                                </div>
+                                        </div>
+                                    </a>
+
+                                    <div class="space-y-1">
+                                        <a href="{{ route('products.show', $product->slug) }}">
+                                            <h3 class="font-medium text-xs md:text-sm text-gray-800 group-hover:text-blue-600 line-clamp-2 leading-tight">
+                                                {{ Str::limit($product->name, 40) }}
+                                            </h3>
+                                        </a>
+
+                                        <div class="flex items-center space-x-1">
+                                            <div class="flex text-yellow-400 text-xs">
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star"></i>
+                                                <i class="fas fa-star-half-alt"></i>
+                                            </div>
+                                            <span class="text-xs text-gray-500">({{ rand(50, 500) }})</span>
+                                        </div>
+
+                                        <div class="flex items-center space-x-2">
+                                            @if($product->special_price && $product->special_price < $product->price)
+                                                <span class="text-sm md:text-lg font-bold text-gray-900">₹{{ number_format($product->special_price, 0) }}</span>
+                                                <span class="text-xs md:text-sm text-gray-500 line-through">₹{{ number_format($product->price, 0) }}</span>
+                                                @else
+                                                <span class="text-sm md:text-lg font-bold text-gray-900">₹{{ number_format($product->price, 0) }}</span>
+                                                @endif
+                                        </div>
+
+                                        <div class="text-xs text-green-600 font-semibold">
+                                            Free delivery
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        </div>
+                        <div class="swiper-button-next !text-blue-600 hidden sm:flex"></div>
+                        <div class="swiper-button-prev !text-blue-600 hidden sm:flex"></div>
+                    </div>
+                </div>
+            </div>
+            @endif
+
+
+
+            <!-- Footer -->
+            <footer class="bg-gray-800 text-white mt-8">
+                <div class="container mx-auto px-4">
+                    <!-- Main Footer -->
+                    <div class="py-8 grid grid-cols-1 md:grid-cols-4 gap-8">
+                        <div>
+                            <h4 class="text-lg font-semibold mb-4">ABOUT</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li><a href="#" class="hover:text-white">Contact Us</a></li>
+                                <li><a href="#" class="hover:text-white">About Us</a></li>
+                                <li><a href="#" class="hover:text-white">Careers</a></li>
+                                <li><a href="#" class="hover:text-white">Corporate Information</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-4">HELP</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li><a href="#" class="hover:text-white">Payments</a></li>
+                                <li><a href="#" class="hover:text-white">Shipping</a></li>
+                                <li><a href="#" class="hover:text-white">Cancellation & Returns</a></li>
+                                <li><a href="#" class="hover:text-white">FAQ</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-4">CONSUMER POLICY</h4>
+                            <ul class="space-y-2 text-gray-300">
+                                <li><a href="#" class="hover:text-white">Return Policy</a></li>
+                                <li><a href="#" class="hover:text-white">Terms Of Use</a></li>
+                                <li><a href="#" class="hover:text-white">Security</a></li>
+                                <li><a href="#" class="hover:text-white">Privacy</a></li>
+                            </ul>
+                        </div>
+
+                        <div>
+                            <h4 class="text-lg font-semibold mb-4">SOCIAL</h4>
+                            <div class="flex space-x-4 mb-4">
+                                <a href="#" class="text-gray-300 hover:text-white text-xl"><i class="fab fa-facebook"></i></a>
+                                <a href="#" class="text-gray-300 hover:text-white text-xl"><i class="fab fa-twitter"></i></a>
+                                <a href="#" class="text-gray-300 hover:text-white text-xl"><i class="fab fa-youtube"></i></a>
+                            </div>
+                            <div class="space-y-2">
+                                <p class="text-gray-300 text-sm">Mail Us:</p>
+                                <p class="text-gray-400 text-xs">E-Commerce Store<br>
+                                    Buildings Alyssa, Begonia &<br>
+                                    Clover situated in Embassy Tech Village</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Bottom Footer -->
+                    <div class="border-t border-gray-700 py-4">
+                        <div class="flex flex-col md:flex-row justify-between items-center">
+                            <div class="flex items-center space-x-4 mb-4 md:mb-0">
+                                <div class="flex items-center">
+                                    <i class="fas fa-star text-yellow-400 mr-1"></i>
+                                    <span class="text-gray-300 text-sm">Become a Seller</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-gift text-orange-400 mr-1"></i>
+                                    <span class="text-gray-300 text-sm">Gift Cards</span>
+                                </div>
+                                <div class="flex items-center">
+                                    <i class="fas fa-question-circle text-blue-400 mr-1"></i>
+                                    <span class="text-gray-300 text-sm">Help Center</span>
+                                </div>
+                            </div>
+
+                            <div class="text-center text-gray-400 text-sm">
+                                <p>&copy; {{ date('Y') }} E-Commerce Store. All rights reserved.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </footer>
+
+            <script>
+                // Mobile Menu Functions
+                function toggleMobileMenu() {
+                    const mobileMenu = document.getElementById('mobile-menu');
+                    mobileMenu.classList.toggle('hidden');
+                }
+
+                function toggleSearchBar() {
+                    const mobileSearch = document.getElementById('mobile-search');
+                    mobileSearch.classList.toggle('hidden');
+                    if (!mobileSearch.classList.contains('hidden')) {
+                        mobileSearch.querySelector('input').focus();
+                    }
+                }
+
+                document.addEventListener('DOMContentLoaded', function() {
+                    // Hero Banner Carousel
+                    const heroSwiper = new Swiper('.hero-swiper', {
+                        slidesPerView: 1,
+                        spaceBetween: 0,
+                        loop: true,
+                        autoplay: {
+                            delay: 4000,
+                            disableOnInteraction: false,
+                        },
+                        pagination: {
+                            el: '.swiper-pagination',
+                            clickable: true,
+                        },
+                        navigation: {
+                            nextEl: '.swiper-button-next',
+                            prevEl: '.swiper-button-prev',
+                        },
+                    });
+
+                    // Featured Products Carousel - Mobile Optimized
+                    const featuredSwiper = new Swiper('.featured-swiper', {
+                        slidesPerView: 1.2,
+                        spaceBetween: 12,
+                        loop: true,
+                        autoplay: {
+                            delay: 3000,
+                            disableOnInteraction: false,
+                        },
+                        navigation: {
+                            nextEl: '.swiper-button-next',
+                            prevEl: '.swiper-button-prev',
+                        },
+                        breakpoints: {
+                            480: {
+                                slidesPerView: 2,
+                                spaceBetween: 12,
+                            },
+                            640: {
+                                slidesPerView: 2.5,
+                                spaceBetween: 16,
+                            },
+                            768: {
+                                slidesPerView: 3,
+                                spaceBetween: 16,
+                            },
+                            1024: {
+                                slidesPerView: 4,
+                                spaceBetween: 20,
+                            },
+                            1280: {
+                                slidesPerView: 5,
+                                spaceBetween: 20,
+                            },
+                            1536: {
+                                slidesPerView: 6,
+                                spaceBetween: 24,
+                            },
+                        },
+                    });
+
+                    // Countdown Timer for Deal of the Day
+                    function updateCountdown() {
+                        const now = new Date().getTime();
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        tomorrow.setHours(0, 0, 0, 0);
+                        const timeLeft = tomorrow.getTime() - now;
+
+                        const hours = Math.floor(timeLeft / (1000 * 60 * 60));
+                        const minutes = Math.floor((timeLeft % (1000 * 60 * 60)) / (1000 * 60));
+                        const seconds = Math.floor((timeLeft % (1000 * 60)) / 1000);
+
+                        const timeString = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')} left`;
+
+                        const countdownElement = document.getElementById('countdown');
+                        const countdownMobileElement = document.getElementById('countdown-mobile');
+                        
+                        if (countdownElement) {
+                            countdownElement.innerHTML = timeString;
+                        }
+                        if (countdownMobileElement) {
+                            countdownMobileElement.innerHTML = timeString;
+                        }
+                    }
+
+                    // Update countdown every second
+                    updateCountdown();
+                    setInterval(updateCountdown, 1000);
+
+                    // Close mobile menu when clicking outside
+                    document.addEventListener('click', function(event) {
+                        const mobileMenu = document.getElementById('mobile-menu');
+                        const mobileSearch = document.getElementById('mobile-search');
+                        const menuButton = event.target.closest('button');
+                        
+                        if (!menuButton && !mobileMenu.contains(event.target)) {
+                            mobileMenu.classList.add('hidden');
+                        }
+                        
+                        if (!event.target.closest('#mobile-search') && !event.target.closest('button[onclick="toggleSearchBar()"]')) {
+                            mobileSearch.classList.add('hidden');
+                        }
+                    });
+                });
+            </script>
+</body>
+
+</html>

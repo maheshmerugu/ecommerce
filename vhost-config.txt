@@ -1,0 +1,17 @@
+# Virtual Host Configuration for E-commerce App
+# Add this to C:\xampp\apache\conf\extra\httpd-vhosts.conf
+
+<VirtualHost *:80>
+    ServerName ecommerce.local
+    DocumentRoot "C:/xampp/htdocs/ecommerce/public"
+    
+    <Directory "C:/xampp/htdocs/ecommerce/public">
+        Options Indexes FollowSymLinks
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+    
+    ErrorLog "logs/ecommerce_error.log"
+    CustomLog "logs/ecommerce_access.log" common
+</VirtualHost>

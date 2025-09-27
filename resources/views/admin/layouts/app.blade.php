@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
+
+    <title>{{ config('app.name', 'Laravel') }} - Admin</title>
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Alpine.js for interactive components -->
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    
+    <!-- Additional styles -->
+    <style>
+        [x-cloak] { display: none !important; }
+    </style>
+</head>
+<body class="bg-gray-100">
+    <div class="min-h-screen flex">
+        <!-- Sidebar -->
+        <div class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out">
+            <!-- Logo -->
+            <a href="{{ route('admin.dashboard') }}" class="text-white flex items-center space-x-2 px-4">
+                <span class="text-2xl font-extrabold">{{ config('app.name') }}</span>
+            </a>
+
+            <!-- Navigation -->
+            <nav>
+                <a href="{{ route('admin.dashboard') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-700' : '' }}">
+                    Dashboard
+                </a>
+                
+                <a href="{{ route('admin.categories.index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.categories.*') ? 'bg-gray-700' : '' }}">
+                    Categories
+                </a>
+                
+                <a href="{{ route('admin.products.index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.products.*') ? 'bg-gray-700' : '' }}">
+                    Products
+                </a>
+            </nav>
+        </div>
+
+        <!-- Content -->
+        <div class="flex-1 flex flex-col overflow-hidden">
+            <!-- Header -->
+            <header class="flex justify-between items-center py-4 px-6 bg-white border-b-4 border-indigo-600">
+                <div class="flex items-center">
+                    <h1 class="text-2xl font-semibold text-gray-800">@yield('title', 'Admin Panel')</h1>
+                </div>
+
+                <!-- User Menu -->
+                <div class="flex items-center">
+                    <div class="relative">
+                        <button class="relative z-10 block h-8 w-8 rounded-full overflow-hidden border-2 border-gray-600 focus:outline-none focus:border-white" id="user-menu">
+                            <span class="bg-gray-600 text-white h-8 w-8 flex items-center justify-center text-sm font-medium">
+                                {{ substr(auth('admin')->user()->name, 0, 1) }}
+                            </span>
+                        </button>
+
+                        <div class="absolute right-0 mt-2 w-48 bg-white rounded-md overflow-hidden shadow-xl z-10 hidden" id="user-dropdown">
+                            <div class="px-4 py-3">
+                                <p class="text-sm leading-5">Signed in as</p>
+                                <p class="text-sm leading-5 font-medium text-gray-900 truncate">{{ auth('admin')->user()->name }}</p>
+                            </div>
+                            <form method="POST" action="{{ route('admin.logout') }}">
+                                @csrf
+                                <button type="submit" class="block w-full text-left px-4 py-2 text-sm leading-5 text-gray-700 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 transition duration-150 ease-in-out">
+                                    Sign out
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Main Content -->
+            <main class="flex-1 overflow-x-hidden overflow-y-auto bg-gray-200">
+                <div class="container mx-auto px-6 py-8">
+                    @if (session('success'))
+                        <div class="bg-green-100 border border-green-400 text-green-700 px-4 py-3 rounded mb-4">
+                            {{ session('success') }}
+                        </div>
+                    @endif
+
+                    @if (session('error'))
+                        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                            {{ session('error') }}
+                        </div>
+                    @endif
+
+                    @yield('content')
+                </div>
+            </main>
+        </div>
+    </div>
+
+    <script>
+        // Toggle user dropdown
+        document.getElementById('user-menu').addEventListener('click', function() {
+            document.getElementById('user-dropdown').classList.toggle('hidden');
+        });
+
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(e) {
+            if (!document.getElementById('user-menu').contains(e.target)) {
+                document.getElementById('user-dropdown').classList.add('hidden');
+            }
+        });
+    </script>
+</body>
+</html>

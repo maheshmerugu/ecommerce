@@ -1,0 +1,29 @@
+# Add this to your Apache httpd-vhosts.conf file
+
+<VirtualHost *:80>
+    ServerName ecommerce.local
+    DocumentRoot "C:/xampp/htdocs/ecommerce/public"
+    
+    <Directory "C:/xampp/htdocs/ecommerce/public">
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+    
+    ErrorLog "logs/ecommerce_error.log"
+    CustomLog "logs/ecommerce_access.log" common
+</VirtualHost>
+
+# Alternative - if you want to use a subdirectory
+<VirtualHost *:80>
+    ServerName localhost
+    DocumentRoot "C:/xampp/htdocs"
+    
+    Alias /ecommerce "C:/xampp/htdocs/ecommerce/public"
+    
+    <Directory "C:/xampp/htdocs/ecommerce/public">
+        AllowOverride All
+        Require all granted
+        DirectoryIndex index.php
+    </Directory>
+</VirtualHost>
