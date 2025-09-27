@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
@@ -15,6 +16,28 @@ use App\Http\Controllers\Customer\DashboardController as CustomerDashboardContro
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
 
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// Test route for images
+Route::get('test-images', function() {
+    return view('test-images');
+})->name('test.images');
+
+// Debug route for images
+Route::get('debug-images', function() {
+    return view('debug-images');
+})->name('debug.images');
+
+// Test image URLs
+Route::get('test-image-urls', function() {
+    $product = App\Models\Product::with('images')->first();
+    
+    return [
+        'asset_url' => $product && $product->images->count() > 0 ? asset('storage/' . $product->images->first()->image_path) : 'No product found',
+        'helper_url' => $product && $product->images->count() > 0 ? product_image_url($product->images->first()->image_path) : 'No product found',
+        'config_app_url' => config('app.url'),
+        'storage_url' => $product && $product->images->count() > 0 ? Storage::url($product->images->first()->image_path) : 'No product found'
+    ];
+})->name('test.image.urls');
 
 // Public Product Routes
 Route::get('products', [ProductController::class, 'index'])->name('products.index');
@@ -89,6 +112,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // Product Management
         Route::resource('products', AdminProductController::class);
+        Route::patch('products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus'])->name('products.toggle-status');
+        Route::patch('products/{product}/toggle-featured', [AdminProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
     });
 });
 

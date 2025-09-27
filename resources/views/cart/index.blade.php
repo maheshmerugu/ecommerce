@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Shopping Cart - E-Commerce Store</title>
+    <title>Shopping Cart - {{ config('app.name', 'Laravel') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -28,8 +28,8 @@
                         <i class="fas fa-arrow-left text-xl"></i>
                     </a>
                     <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600">
-                        <span class="hidden sm:inline">E-Commerce</span>
-                        <span class="sm:hidden">EC</span>
+                        <span class="hidden sm:inline">{{ config('app.name', 'Laravel') }}</span>
+                        <span class="sm:hidden">{{ substr(config('app.name', 'Laravel'), 0, 2) }}</span>
                     </a>
                 </div>
 
@@ -75,7 +75,7 @@
                                     <div class="flex-shrink-0">
                                         <a href="{{ route('products.show', $item->product->slug) }}">
                                             @if($item->product->images && $item->product->images->count() > 0)
-                                                <img src="{{ Storage::url($item->product->images->first()->image_path) }}" 
+                                                <img src="{{ product_image_url($item->product->images->first()->image_path) }}" 
                                                     alt="{{ $item->product->name }}" 
                                                     class="w-20 h-20 md:w-24 md:h-24 object-contain rounded border">
                                             @else

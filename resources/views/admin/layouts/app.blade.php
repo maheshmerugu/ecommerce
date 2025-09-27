@@ -5,8 +5,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }} - Admin</title>
+    <title>@yield('title', 'Admin Panel') - {{ config('app.name', 'Laravel') }}</title>
 
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <!-- FontAwesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -16,6 +22,7 @@
     <!-- Additional styles -->
     <style>
         [x-cloak] { display: none !important; }
+        .badge-lg { font-size: 0.9em; padding: 0.5rem 0.75rem; }
     </style>
 </head>
 <body class="bg-gray-100">
@@ -110,5 +117,10 @@
             }
         });
     </script>
+
+    <!-- Bootstrap JavaScript -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js"></script>
+    
+    @yield('scripts')
 </body>
 </html>

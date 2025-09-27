@@ -37,6 +37,22 @@
             box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
         }
 
+        /* Account Dropdown Styles */
+        .account-dropdown {
+            transition: all 0.2s ease-in-out;
+            transform: translateY(-10px);
+            pointer-events: none;
+        }
+
+        .group:hover .account-dropdown,
+        .account-dropdown:hover,
+        .account-dropdown.show {
+            opacity: 1 !important;
+            visibility: visible !important;
+            transform: translateY(0);
+            pointer-events: all;
+        }
+
         .banner-slide {
             min-height: 280px;
         }
@@ -88,30 +104,6 @@
 </head>
 
 <body class="bg-gray-100">
-    <!-- Top Header Bar -->
-    <div class="bg-blue-600 text-white text-xs py-1 hidden md:block">
-        <div class="container mx-auto px-4 flex justify-between items-center">
-            <div class="flex items-center space-x-4">
-                <span><i class="fas fa-truck mr-1"></i> Free delivery</span>
-                <span><i class="fas fa-undo mr-1"></i> Return policy</span>
-            </div>
-            <div class="flex items-center space-x-4">
-                @guest('customer')
-                <a href="{{ route('login') }}" class="hover:text-blue-200">Login</a>
-                <a href="{{ route('register') }}" class="hover:text-blue-200">Sign Up</a>
-                @endguest
-                @auth('customer')
-                <span>Welcome, {{ auth('customer')->user()->first_name }}!</span>
-                <a href="{{ route('customer.dashboard') }}" class="hover:text-blue-200">My Account</a>
-                <form action="{{ route('customer.logout') }}" method="POST" class="inline">
-                    @csrf
-                    <button type="submit" class="hover:text-blue-200">Logout</button>
-                </form>
-                @endauth
-            </div>
-        </div>
-    </div>
-
     <!-- Main Header -->
     <header class="bg-white shadow-sm border-b">
         <div class="container mx-auto px-4">
@@ -126,9 +118,8 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4 md:mr-8">
-                        <span class="hidden sm:inline">E-Commerce</span>
-                        <span class="sm:hidden">EC</span>
-                        <span class="text-xs text-gray-500 block -mt-1 hidden md:block">Explore Plus</span>
+                        <span class="hidden sm:inline">{{ config('app.name', 'Laravel') }}</span>
+                        <span class="sm:hidden">{{ substr(config('app.name', 'Laravel'), 0, 2) }}</span>
                     </a>
                 </div>
 
@@ -152,29 +143,70 @@
                         <span class="text-xs">Search</span>
                     </button>
 
-                    @auth('customer')
-                    <a href="#" class="flex flex-col items-center text-gray-700 hover:text-blue-600">
-                        <i class="fas fa-user text-lg"></i>
-                        <span class="text-xs hidden sm:inline">Account</span>
-                    </a>
-                    @endauth
+                    <!-- Account Dropdown -->
+                    <div class="relative flex flex-col items-center text-gray-700 hover:text-blue-600 group">
+                        <a href="#" class="flex flex-col items-center">
+                            <i class="fas fa-user text-lg"></i>
+                            <span class="text-xs hidden sm:inline">Account</span>
+                        </a>
+                        
+                        <!-- Dropdown Menu -->
+                        <div class="absolute top-full right-0 mt-2 w-48 bg-white rounded-md shadow-lg border border-gray-200 opacity-0 invisible account-dropdown z-50">
+                            <div class="py-2">
+                                @guest('customer')
+                                <a href="{{ route('login') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                                    <i class="fas fa-sign-in-alt mr-2"></i>Login
+                                </a>
+                                <a href="{{ route('register') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                                    <i class="fas fa-user-plus mr-2"></i>Sign Up
+                                </a>
+                                @endguest
+                                
+                                @auth('customer')
+                                <div class="px-4 py-2 text-sm text-gray-500 border-b border-gray-100">
+                                    Welcome, {{ auth('customer')->user()->first_name }}!
+                                </div>
+                                <a href="{{ route('customer.dashboard') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                                    <i class="fas fa-tachometer-alt mr-2"></i>Dashboard
+                                </a>
+                                <a href="{{ route('customer.profile.show') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                                    <i class="fas fa-user mr-2"></i>My Profile
+                                </a>
+                                <a href="{{ route('customer.orders.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                                    <i class="fas fa-shopping-bag mr-2"></i>My Orders
+                                </a>
+                                <a href="{{ route('customer.addresses.index') }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-blue-600">
+                                    <i class="fas fa-map-marker-alt mr-2"></i>My Addresses
+                                </a>
+                                <div class="border-t border-gray-100 mt-1 pt-1">
+                                    <form action="{{ route('customer.logout') }}" method="POST" class="block">
+                                        @csrf
+                                        <button type="submit" class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 hover:text-red-600">
+                                            <i class="fas fa-sign-out-alt mr-2"></i>Logout
+                                        </button>
+                                    </form>
+                                </div>
+                                @endauth
+                            </div>
+                        </div>
+                    </div>
 
                     <a href="{{ route('wishlist.index') }}" class="flex flex-col items-center text-gray-700 hover:text-blue-600 relative">
                         <i class="fas fa-heart text-lg"></i>
                         <span class="text-xs hidden sm:inline">Wishlist</span>
-                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center wishlist-count">0</span>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center wishlist-count" style="display: none;">0</span>
                     </a>
 
                     <a href="{{ route('cart.index') }}" class="flex flex-col items-center text-gray-700 hover:text-blue-600 relative">
                         <i class="fas fa-shopping-cart text-lg"></i>
                         <span class="text-xs hidden sm:inline">Cart</span>
-                        <span class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center cart-count">0</span>
+                        <span class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center cart-count" style="display: none;">0</span>
                     </a>
 
-                    <a href="#" class="hidden md:flex flex-col items-center text-gray-700 hover:text-blue-600">
+                    {{-- <a href="#" class="hidden md:flex flex-col items-center text-gray-700 hover:text-blue-600">
                         <i class="fas fa-store text-lg"></i>
                         <span class="text-xs">Seller</span>
-                    </a>
+                    </a> --}}
 
                     <a href="#" class="hidden md:flex flex-col items-center text-gray-700 hover:text-blue-600">
                         <i class="fas fa-ellipsis-v text-lg"></i>
@@ -209,11 +241,7 @@
                         <button type="submit" class="text-gray-700 hover:text-blue-600 py-2 text-left">Logout</button>
                     </form>
                     @endauth
-                    <a href="#" class="text-gray-700 hover:text-blue-600 py-2">Become a Seller</a>
-                    <div class="flex items-center space-x-4 py-2 text-sm text-gray-600">
-                        <span><i class="fas fa-truck mr-1"></i> Free delivery</span>
-                        <span><i class="fas fa-undo mr-1"></i> Return policy</span>
-                    </div>
+                    {{-- <a href="#" class="text-gray-700 hover:text-blue-600 py-2">Become a Seller</a> --}}
                 </div>
             </div>
         </div>
@@ -321,7 +349,7 @@
                                     <a href="{{ route('products.show', $product->slug) }}" class="block">
                                         <div class="relative mb-3">
                                             @if($product->images && $product->images->count() > 0)
-                                            <img src="{{ Storage::url($product->images->first()->image_path) }}"
+                                            <img src="{{ product_image_url($product->images->first()->image_path) }}"
                                                 alt="{{ $product->name }}"
                                                 class="w-full h-24 md:h-32 object-contain group-hover:scale-105 transition duration-300">
                                             @else
@@ -372,10 +400,6 @@
                                                 <span class="text-sm md:text-lg font-bold text-gray-900">₹{{ number_format($product->price, 0) }}</span>
                                                 @endif
                                         </div>
-
-                                        <div class="text-xs text-green-600 font-semibold">
-                                            Free delivery
-                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -388,7 +412,85 @@
             </div>
             @endif
 
+            <!-- Latest Products -->
+            @if($latestProducts && $latestProducts->count() > 0)
+            <div class="bg-white rounded shadow-sm mb-6">
+                <div class="flex justify-between items-center p-4 border-b">
+                    <h2 class="text-xl font-bold text-gray-800">Latest Products</h2>
+                    <a href="{{ route('products.index') }}" class="text-blue-600 hover:text-blue-800 font-semibold">
+                        View All <i class="fas fa-arrow-right ml-1"></i>
+                    </a>
+                </div>
 
+                <div class="p-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        @foreach($latestProducts->take(6) as $product)
+                        <div class="product-card bg-white border border-gray-200 rounded p-3 group">
+                            <a href="{{ route('products.show', $product->slug) }}" class="block">
+                                <div class="relative mb-3">
+                                    @if($product->images && $product->images->count() > 0)
+                                    <img src="{{ product_image_url($product->images->first()->image_path) }}"
+                                        alt="{{ $product->name }}"
+                                        class="w-full h-24 md:h-32 object-contain group-hover:scale-105 transition duration-300">
+                                    @else
+                                    <div class="w-full h-24 md:h-32 bg-gray-100 flex items-center justify-center rounded">
+                                        <i class="fas fa-image text-2xl text-gray-400"></i>
+                                    </div>
+                                    @endif
+
+                                    @if($product->special_price && $product->special_price < $product->price)
+                                    <div class="absolute top-1 left-1">
+                                        <span class="bg-green-500 text-white px-1 py-1 rounded text-xs font-bold">
+                                            {{ round((($product->price - $product->special_price) / $product->price) * 100) }}% OFF
+                                        </span>
+                                    </div>
+                                    @endif
+
+                                    <div class="absolute top-1 right-1">
+                                        <button onclick="addToWishlist({{ $product->id }})" class="w-8 h-8 bg-white rounded-full shadow-sm flex items-center justify-center hover:bg-red-50 group">
+                                            <i class="fas fa-heart text-sm text-gray-400 group-hover:text-red-500"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </a>
+
+                            <div class="space-y-1">
+                                <a href="{{ route('products.show', $product->slug) }}">
+                                    <h3 class="font-medium text-sm text-gray-800 group-hover:text-blue-600 line-clamp-2">
+                                        {{ Str::limit($product->name, 35) }}
+                                    </h3>
+                                </a>
+
+                                <div class="flex items-center space-x-1">
+                                    <div class="flex text-yellow-400 text-xs">
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star"></i>
+                                        <i class="fas fa-star-half-alt"></i>
+                                    </div>
+                                    <span class="text-xs text-gray-500">({{ rand(25, 200) }})</span>
+                                </div>
+
+                                <div class="flex items-center space-x-2">
+                                    @if($product->special_price && $product->special_price < $product->price)
+                                    <span class="text-lg font-bold text-gray-900">${{ number_format($product->special_price, 0) }}</span>
+                                    <span class="text-sm text-gray-500 line-through">${{ number_format($product->price, 0) }}</span>
+                                    @else
+                                    <span class="text-lg font-bold text-gray-900">${{ number_format($product->price, 0) }}</span>
+                                    @endif
+                                </div>
+
+                                <button onclick="addToCart({{ $product->id }})" class="w-full bg-blue-600 text-white py-2 rounded text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                    Add to Cart
+                                </button>
+                            </div>
+                        </div>
+                        @endforeach
+                    </div>
+                </div>
+            </div>
+            @endif
 
             <!-- Footer -->
             <footer class="bg-gray-800 text-white mt-8">
@@ -418,7 +520,6 @@
                         <div>
                             <h4 class="text-lg font-semibold mb-4">CONSUMER POLICY</h4>
                             <ul class="space-y-2 text-gray-300">
-                                <li><a href="#" class="hover:text-white">Return Policy</a></li>
                                 <li><a href="#" class="hover:text-white">Terms Of Use</a></li>
                                 <li><a href="#" class="hover:text-white">Security</a></li>
                                 <li><a href="#" class="hover:text-white">Privacy</a></li>
@@ -445,10 +546,10 @@
                     <div class="border-t border-gray-700 py-4">
                         <div class="flex flex-col md:flex-row justify-between items-center">
                             <div class="flex items-center space-x-4 mb-4 md:mb-0">
-                                <div class="flex items-center">
+                                {{-- <div class="flex items-center">
                                     <i class="fas fa-star text-yellow-400 mr-1"></i>
                                     <span class="text-gray-300 text-sm">Become a Seller</span>
-                                </div>
+                                </div> --}}
                                 <div class="flex items-center">
                                     <i class="fas fa-gift text-orange-400 mr-1"></i>
                                     <span class="text-gray-300 text-sm">Gift Cards</span>
@@ -586,6 +687,98 @@
                             mobileSearch.classList.add('hidden');
                         }
                     });
+
+                    // Function to update cart count
+                    function updateCartCount() {
+                        fetch('{{ route("cart.count") }}')
+                            .then(response => response.json())
+                            .then(data => {
+                                const cartCountElements = document.querySelectorAll('.cart-count');
+                                cartCountElements.forEach(element => {
+                                    element.textContent = data.count;
+                                    // Hide the badge if count is 0
+                                    if (data.count === 0) {
+                                        element.style.display = 'none';
+                                    } else {
+                                        element.style.display = 'flex';
+                                    }
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error updating cart count:', error);
+                            });
+                    }
+
+                    // Function to update wishlist count
+                    function updateWishlistCount() {
+                        fetch('{{ route("wishlist.count") }}')
+                            .then(response => response.json())
+                            .then(data => {
+                                const wishlistCountElements = document.querySelectorAll('.wishlist-count');
+                                wishlistCountElements.forEach(element => {
+                                    element.textContent = data.count;
+                                    // Hide the badge if count is 0
+                                    if (data.count === 0) {
+                                        element.style.display = 'none';
+                                    } else {
+                                        element.style.display = 'flex';
+                                    }
+                                });
+                            })
+                            .catch(error => {
+                                console.error('Error updating wishlist count:', error);
+                            });
+                    }
+
+                    // Function to update both counts
+                    function updateAllCounts() {
+                        updateCartCount();
+                        updateWishlistCount();
+                    }
+
+                    // Update counts when page loads
+                    updateAllCounts();
+
+                    // Update counts every 30 seconds to keep them fresh
+                    setInterval(updateAllCounts, 30000);
+
+                    // Make functions globally available for other scripts
+                    window.updateCartCount = updateCartCount;
+                    window.updateWishlistCount = updateWishlistCount;
+                    window.updateAllCounts = updateAllCounts;
+
+                    // Account Dropdown Delay Functionality
+                    const accountDropdown = document.querySelector('.account-dropdown');
+                    const accountTrigger = document.querySelector('.group');
+                    let dropdownTimeout;
+
+                    if (accountTrigger && accountDropdown) {
+                        // Show dropdown on hover
+                        accountTrigger.addEventListener('mouseenter', function() {
+                            clearTimeout(dropdownTimeout);
+                            accountDropdown.classList.add('show');
+                        });
+
+                        // Hide dropdown with delay when mouse leaves
+                        accountTrigger.addEventListener('mouseleave', function() {
+                            dropdownTimeout = setTimeout(function() {
+                                accountDropdown.classList.remove('show');
+                            }, 300); // 300ms delay
+                        });
+
+                        // Keep dropdown visible when hovering over it
+                        accountDropdown.addEventListener('mouseenter', function() {
+                            clearTimeout(dropdownTimeout);
+                            accountDropdown.classList.add('show');
+                        });
+
+                        // Hide dropdown when mouse leaves the dropdown itself
+                        accountDropdown.addEventListener('mouseleave', function() {
+                            dropdownTimeout = setTimeout(function() {
+                                accountDropdown.classList.remove('show');
+                            }, 300); // 300ms delay
+                        });
+                    }
                 });
             </script>
 </body>

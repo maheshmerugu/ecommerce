@@ -155,6 +155,8 @@ class ProductSeeder extends Seeder
                 'sort_order' => 0,
                 'meta_title' => $productData['name'],
                 'meta_description' => $productData['short_description'],
+                // Add main image path for fallback
+                'image' => 'products/' . Str::slug($productData['name']) . '-1.jpg',
             ]);
 
             // Attach product to category if category exists

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Wishlist - E-Commerce Store</title>
+    <title>My Wishlist - {{ config('app.name', 'Laravel') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -16,8 +16,8 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4">
-                        <span class="hidden sm:inline">E-Commerce</span>
-                        <span class="sm:hidden">EC</span>
+                        <span class="hidden sm:inline">{{ config('app.name', 'Laravel') }}</span>
+                        <span class="sm:hidden">{{ substr(config('app.name', 'Laravel'), 0, 2) }}</span>
                     </a>
                 </div>
 
@@ -81,7 +81,7 @@
                             <!-- Product Image -->
                             <div class="relative aspect-square bg-gray-100 overflow-hidden">
                                 @if($item->product->images && $item->product->images->count() > 0)
-                                    <img src="{{ Storage::url($item->product->images->first()->image_path) }}" 
+                                    <img src="{{ asset('storage/' . $item->product->images->first()->image_path) }}" 
                                          alt="{{ $item->product->name }}" 
                                          class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
                                 @else

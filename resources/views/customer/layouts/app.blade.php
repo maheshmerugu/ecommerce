@@ -26,15 +26,15 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="text-xl font-bold text-gray-900">
-                        {{ config('app.name', 'E-Commerce') }}
+                        {{ config('app.name', 'Laravel') }}
                     </a>
                 </div>
 
                 <!-- Navigation -->
                 <nav class="hidden md:flex space-x-8">
                     <a href="{{ route('home') }}" class="text-gray-500 hover:text-gray-900">Home</a>
-                    <a href="#" class="text-gray-500 hover:text-gray-900">Products</a>
-                    <a href="#" class="text-gray-500 hover:text-gray-900">Categories</a>
+                    <a href="{{ route('products.index') }}" class="text-gray-500 hover:text-gray-900">Products</a>
+                    <a href="{{ route('products.index') }}" class="text-gray-500 hover:text-gray-900">Categories</a>
                 </nav>
 
                 <!-- User Menu -->
@@ -72,12 +72,22 @@
                         <a href="{{ route('register') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Sign up</a>
                     @endauth
 
+                    <!-- Wishlist -->
+                    <a href="{{ route('wishlist.index') }}" class="text-gray-400 hover:text-gray-500 relative">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                        <span class="sr-only">Wishlist</span>
+                        <span class="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center wishlist-count" style="display: none;">0</span>
+                    </a>
+
                     <!-- Cart -->
-                    <a href="#" class="text-gray-400 hover:text-gray-500">
+                    <a href="{{ route('cart.index') }}" class="text-gray-400 hover:text-gray-500 relative">
                         <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4m0 0L7 13m0 0l-1.5 6M7 13h10m0 0l1.5 6"></path>
                         </svg>
                         <span class="sr-only">Shopping cart</span>
+                        <span class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center cart-count" style="display: none;">0</span>
                     </a>
                 </div>
             </div>
@@ -150,6 +160,67 @@
                 }
             });
         }
+
+        // Function to update cart count
+        function updateCartCount() {
+            fetch('{{ route("cart.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCountElements = document.querySelectorAll('.cart-count');
+                    cartCountElements.forEach(element => {
+                        element.textContent = data.count;
+                        // Hide the badge if count is 0
+                        if (data.count === 0) {
+                            element.style.display = 'none';
+                        } else {
+                            element.style.display = 'flex';
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error updating cart count:', error);
+                });
+        }
+
+        // Function to update wishlist count
+        function updateWishlistCount() {
+            fetch('{{ route("wishlist.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const wishlistCountElements = document.querySelectorAll('.wishlist-count');
+                    wishlistCountElements.forEach(element => {
+                        element.textContent = data.count;
+                        // Hide the badge if count is 0
+                        if (data.count === 0) {
+                            element.style.display = 'none';
+                        } else {
+                            element.style.display = 'flex';
+                        }
+                    });
+                })
+                .catch(error => {
+                    console.error('Error updating wishlist count:', error);
+                });
+        }
+
+        // Function to update both counts
+        function updateAllCounts() {
+            updateCartCount();
+            updateWishlistCount();
+        }
+
+        // Update counts when page loads
+        document.addEventListener('DOMContentLoaded', function() {
+            updateAllCounts();
+            
+            // Update counts every 30 seconds to keep them fresh
+            setInterval(updateAllCounts, 30000);
+        });
+
+        // Make functions globally available for other scripts
+        window.updateCartCount = updateCartCount;
+        window.updateWishlistCount = updateWishlistCount;
+        window.updateAllCounts = updateAllCounts;
     </script>
 </body>
 </html>

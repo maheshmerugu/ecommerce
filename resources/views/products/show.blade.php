@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ $product->name }} - E-Commerce Store</title>
+    <title>{{ $product->name }} - {{ config('app.name', 'Laravel') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -40,13 +40,123 @@
             .product-content { margin-bottom: 80px; }
         }
         
-        /* Image gallery improvements */
-        .main-image {
-            height: 400px;
-            object-fit: contain;
+        /* Image gallery improvements - Flipkart Style */
+        .image-gallery-container {
+            display: flex;
+            gap: 16px;
         }
+        
+        .thumbnail-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            width: 60px;
+        }
+        
+        .thumbnail-item {
+            width: 60px;
+            height: 60px;
+            border: 2px solid #e5e7eb;
+            border-radius: 4px;
+            cursor: pointer;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .thumbnail-item:hover,
+        .thumbnail-item.active {
+            border-color: #2563eb;
+        }
+        
+        .thumbnail-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .main-image-container {
+            flex: 1;
+            position: relative;
+            background: #f9fafb;
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        
+        .main-image {
+            height: 500px;
+            width: 100%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        
+        /* Zoom functionality */
+        .zoom-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.9);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+        
+        .zoomed-image {
+            max-width: 90%;
+            max-height: 90%;
+            object-fit: contain;
+            transition: transform 0.3s ease;
+        }
+        
+        .zoom-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .zoom-btn {
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.3s ease;
+        }
+        
+        .zoom-btn:hover {
+            background: white;
+        }
+        
         @media (max-width: 768px) {
-            .main-image { height: 300px; }
+            .image-gallery-container {
+                flex-direction: column-reverse;
+            }
+            
+            .thumbnail-list {
+                flex-direction: row;
+                width: 100%;
+                overflow-x: auto;
+                padding: 8px 0;
+            }
+            
+            .thumbnail-item {
+                flex-shrink: 0;
+            }
+            
+            .main-image {
+                height: 350px;
+            }
         }
     </style>
 </head>
@@ -58,8 +168,8 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4">
-                        <span class="hidden sm:inline">E-Commerce</span>
-                        <span class="sm:hidden">EC</span>
+                        <span class="hidden sm:inline">{{ config('app.name', 'Laravel') }}</span>
+                        <span class="sm:hidden">{{ substr(config('app.name', 'Laravel'), 0, 2) }}</span>
                     </a>
                 </div>
 
@@ -92,7 +202,7 @@
                     <a href="{{ route('cart.index') }}" class="flex flex-col items-center text-gray-700 hover:text-blue-600 relative">
                         <i class="fas fa-shopping-cart text-lg"></i>
                         <span class="text-xs hidden sm:inline">Cart</span>
-                        <span class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center cart-count">0</span>
+                        <span class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center cart-count" style="display: none;">0</span>
                     </a>
                 </div>
             </div>
@@ -118,34 +228,75 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
             <!-- Product Images -->
             <div class="space-y-4">
-                <!-- Main Image -->
+                <!-- Image Gallery - Flipkart Style -->
                 <div class="bg-white rounded-lg p-4 shadow-sm">
-                    <div class="product-image-zoom overflow-hidden rounded">
-                        @if($product->images && $product->images->count() > 0)
-                            <img id="main-image" src="{{ Storage::url($product->images->first()->image_path) }}" 
-                                alt="{{ $product->name }}" 
-                                class="main-image w-full transition-transform duration-300">
-                        @else
-                            <div class="main-image w-full bg-gray-100 flex items-center justify-center rounded">
-                                <i class="fas fa-image text-6xl text-gray-400"></i>
-                            </div>
-                        @endif
+                    <div class="image-gallery-container">
+                        <!-- Thumbnail list -->
+                        <div class="thumbnail-list">
+                            @php
+                                $images = collect();
+                                
+                                // Add main product image first
+                                if($product->image) {
+                                    $images->push([
+                                        'thumb' => asset('storage/' . $product->image),
+                                        'full' => asset('storage/' . $product->image),
+                                        'alt' => $product->name . ' - Main Image'
+                                    ]);
+                                } elseif($product->images && $product->images->count() > 0) {
+                                    $images->push([
+                                        'thumb' => asset('storage/' . $product->images->first()->image_path),
+                                        'full' => asset('storage/' . $product->images->first()->image_path),
+                                        'alt' => $product->name . ' - Main Image'
+                                    ]);
+                                }
+                                
+                                // Add additional product images
+                                if($product->images) {
+                                    $imageIndex = 2; // Start from 2 since main image is 1
+                                    foreach($product->images->skip(1)->take(3) as $img) {
+                                        $images->push([
+                                            'thumb' => asset('storage/' . $img->image_path),
+                                            'full' => asset('storage/' . $img->image_path),
+                                            'alt' => $product->name . ' - Image ' . $imageIndex
+                                        ]);
+                                        $imageIndex++;
+                                    }
+                                }
+                                
+                                // Fill remaining slots with main image if needed (to show 4 images total)
+                                while($images->count() < 4 && $images->count() > 0) {
+                                    $images->push($images->first());
+                                }
+                            @endphp
+                            
+                            @if($images->count() > 0)
+                                @foreach($images->take(4) as $index => $image)
+                                    <div class="thumbnail-item {{ $index === 0 ? 'active' : '' }}" 
+                                         onclick="changeMainImage('{{ $image['full'] }}', '{{ $image['alt'] }}', this)" 
+                                         data-image="{{ $image['full'] }}">
+                                        <img src="{{ $image['thumb'] }}" alt="{{ $image['alt'] }}" loading="lazy">
+                                    </div>
+                                @endforeach
+                            @endif
+                        </div>
+                        
+                        <!-- Main image container -->
+                        <div class="main-image-container" onclick="openZoom()">
+                            @if($images->count() > 0)
+                                <img id="mainProductImage" 
+                                     class="main-image" 
+                                     src="{{ $images->first()['full'] }}" 
+                                     alt="{{ $images->first()['alt'] }}" 
+                                     loading="eager">
+                            @else
+                                <div class="main-image flex items-center justify-center bg-gray-100">
+                                    <i class="fas fa-image text-6xl text-gray-400"></i>
+                                </div>
+                            @endif
+                        </div>
                     </div>
                 </div>
-
-                <!-- Thumbnail Images -->
-                @if($product->images && $product->images->count() > 1)
-                <div class="flex space-x-2 overflow-x-auto pb-2">
-                    @foreach($product->images as $image)
-                    <div class="product-thumbnail border-2 border-transparent rounded cursor-pointer flex-shrink-0 hover:border-blue-500 transition-colors" 
-                         onclick="changeMainImage('{{ Storage::url($image->image_path) }}', this)">
-                        <img src="{{ Storage::url($image->image_path) }}" 
-                            alt="{{ $product->name }}" 
-                            class="w-16 h-16 md:w-20 md:h-20 object-contain p-1">
-                    </div>
-                    @endforeach
-                </div>
-                @endif
 
                 <!-- Mobile Action Buttons -->
                 <div class="mobile-sticky-buttons md:hidden">
@@ -160,6 +311,22 @@
                         </button>
                     </div>
                 </div>
+            </div>
+
+            <!-- Zoom Overlay -->
+            <div id="zoomOverlay" class="zoom-overlay" onclick="closeZoom()">
+                <div class="zoom-controls">
+                    <button class="zoom-btn" onclick="event.stopPropagation(); zoomIn()">
+                        <i class="fas fa-plus"></i>
+                    </button>
+                    <button class="zoom-btn" onclick="event.stopPropagation(); zoomOut()">
+                        <i class="fas fa-minus"></i>
+                    </button>
+                    <button class="zoom-btn" onclick="closeZoom()">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <img id="zoomedImage" class="zoomed-image" src="" alt="">
             </div>
 
             <!-- Product Info -->
@@ -269,7 +436,7 @@
                     <a href="{{ route('products.show', $relatedProduct->slug) }}" class="block">
                         <div class="aspect-square bg-gray-100 relative overflow-hidden">
                             @if($relatedProduct->images && $relatedProduct->images->count() > 0)
-                                <img src="{{ Storage::url($relatedProduct->images->first()->image_path) }}" 
+                                <img src="{{ asset('storage/' . $relatedProduct->images->first()->image_path) }}" 
                                     alt="{{ $relatedProduct->name }}" 
                                     class="w-full h-full object-contain hover:scale-105 transition-transform duration-300">
                             @else
@@ -320,18 +487,74 @@
         // Debug: Log token on page load
         console.log('CSRF Token loaded:', token);
 
-        function changeMainImage(imageSrc, thumbnail) {
-            const mainImage = document.getElementById('main-image');
-            mainImage.src = imageSrc;
+        // Image gallery functions
+        function changeMainImage(imageSrc, alt, thumbnail) {
+            const mainImage = document.getElementById('mainProductImage');
+            if (mainImage) {
+                mainImage.src = imageSrc;
+                mainImage.alt = alt;
+            }
             
             // Update thumbnail active state
-            document.querySelectorAll('.product-thumbnail').forEach(thumb => {
-                thumb.classList.remove('border-blue-500');
-                thumb.classList.add('border-transparent');
+            document.querySelectorAll('.thumbnail-item').forEach(thumb => {
+                thumb.classList.remove('active');
             });
-            thumbnail.classList.remove('border-transparent');
-            thumbnail.classList.add('border-blue-500');
+            thumbnail.classList.add('active');
         }
+
+        // Zoom functionality
+        let currentZoomLevel = 1;
+        
+        function openZoom() {
+            const mainImage = document.getElementById('mainProductImage');
+            const zoomOverlay = document.getElementById('zoomOverlay');
+            const zoomedImage = document.getElementById('zoomedImage');
+            
+            if (mainImage && zoomOverlay && zoomedImage) {
+                zoomedImage.src = mainImage.src;
+                zoomedImage.alt = mainImage.alt;
+                currentZoomLevel = 1;
+                zoomedImage.style.transform = `scale(${currentZoomLevel})`;
+                zoomOverlay.style.display = 'flex';
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        
+        function closeZoom() {
+            const zoomOverlay = document.getElementById('zoomOverlay');
+            if (zoomOverlay) {
+                zoomOverlay.style.display = 'none';
+                document.body.style.overflow = 'auto';
+                currentZoomLevel = 1;
+            }
+        }
+        
+        function zoomIn() {
+            if (currentZoomLevel < 3) {
+                currentZoomLevel += 0.5;
+                const zoomedImage = document.getElementById('zoomedImage');
+                if (zoomedImage) {
+                    zoomedImage.style.transform = `scale(${currentZoomLevel})`;
+                }
+            }
+        }
+        
+        function zoomOut() {
+            if (currentZoomLevel > 0.5) {
+                currentZoomLevel -= 0.5;
+                const zoomedImage = document.getElementById('zoomedImage');
+                if (zoomedImage) {
+                    zoomedImage.style.transform = `scale(${currentZoomLevel})`;
+                }
+            }
+        }
+        
+        // Close zoom on escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeZoom();
+            }
+        });
 
         function addToCart(productId, quantity = 1) {
             console.log('AddToCart called with:', { productId, quantity, token });
@@ -385,6 +608,12 @@
                     const cartCountElements = document.querySelectorAll('.cart-count');
                     cartCountElements.forEach(el => {
                         el.textContent = data.cart_count || 0;
+                        // Show/hide badge based on count
+                        if (data.cart_count > 0) {
+                            el.style.display = 'flex';
+                        } else {
+                            el.style.display = 'none';
+                        }
                     });
                 } else {
                     console.error('Server returned success=false:', data);
@@ -502,6 +731,12 @@
                     const wishlistCountElements = document.querySelectorAll('.wishlist-count');
                     wishlistCountElements.forEach(el => {
                         el.textContent = data.wishlist_count || 0;
+                        // Show/hide badge based on count
+                        if (data.wishlist_count > 0) {
+                            el.style.display = 'flex';
+                        } else {
+                            el.style.display = 'none';
+                        }
                     });
                 } else {
                     console.error('Server returned success=false:', data);
@@ -558,7 +793,45 @@
                 firstThumbnail.classList.remove('border-transparent');
                 firstThumbnail.classList.add('border-blue-500');
             }
+            
+            // Load initial cart and wishlist counts
+            loadInitialCounts();
         });
+        
+        // Function to load initial counts
+        function loadInitialCounts() {
+            // Load cart count
+            fetch('{{ route("cart.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCountElements = document.querySelectorAll('.cart-count');
+                    cartCountElements.forEach(el => {
+                        el.textContent = data.count;
+                        if (data.count > 0) {
+                            el.style.display = 'flex';
+                        } else {
+                            el.style.display = 'none';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading cart count:', error));
+                
+            // Load wishlist count
+            fetch('{{ route("wishlist.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const wishlistCountElements = document.querySelectorAll('.wishlist-count');
+                    wishlistCountElements.forEach(el => {
+                        el.textContent = data.count;
+                        if (data.count > 0) {
+                            el.style.display = 'flex';
+                        } else {
+                            el.style.display = 'none';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading wishlist count:', error));
+        }
     </script>
 </body>
 </html>

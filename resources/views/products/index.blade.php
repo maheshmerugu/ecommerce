@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - E-Commerce Store</title>
+    <title>Products - {{ config('app.name', 'Laravel') }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -44,7 +44,7 @@
                 <div class="flex justify-between items-center">
                     <!-- Logo -->
                     <div class="text-2xl font-bold text-blue-600">
-                        <a href="{{ route('home') }}">E-Commerce Store</a>
+                        <a href="{{ route('home') }}">{{ config('app.name', 'Laravel') }}</a>
                     </div>
 
                     <!-- Search Bar -->
@@ -66,7 +66,7 @@
                         </a>
                         <a href="{{ route('cart.index') }}" class="relative hover:text-blue-600">
                             <i class="fas fa-shopping-cart text-xl"></i>
-                            <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center cart-count">0</span>
+                            <span class="absolute -top-2 -right-2 bg-blue-500 text-white text-xs rounded-full h-5 w-5 flex items-center justify-center cart-count" style="display: none;">0</span>
                         </a>
                     </div>
                 </div>
@@ -273,7 +273,7 @@
                     <div class="bg-white rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition duration-300">
                         <div class="relative">
                             @if($product->images->count() > 0)
-                                <img src="{{ Storage::url($product->images->first()->image_path) }}" 
+                                <img src="{{ product_image_url($product->images->first()->image_path) }}" 
                                     alt="{{ $product->name }}" 
                                     class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
                             @else
@@ -409,6 +409,12 @@
                     const cartCountElements = document.querySelectorAll('.cart-count');
                     cartCountElements.forEach(el => {
                         el.textContent = data.cart_count || 0;
+                        // Show/hide badge based on count
+                        if (data.cart_count > 0) {
+                            el.style.display = 'flex';
+                        } else {
+                            el.style.display = 'none';
+                        }
                     });
                     
                     // Change button text temporarily
@@ -531,7 +537,45 @@
             if (maxPriceInput) {
                 maxPriceInput.addEventListener('input', handlePriceChange);
             }
+            
+            // Load initial cart and wishlist counts
+            loadInitialCounts();
         });
+        
+        // Function to load initial counts
+        function loadInitialCounts() {
+            // Load cart count
+            fetch('{{ route("cart.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const cartCountElements = document.querySelectorAll('.cart-count');
+                    cartCountElements.forEach(el => {
+                        el.textContent = data.count;
+                        if (data.count > 0) {
+                            el.style.display = 'flex';
+                        } else {
+                            el.style.display = 'none';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading cart count:', error));
+                
+            // Load wishlist count
+            fetch('{{ route("wishlist.count") }}')
+                .then(response => response.json())
+                .then(data => {
+                    const wishlistCountElements = document.querySelectorAll('.wishlist-count');
+                    wishlistCountElements.forEach(el => {
+                        el.textContent = data.count;
+                        if (data.count > 0) {
+                            el.style.display = 'flex';
+                        } else {
+                            el.style.display = 'none';
+                        }
+                    });
+                })
+                .catch(error => console.error('Error loading wishlist count:', error));
+        }
     </script>
 </body>
 </html>

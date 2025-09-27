@@ -17,6 +17,9 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             CustomerSeeder::class,
             AdditionalUsersSeeder::class,
+            CategorySeeder::class,
+            ProductSeeder::class,
+            ProductImageSeeder::class,
         ]);
 
         // User::factory(10)->create();
