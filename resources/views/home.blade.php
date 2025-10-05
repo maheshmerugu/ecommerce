@@ -4,6 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>E-Commerce Store - Online Shopping for Electronics, Fashion, Home & More</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
@@ -367,7 +368,7 @@
                                                 @endif
 
                                                 <div class="absolute top-1 right-1">
-                                                    <button class="w-6 h-6 md:w-8 md:h-8 bg-white rounded-full shadow-sm flex items-center justify-center hover:bg-red-50 group">
+                                                    <button onclick="addToWishlist({{ $product->id }})" class="w-6 h-6 md:w-8 md:h-8 bg-white rounded-full shadow-sm flex items-center justify-center hover:bg-red-50 group">
                                                         <i class="fas fa-heart text-xs md:text-sm text-gray-400 group-hover:text-red-500"></i>
                                                     </button>
                                                 </div>
@@ -780,6 +781,105 @@
                         });
                     }
                 });
+
+                // Add to Cart function (global)
+                window.addToCart = function(productId) {
+                    fetch('{{ route("cart.add") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            product_id: productId,
+                            quantity: 1
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            // Show success message
+                            showToast('Product added to cart successfully!', 'success');
+                            // Update cart count
+                            updateCartCount();
+                        } else {
+                            showToast(data.message || 'Failed to add product to cart', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred while adding to cart', 'error');
+                    });
+                };
+
+                // Add to Wishlist function (global)
+                window.addToWishlist = function(productId) {
+                    fetch('{{ route("wishlist.add") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+                        },
+                        body: JSON.stringify({
+                            product_id: productId
+                        })
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.success) {
+                            showToast('Product added to wishlist!', 'success');
+                            updateWishlistCount();
+                        } else {
+                            showToast(data.message || 'Failed to add to wishlist', 'error');
+                        }
+                    })
+                    .catch(error => {
+                        console.error('Error:', error);
+                        showToast('An error occurred while adding to wishlist', 'error');
+                    });
+                };
+
+                // Toast notification function (global)
+                window.showToast = function(message, type = 'info') {
+                    // Remove existing toasts
+                    const existingToast = document.querySelector('.toast');
+                    if (existingToast) {
+                        existingToast.remove();
+                    }
+
+                    // Create toast element
+                    const toast = document.createElement('div');
+                    toast.className = `toast fixed top-4 right-4 px-4 py-2 rounded-lg text-white text-sm font-medium z-50 transform transition-all duration-300`;
+                    
+                    // Set color based on type
+                    if (type === 'success') {
+                        toast.classList.add('bg-green-500');
+                    } else if (type === 'error') {
+                        toast.classList.add('bg-red-500');
+                    } else {
+                        toast.classList.add('bg-blue-500');
+                    }
+                    
+                    toast.textContent = message;
+                    toast.style.transform = 'translateX(100%)';
+                    
+                    document.body.appendChild(toast);
+                    
+                    // Animate in
+                    setTimeout(() => {
+                        toast.style.transform = 'translateX(0)';
+                    }, 10);
+                    
+                    // Remove after 3 seconds
+                    setTimeout(() => {
+                        toast.style.transform = 'translateX(100%)';
+                        setTimeout(() => {
+                            if (toast.parentNode) {
+                                toast.parentNode.removeChild(toast);
+                            }
+                        }, 300);
+                    }, 3000);
+                };
             </script>
 </body>
 
