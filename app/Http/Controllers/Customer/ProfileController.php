@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -15,8 +16,16 @@ class ProfileController extends Controller
     public function show()
     {
         $customer = Auth::guard('customer')->user();
-        $addresses = collect(); // Empty collection for now
-        $recentOrders = collect(); // Empty collection for now
+        
+        // Get customer addresses
+        $addresses = $customer->addresses ?? collect();
+        
+        // Get recent orders (last 3)
+        $recentOrders = $customer->orders()
+                               ->with(['items.product.images'])
+                               ->orderBy('created_at', 'desc')
+                               ->limit(3)
+                               ->get();
         
         return view('customer.profile.show', compact('customer', 'addresses', 'recentOrders'));
     }
@@ -82,7 +91,12 @@ class ProfileController extends Controller
     public function orders()
     {
         $customer = Auth::guard('customer')->user();
-        $orders = collect(); // Empty collection for now
+        
+        // Get all orders for the customer with pagination
+        $orders = $customer->orders()
+                          ->with(['items.product.images'])
+                          ->orderBy('created_at', 'desc')
+                          ->paginate(10);
         
         return view('customer.profile.orders', compact('orders'));
     }
