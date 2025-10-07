@@ -82,6 +82,14 @@ class Customer extends Authenticatable
     }
 
     /**
+     * Get or create a cart for this customer.
+     */
+    public function getOrCreateCart()
+    {
+        return Cart::firstOrCreate(['customer_id' => $this->id]);
+    }
+
+    /**
      * Get all orders for this customer.
      */
     public function orders(): HasMany

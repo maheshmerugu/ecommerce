@@ -19,9 +19,8 @@ class CartController extends Controller
     {
         if (Auth::guard('customer')->check()) {
             // For logged in customers
-            $cart = Cart::firstOrCreate([
-                'customer_id' => Auth::guard('customer')->id()
-            ]);
+            $customer = Auth::guard('customer')->user();
+            $cart = $customer->getOrCreateCart();
         } else {
             // For guest users
             $sessionId = Session::getId();

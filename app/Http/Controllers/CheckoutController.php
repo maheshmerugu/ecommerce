@@ -348,21 +348,19 @@ class CheckoutController extends Controller
     private function getCart()
     {
         if (Auth::guard('customer')->check()) {
-            $customerId = Auth::guard('customer')->id();
-            $cart = Cart::where('customer_id', $customerId)->with('items.product.images')->first();
+            $customer = Auth::guard('customer')->user();
+            $cart = $customer->getOrCreateCart();
             
-            if (!$cart) {
-                throw new \Exception("No cart found for customer ID: $customerId");
-            }
+            // Load relationships
+            $cart->load('items.product.images');
             
             return $cart;
         } else {
             $sessionId = Session::getId();
-            $cart = Cart::where('session_id', $sessionId)->with('items.product.images')->first();
+            $cart = Cart::firstOrCreate(['session_id' => $sessionId]);
             
-            if (!$cart) {
-                throw new \Exception("No cart found for session ID: $sessionId");
-            }
+            // Load relationships
+            $cart->load('items.product.images');
             
             return $cart;
         }
