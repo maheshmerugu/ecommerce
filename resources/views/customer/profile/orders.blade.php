@@ -1,11 +1,7 @@
 @extends('customer.layouts.app')
 
 @section('content')
-                                            @if($item->product && $item->product->image)
-                                                <img src="{{ asset('public/storage/' . $item->product->image) }}" 
-                                                     alt="{{ $item->product_name }}" 
-                                                     class="w-16 h-16 object-cover rounded border mr-3">
-                                            @elseclass="container mx-auto px-4 py-8">
+<div class="container mx-auto px-4 py-8">
     <div class="max-w-6xl mx-auto">
         <!-- Page Header -->
         <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
