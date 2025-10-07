@@ -1,0 +1,5 @@
+---
+deployment:
+  tasks:
+    - export DEPLOYPATH=/home/p865jltij03r/public_html/fourwheels.co.in/
+    - /bin/cp -R * $DEPLOYPATH
