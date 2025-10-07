@@ -135,9 +135,6 @@
                                 </label>
                             </div>
                         </div>
-                        @endif
-                            </div>
-                        </div>
                         @else
                         <div class="mb-4 p-3 bg-blue-50 border-l-4 border-blue-400">
                             <p class="text-sm text-blue-700">
