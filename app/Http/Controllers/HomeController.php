@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Product;
 
@@ -41,6 +42,9 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        return view('home', compact('categories', 'carouselProducts', 'featuredProducts', 'latestProducts'));
+        // Get active banners for hero carousel
+        $banners = Banner::active()->orderBy('position')->get();
+
+        return view('home', compact('categories', 'carouselProducts', 'featuredProducts', 'latestProducts', 'banners'));
     }
 }

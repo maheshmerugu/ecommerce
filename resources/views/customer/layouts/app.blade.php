@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ config('app.name', 'Laravel') }} - @yield('title', 'Customer Dashboard')</title>
+    <title>{{ $storeName }} - @yield('title', 'Customer Dashboard')</title>
 
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -26,7 +26,7 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="text-xl font-bold text-gray-900">
-                        {{ config('app.name', 'Laravel') }}
+                        {{ $storeName }}
                     </a>
                 </div>
 
@@ -137,7 +137,7 @@
     <footer class="bg-white border-t mt-12">
         <div class="max-w-7xl mx-auto py-12 px-4 sm:px-6 lg:px-8">
             <div class="text-center">
-                <p class="text-gray-500">&copy; 2025 {{ config('app.name') }}. All rights reserved.</p>
+                <p class="text-gray-500">&copy; 2025 {{ $storeName }}. All rights reserved.</p>
             </div>
         </div>
     </footer>

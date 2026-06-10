@@ -63,13 +63,29 @@ class CartController extends Controller
 
             $product = Product::findOrFail($request->product_id);
             $quantity = $request->quantity ?? 1;
+
+            // Stock check
+            if ($product->track_quantity) {
+                $cart = $this->getCart();
+                $existingInCart = $cart->items()->where('product_id', $product->id)->value('quantity') ?? 0;
+                $totalRequested = $existingInCart + $quantity;
+                if ($product->quantity < 1) {
+                    return response()->json(['success' => false, 'message' => 'This product is out of stock.'], 422);
+                }
+                if ($product->quantity < $totalRequested) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => "Only {$product->quantity} unit(s) available."
+                    ], 422);
+                }
+            } else {
+                $cart = $this->getCart();
+            }
             
             // Get the price to use (special price if available, otherwise regular price)
             $price = $product->special_price && $product->special_price < $product->price 
                 ? $product->special_price 
                 : $product->price;
-
-            $cart = $this->getCart();
 
             // Check if product already exists in cart
             $existingItem = $cart->items()->where('product_id', $product->id)->first();

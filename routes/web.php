@@ -12,6 +12,10 @@ use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ProductController as AdminProductController;
+use App\Http\Controllers\Admin\OrderController as AdminOrderController;
+use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
+use App\Http\Controllers\Admin\BannerController as AdminBannerController;
+use App\Http\Controllers\Admin\SettingController as AdminSettingController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
@@ -100,7 +104,8 @@ Route::middleware(['auth:customer'])->group(function () {
     Route::get('addresses/{address}/edit', [CustomerProfileController::class, 'editAddress'])->name('customer.addresses.edit');
     Route::put('addresses/{address}', [CustomerProfileController::class, 'updateAddress'])->name('customer.addresses.update');
     Route::delete('addresses/{address}', [CustomerProfileController::class, 'destroyAddress'])->name('customer.addresses.destroy');
-    
+    Route::patch('addresses/{address}/default', [CustomerProfileController::class, 'setDefaultAddress'])->name('customer.addresses.set-default');
+
     // Order History
     Route::get('orders', [CustomerProfileController::class, 'orders'])->name('customer.orders.index');
     Route::get('orders/{order}', [CustomerProfileController::class, 'orderShow'])->name('customer.orders.show');
@@ -121,11 +126,30 @@ Route::prefix('admin')->name('admin.')->group(function () {
         
         // Category Management
         Route::resource('categories', AdminCategoryController::class);
-        
+        Route::patch('categories/{category}/toggle-status', [AdminCategoryController::class, 'toggleStatus'])->name('categories.toggle-status');
+
         // Product Management
         Route::resource('products', AdminProductController::class);
         Route::patch('products/{product}/toggle-status', [AdminProductController::class, 'toggleStatus'])->name('products.toggle-status');
         Route::patch('products/{product}/toggle-featured', [AdminProductController::class, 'toggleFeatured'])->name('products.toggle-featured');
+
+        // Order Management
+        Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
+        Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
+        Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+
+        // Customer Management
+        Route::get('customers', [AdminCustomerController::class, 'index'])->name('customers.index');
+        Route::get('customers/{customer}', [AdminCustomerController::class, 'show'])->name('customers.show');
+        Route::patch('customers/{customer}/toggle-status', [AdminCustomerController::class, 'toggleStatus'])->name('customers.toggle-status');
+
+        // Banner Management
+        Route::resource('banners', AdminBannerController::class)->except(['show']);
+        Route::patch('banners/{banner}/toggle-status', [AdminBannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+
+        // Settings
+        Route::get('settings', [AdminSettingController::class, 'index'])->name('settings.index');
+        Route::put('settings', [AdminSettingController::class, 'update'])->name('settings.update');
     });
 });
 

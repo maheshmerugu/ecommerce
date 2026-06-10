@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Products - {{ config('app.name', 'Laravel') }}</title>
+    <title>Products - {{ $storeName }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -41,7 +41,7 @@
                 <div class="flex justify-between items-center">
                     <!-- Logo -->
                     <div class="text-2xl font-bold text-blue-600">
-                        <a href="{{ route('home') }}">{{ config('app.name', 'Laravel') }}</a>
+                        <a href="{{ route('home') }}">{{ $storeName }}</a>
                     </div>
 
                     <!-- Search Bar -->

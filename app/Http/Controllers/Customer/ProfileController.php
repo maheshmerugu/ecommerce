@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Address;
 use App\Models\Order;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -80,8 +81,7 @@ class ProfileController extends Controller
     public function addresses()
     {
         $customer = Auth::guard('customer')->user();
-        $addresses = collect(); // Empty collection for now
-        
+        $addresses = $customer->addresses()->orderByDesc('is_default')->orderBy('created_at')->get();
         return view('customer.profile.addresses', compact('addresses'));
     }
 
@@ -91,21 +91,23 @@ class ProfileController extends Controller
     public function orders()
     {
         $customer = Auth::guard('customer')->user();
-        
-        // Get all orders for the customer with pagination
         $orders = $customer->orders()
                           ->with(['items.product.images'])
                           ->orderBy('created_at', 'desc')
                           ->paginate(10);
-        
         return view('customer.profile.orders', compact('orders'));
     }
 
     /**
      * Show specific order
      */
-    public function orderShow($order)
+    public function orderShow(Order $order)
     {
+        $customer = Auth::guard('customer')->user();
+        if ($order->customer_id !== $customer->id) {
+            abort(403);
+        }
+        $order->load(['items.product.images']);
         return view('customer.profile.order-show', compact('order'));
     }
 
@@ -122,30 +124,134 @@ class ProfileController extends Controller
      */
     public function storeAddress(Request $request)
     {
-        return redirect()->route('customer.addresses.index')->with('success', 'Address functionality coming soon!');
+        $customer = Auth::guard('customer')->user();
+
+        $request->validate([
+            'first_name'     => 'required|string|max:100',
+            'last_name'      => 'required|string|max:100',
+            'phone'          => 'required|string|max:20',
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city'           => 'required|string|max:100',
+            'state'          => 'required|string|max:100',
+            'postal_code'    => 'required|string|max:20',
+            'type'           => 'nullable|in:shipping,billing,home,work,other',
+        ]);
+
+        $isFirst = $customer->addresses()->count() === 0;
+
+        // If this is set as default, unset other defaults
+        if ($request->boolean('is_default') || $isFirst) {
+            $customer->addresses()->update(['is_default' => false]);
+        }
+
+        $customer->addresses()->create([
+            'first_name'     => $request->first_name,
+            'last_name'      => $request->last_name,
+            'phone'          => $request->phone,
+            'company'        => $request->company,
+            'address_line_1' => $request->address_line_1,
+            'address_line_2' => $request->address_line_2,
+            'city'           => $request->city,
+            'state'          => $request->state,
+            'postal_code'    => $request->postal_code,
+            'country'        => $request->input('country', 'India'),
+            'type'           => $request->input('type', 'shipping'),
+            'is_default'     => $request->boolean('is_default') || $isFirst,
+        ]);
+
+        return redirect()->route('customer.addresses.index')->with('success', 'Address added successfully!');
     }
 
     /**
      * Edit address
      */
-    public function editAddress($address)
+    public function editAddress(Address $address)
     {
+        $customer = Auth::guard('customer')->user();
+        if ($address->customer_id !== $customer->id) {
+            abort(403);
+        }
         return view('customer.profile.edit-address', compact('address'));
     }
 
     /**
      * Update address
      */
-    public function updateAddress(Request $request, $address)
+    public function updateAddress(Request $request, Address $address)
     {
-        return redirect()->route('customer.addresses.index')->with('success', 'Address functionality coming soon!');
+        $customer = Auth::guard('customer')->user();
+        if ($address->customer_id !== $customer->id) {
+            abort(403);
+        }
+
+        $request->validate([
+            'first_name'     => 'required|string|max:100',
+            'last_name'      => 'required|string|max:100',
+            'phone'          => 'required|string|max:20',
+            'address_line_1' => 'required|string|max:255',
+            'address_line_2' => 'nullable|string|max:255',
+            'city'           => 'required|string|max:100',
+            'state'          => 'required|string|max:100',
+            'postal_code'    => 'required|string|max:20',
+            'type'           => 'nullable|in:shipping,billing,home,work,other',
+        ]);
+
+        if ($request->boolean('is_default')) {
+            $customer->addresses()->where('id', '!=', $address->id)->update(['is_default' => false]);
+        }
+
+        $address->update([
+            'first_name'     => $request->first_name,
+            'last_name'      => $request->last_name,
+            'phone'          => $request->phone,
+            'company'        => $request->company,
+            'address_line_1' => $request->address_line_1,
+            'address_line_2' => $request->address_line_2,
+            'city'           => $request->city,
+            'state'          => $request->state,
+            'postal_code'    => $request->postal_code,
+            'country'        => $request->input('country', 'India'),
+            'type'           => $request->input('type', 'shipping'),
+            'is_default'     => $request->boolean('is_default'),
+        ]);
+
+        return redirect()->route('customer.addresses.index')->with('success', 'Address updated successfully!');
+    }
+
+    /**
+     * Set address as default
+     */
+    public function setDefaultAddress(Address $address)
+    {
+        $customer = Auth::guard('customer')->user();
+        if ($address->customer_id !== $customer->id) {
+            abort(403);
+        }
+
+        $customer->addresses()->update(['is_default' => false]);
+        $address->update(['is_default' => true]);
+
+        return redirect()->back()->with('success', 'Default address updated!');
     }
 
     /**
      * Delete address
      */
-    public function destroyAddress($address)
+    public function destroyAddress(Address $address)
     {
-        return redirect()->route('customer.addresses.index')->with('success', 'Address functionality coming soon!');
+        $customer = Auth::guard('customer')->user();
+        if ($address->customer_id !== $customer->id) {
+            abort(403);
+        }
+
+        $address->delete();
+
+        // If deleted address was default, make newest the default
+        if ($address->is_default) {
+            $customer->addresses()->latest()->first()?->update(['is_default' => true]);
+        }
+
+        return redirect()->route('customer.addresses.index')->with('success', 'Address deleted successfully!');
     }
 }

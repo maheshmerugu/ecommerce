@@ -5,8 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Cart;
 use App\Models\Order;
-use  App\Models\OrderItem;
+use App\Models\OrderItem;
 use App\Models\Address;
+use App\Models\Payment;
+use App\Models\Product;
+use App\Models\Setting;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -20,11 +23,13 @@ class CheckoutController extends Controller
     
     public function __construct()
     {
-        $keyId = env('RAZORPAY_KEY_ID');
-        $keySecret = env('RAZORPAY_KEY_SECRET');
-        
-        // Validate Razorpay credentials
-        if (!$keyId || !$keySecret || $keyId === 'your_razorpay_key_id' || $keySecret === 'your_razorpay_key_secret') {
+        // Prefer DB settings, fall back to .env
+        $keyId     = Setting::get('razorpay_key_id')     ?: env('RAZORPAY_KEY_ID');
+        $keySecret = Setting::get('razorpay_key_secret') ?: env('RAZORPAY_KEY_SECRET');
+
+        $placeholders = ['your_razorpay_key_id', 'your_razorpay_key_secret', '', null];
+
+        if (in_array($keyId, $placeholders, true) || in_array($keySecret, $placeholders, true)) {
             Log::warning('Razorpay credentials not properly configured');
             $this->razorpay = null;
         } else {
@@ -51,11 +56,14 @@ class CheckoutController extends Controller
 
         $cartItems = $cart->items()->with('product.images')->get();
         $user = Auth::guard('customer')->user();
-        
+
         // Load saved addresses for authenticated user
         $addresses = $user ? $user->addresses : collect();
-        
-        return view('checkout.index', compact('cart', 'cartItems', 'addresses', 'user'));
+
+        // Pass Razorpay Key ID to view (DB setting first, then .env fallback)
+        $razorpayKeyId = Setting::get('razorpay_key_id') ?: env('RAZORPAY_KEY_ID', '');
+
+        return view('checkout.index', compact('cart', 'cartItems', 'addresses', 'user', 'razorpayKeyId'));
     }
 
     /**
@@ -87,6 +95,21 @@ class CheckoutController extends Controller
         
         if (!$cart || $cart->items->isEmpty()) {
             return response()->json(['success' => false, 'message' => 'Cart is empty']);
+        }
+
+        // Stock validation before creating order
+        $cart->load('items.product');
+        foreach ($cart->items as $item) {
+            if (!$item->product) {
+                return response()->json(['success' => false, 'message' => 'A product in your cart is no longer available.']);
+            }
+            if ($item->product->track_quantity && $item->product->quantity < $item->quantity) {
+                $available = $item->product->quantity;
+                return response()->json([
+                    'success' => false,
+                    'message' => "\"" . $item->product->name . "\" only has {$available} unit(s) available. Please update your cart."
+                ]);
+            }
         }
 
         try {
@@ -146,7 +169,7 @@ class CheckoutController extends Controller
                 'razorpay_order_id' => $razorpayOrder['id'],
                 'amount' => $amountInPaisa,
                 'currency' => 'INR',
-                'name' => config('app.name'),
+                'name' => Setting::get('store_name') ?: config('app.name'),
                 'description' => 'Order #' . $order->order_number,
                 'prefill' => [
                     'name' => $request->customer_name,
@@ -205,7 +228,7 @@ class CheckoutController extends Controller
             }
 
             // Update order
-            $order = Order::findOrFail($request->order_id);
+            $order = Order::with('items.product')->findOrFail($request->order_id);
             
             // Check if this order belongs to the current user
             if ($order->customer_id !== Auth::guard('customer')->id()) {
@@ -214,9 +237,33 @@ class CheckoutController extends Controller
             
             $order->update([
                 'razorpay_payment_id' => $request->razorpay_payment_id,
-                'razorpay_signature' => $request->razorpay_signature,
-                'payment_status' => 'paid',
-                'status' => 'processing'  // Use valid enum value instead of 'confirmed'
+                'razorpay_signature'  => $request->razorpay_signature,
+                'payment_status'      => 'paid',
+                'status'              => 'processing',
+            ]);
+
+            // Deduct inventory
+            foreach ($order->items as $item) {
+                if ($item->product && $item->product->track_quantity) {
+                    $item->product->decrement('quantity', $item->quantity);
+                }
+            }
+
+            // Record payment
+            Payment::create([
+                'order_id'               => $order->id,
+                'payment_method'         => 'razorpay',
+                'transaction_id'         => $request->razorpay_payment_id,
+                'gateway_transaction_id' => $request->razorpay_order_id,
+                'amount'                 => $order->total,
+                'currency'               => $order->currency ?? 'INR',
+                'status'                 => 'completed',
+                'gateway_response'       => [
+                    'razorpay_payment_id' => $request->razorpay_payment_id,
+                    'razorpay_order_id'   => $request->razorpay_order_id,
+                    'razorpay_signature'  => $request->razorpay_signature,
+                ],
+                'processed_at' => now(),
             ]);
 
             Log::info('Order updated successfully', ['order_id' => $order->id]);
@@ -289,7 +336,8 @@ class CheckoutController extends Controller
         
         $orderNumber = 'ORD-' . strtoupper(Str::random(8)) . '-' . time();
         
-        $shippingFee = (float) config('shop.shipping_fee', 150);
+        // Shipping fee: DB setting > config > default 150
+        $shippingFee = (float) (Setting::get('shipping_fee') ?: config('shop.shipping_fee', 150));
 
         $order = Order::create([
             'order_number' => $orderNumber,

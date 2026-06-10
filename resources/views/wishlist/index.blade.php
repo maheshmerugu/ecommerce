@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Wishlist - {{ config('app.name', 'Laravel') }}</title>
+    <title>My Wishlist - {{ $storeName }}</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
@@ -16,8 +16,8 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4">
-                        <span class="hidden sm:inline">{{ config('app.name', 'Laravel') }}</span>
-                        <span class="sm:hidden">{{ substr(config('app.name', 'Laravel'), 0, 2) }}</span>
+                        <span class="hidden sm:inline">{{ $storeName }}</span>
+                        <span class="sm:hidden">{{ substr($storeName, 0, 2) }}</span>
                     </a>
                 </div>
 

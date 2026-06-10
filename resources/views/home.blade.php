@@ -119,8 +119,8 @@
                 <!-- Logo -->
                 <div class="flex items-center">
                     <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4 md:mr-8">
-                        <span class="hidden sm:inline">{{ config('app.name', 'Laravel') }}</span>
-                        <span class="sm:hidden">{{ substr(config('app.name', 'Laravel'), 0, 2) }}</span>
+                        <span class="hidden sm:inline">{{ $storeName }}</span>
+                        <span class="sm:hidden">{{ substr($storeName, 0, 2) }}</span>
                     </a>
                 </div>
 
@@ -256,7 +256,32 @@
             <div class="bg-white rounded shadow-sm mb-3 md:mb-4 overflow-hidden">
                 <div class="swiper hero-swiper banner-slide">
                     <div class="swiper-wrapper">
-                        @if(isset($carouselProducts) && $carouselProducts->count() > 0)
+                        @if(isset($banners) && $banners->count() > 0)
+                            @foreach($banners as $banner)
+                            <div class="swiper-slide relative min-h-[200px] md:min-h-[280px] overflow-hidden"
+                                 style="background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);">
+                                <img src="{{ asset('storage/' . $banner->image) }}"
+                                     alt="{{ $banner->title }}"
+                                     class="absolute inset-0 w-full h-full object-cover opacity-70">
+                                <div class="relative z-10 flex items-center h-full p-6 md:p-12 min-h-[200px] md:min-h-[280px]">
+                                    <div class="text-white max-w-lg">
+                                        @if($banner->title)
+                                            <h2 class="text-2xl md:text-4xl font-bold mb-2 drop-shadow">{{ $banner->title }}</h2>
+                                        @endif
+                                        @if($banner->caption)
+                                            <p class="text-sm md:text-lg mb-4 opacity-90">{{ $banner->caption }}</p>
+                                        @endif
+                                        @if($banner->link)
+                                            <a href="{{ $banner->link }}"
+                                               class="bg-white text-blue-700 px-5 py-2 rounded font-semibold hover:bg-gray-100 transition inline-block">
+                                                Shop Now
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                            @endforeach
+                        @elseif(isset($carouselProducts) && $carouselProducts->count() > 0)
                             @foreach($carouselProducts as $product)
                             <div class="swiper-slide p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
                                 <div class="w-full md:w-1/2 text-center md:text-left">

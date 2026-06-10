@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>@yield('title', 'Admin Panel') - {{ config('app.name', 'Laravel') }}</title>
+    <title>@yield('title', 'Admin Panel') - {{ $storeName }}</title>
 
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -31,21 +31,45 @@
         <div class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out">
             <!-- Logo -->
             <a href="{{ route('admin.dashboard') }}" class="text-white flex items-center space-x-2 px-4">
-                <span class="text-2xl font-extrabold">{{ config('app.name') }}</span>
+                <span class="text-2xl font-extrabold">{{ $storeName }}</span>
             </a>
 
             <!-- Navigation -->
-            <nav>
-                <a href="{{ route('admin.dashboard') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-700' : '' }}">
-                    Dashboard
+            <nav class="space-y-1">
+                <a href="{{ route('admin.dashboard') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-tachometer-alt w-5 mr-2"></i> Dashboard
                 </a>
-                
-                <a href="{{ route('admin.categories.index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.categories.*') ? 'bg-gray-700' : '' }}">
-                    Categories
+
+                <div class="pt-2 pb-1 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Catalog</div>
+
+                <a href="{{ route('admin.categories.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.categories.*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-tags w-5 mr-2"></i> Categories
                 </a>
-                
-                <a href="{{ route('admin.products.index') }}" class="block py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.products.*') ? 'bg-gray-700' : '' }}">
-                    Products
+
+                <a href="{{ route('admin.products.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.products.*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-box w-5 mr-2"></i> Products
+                </a>
+
+                <div class="pt-2 pb-1 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sales</div>
+
+                <a href="{{ route('admin.orders.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.orders.*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-shopping-bag w-5 mr-2"></i> Orders
+                </a>
+
+                <a href="{{ route('admin.customers.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.customers.*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-users w-5 mr-2"></i> Customers
+                </a>
+
+                <div class="pt-2 pb-1 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Content</div>
+
+                <a href="{{ route('admin.banners.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.banners.*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-images w-5 mr-2"></i> Banners
+                </a>
+
+                <div class="pt-2 pb-1 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">System</div>
+
+                <a href="{{ route('admin.settings.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.settings.*') ? 'bg-gray-700' : '' }}">
+                    <i class="fas fa-cog w-5 mr-2"></i> Settings
                 </a>
             </nav>
         </div>

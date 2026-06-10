@@ -68,18 +68,22 @@
                         <!-- Action Buttons -->
                         <div class="flex items-center justify-between pt-4 border-t border-gray-200">
                             <div class="flex items-center space-x-2">
-                                <a href="{{ route('customer.addresses.edit', $address->id ?? 1) }}" 
+                                <a href="{{ route('customer.addresses.edit', $address->id) }}" 
                                    class="text-blue-600 hover:text-blue-700 text-sm font-medium">
                                     <i class="fas fa-edit mr-1"></i>Edit
                                 </a>
-                                @if(!($address->is_default ?? false))
-                                    <button class="text-green-600 hover:text-green-700 text-sm font-medium">
-                                        <i class="fas fa-star mr-1"></i>Set Default
-                                    </button>
+                                @if(!$address->is_default)
+                                    <form method="POST" action="{{ route('customer.addresses.set-default', $address->id) }}" class="inline">
+                                        @csrf
+                                        @method('PATCH')
+                                        <button type="submit" class="text-green-600 hover:text-green-700 text-sm font-medium">
+                                            <i class="fas fa-star mr-1"></i>Set Default
+                                        </button>
+                                    </form>
                                 @endif
                             </div>
-                            @if(!($address->is_default ?? false))
-                                <form method="POST" action="{{ route('customer.addresses.destroy', $address->id ?? 1) }}" 
+                            @if(!$address->is_default)
+                                <form method="POST" action="{{ route('customer.addresses.destroy', $address->id) }}" 
                                       onsubmit="return confirm('Are you sure you want to delete this address?')" class="inline">
                                     @csrf
                                     @method('DELETE')

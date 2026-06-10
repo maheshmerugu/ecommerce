@@ -3,12 +3,15 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Models\Cart;
+use App\Models\CartItem;
 use App\Models\Customer;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Validation\Rules;
@@ -43,13 +46,38 @@ class AuthController extends Controller
             'password' => ['required'],
         ]);
 
+        // Capture guest session cart before session regeneration
+        $guestSessionId = Session::getId();
+        $guestCart = Cart::where('session_id', $guestSessionId)
+                         ->whereNull('customer_id')
+                         ->with('items')
+                         ->first();
+
         if (Auth::guard('customer')->attempt($request->only('email', 'password'), $request->filled('remember'))) {
             $request->session()->regenerate();
-            
+
+            $customer = Auth::guard('customer')->user();
+
             // Update last login
-            Auth::guard('customer')->user()->update([
-                'last_login_at' => now()
-            ]);
+            $customer->update(['last_login_at' => now()]);
+
+            // Merge guest cart into customer cart
+            if ($guestCart && $guestCart->items->isNotEmpty()) {
+                $customerCart = $customer->getOrCreateCart();
+                foreach ($guestCart->items as $guestItem) {
+                    $existing = $customerCart->items()->where('product_id', $guestItem->product_id)->first();
+                    if ($existing) {
+                        $existing->increment('quantity', $guestItem->quantity);
+                    } else {
+                        $customerCart->items()->create([
+                            'product_id' => $guestItem->product_id,
+                            'quantity'   => $guestItem->quantity,
+                            'price'      => $guestItem->price,
+                        ]);
+                    }
+                }
+                $guestCart->delete();
+            }
 
             return redirect()->intended(route('customer.dashboard'));
         }
