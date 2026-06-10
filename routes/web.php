@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\Storage;
 use App\Http\Controllers\HomeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\CartController;
+use App\Http\Controllers\LocationController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
@@ -53,6 +54,11 @@ Route::prefix('cart')->name('cart.')->group(function () {
     Route::get('count', [CartController::class, 'count'])->name('count');
 });
 
+// Location endpoints for dynamic state/city lists
+Route::get('locations/states', [LocationController::class, 'states'])->name('locations.states');
+Route::get('locations/cities', [LocationController::class, 'cities'])->name('locations.cities');
+Route::get('locations/pincodes', [LocationController::class, 'pincodes'])->name('locations.pincodes');
+
 // Wishlist Routes (available for both guests and logged-in users)
 Route::prefix('wishlist')->name('wishlist.')->group(function () {
     Route::get('/', [WishlistController::class, 'index'])->name('index');
@@ -68,6 +74,12 @@ Route::middleware('guest:customer')->group(function () {
     Route::post('login', [CustomerAuthController::class, 'login']);
     Route::get('register', [CustomerAuthController::class, 'showRegister'])->name('register');
     Route::post('register', [CustomerAuthController::class, 'register']);
+    
+    // Password Reset for Customers
+    Route::get('password/forgot', [CustomerAuthController::class, 'showForgotForm'])->name('password.request');
+    Route::post('password/email', [CustomerAuthController::class, 'sendResetLinkEmail'])->name('password.email');
+    Route::get('password/reset/{token}', [CustomerAuthController::class, 'showResetForm'])->name('password.reset');
+    Route::post('password/reset', [CustomerAuthController::class, 'reset'])->name('password.update');
 });
 
 // Customer Protected Routes (no prefix)

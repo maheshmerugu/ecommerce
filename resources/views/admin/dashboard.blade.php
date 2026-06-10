@@ -60,13 +60,106 @@
                 </div>
                 <div class="ml-4">
                     <p class="text-sm font-medium text-gray-600">Total Revenue</p>
-                    <p class="text-2xl font-semibold text-gray-900">${{ number_format($stats['total_revenue'], 2) }}</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ format_currency($stats['total_revenue'], 2) }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Earnings Section -->
+    <div class="mb-8">
+        <h3 class="text-gray-700 text-xl font-medium mb-4">Earnings</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+            <!-- Today's Earnings -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Today's Earnings</p>
+                        <p class="text-2xl font-semibold text-gray-900 mt-2">{{ format_currency($earnings['today'], 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-blue-600 text-white">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- This Month's Earnings -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">This Month</p>
+                        <p class="text-2xl font-semibold text-gray-900 mt-2">{{ format_currency($earnings['this_month'], 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-green-600 text-white">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- This Year's Earnings -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">This Year</p>
+                        <p class="text-2xl font-semibold text-gray-900 mt-2">{{ format_currency($earnings['this_year'], 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-purple-600 text-white">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Total Earnings -->
+            <div class="bg-white rounded-lg shadow p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-gray-600">Total Earnings</p>
+                        <p class="text-2xl font-semibold text-gray-900 mt-2">{{ format_currency($earnings['total'], 2) }}</p>
+                    </div>
+                    <div class="p-3 rounded-full bg-indigo-600 text-white">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <!-- Top Products by Revenue -->
+        <div class="bg-white rounded-lg shadow">
+            <div class="px-6 py-4 border-b border-gray-200">
+                <h3 class="text-lg font-medium text-gray-900">Top Products by Revenue</h3>
+            </div>
+            <div class="p-6">
+                @if($top_products->count() > 0)
+                    <div class="space-y-3">
+                        @foreach($top_products as $item)
+                            <div class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-900">{{ $item['product']->name }}</p>
+                                    <p class="text-xs text-gray-500">Qty: {{ $item['quantity'] }}</p>
+                                </div>
+                                <div class="text-right">
+                                    <p class="text-sm font-medium text-blue-600">{{ format_currency($item['revenue'], 2) }}</p>
+                                    <p class="text-xs text-gray-500">Revenue</p>
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @else
+                    <p class="text-gray-500 text-center">No products sold yet.</p>
+                @endif
+            </div>
+        </div>
+
         <!-- Recent Orders -->
         <div class="bg-white rounded-lg shadow">
             <div class="px-6 py-4 border-b border-gray-200">
@@ -89,7 +182,7 @@
                                     <tr>
                                         <td class="py-2 text-sm text-gray-900">#{{ $order->order_number }}</td>
                                         <td class="py-2 text-sm text-gray-900">{{ $order->customer->full_name ?? 'Guest' }}</td>
-                                        <td class="py-2 text-sm text-gray-900">${{ number_format($order->total, 2) }}</td>
+                                        <td class="py-2 text-sm text-gray-900">{{ format_currency($order->total, 2) }}</td>
                                         <td class="py-2">
                                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
                                                 {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}

@@ -77,18 +77,14 @@
                 </div>
 
                 <!-- City, State, ZIP -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City *</label>
-                        <input type="text" name="city" id="city" value="{{ old('city') }}" required
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="City">
+                           <select name="city" id="city" required class="w-full"><option value="">Select city</option></select>
                     </div>
                     <div>
                         <label for="state" class="block text-sm font-medium text-gray-700 mb-2">State *</label>
-                        <input type="text" name="state" id="state" value="{{ old('state') }}" required
-                               class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="State">
+                           <select name="state" id="state" required class="w-full"><option value="">Select state</option></select>
                     </div>
                     <div>
                         <label for="zip_code" class="block text-sm font-medium text-gray-700 mb-2">ZIP Code *</label>
@@ -139,4 +135,52 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+<script>
+    let createStateTS, createCityTS;
+    function initCreateAddressSelects() {
+        fetch('{{ route("locations.states") }}')
+            .then(res => res.json())
+            .then(data => {
+                const states = data.states || [];
+                const stateEl = document.getElementById('state');
+                stateEl.innerHTML = '<option value="">Select state</option>' + states.map(s => `<option value="${s}">${s}</option>`).join('');
+                createStateTS = new TomSelect('#state', { create: false, sortField: {field: 'text'} });
+
+                createCityTS = new TomSelect('#city', { create: true, sortField: {field: 'text'} });
+
+                const pre = createStateTS.getValue();
+                if (pre) loadCitiesForCreate(pre);
+                createStateTS.on('change', loadCitiesForCreate);
+                createCityTS.on('change', function(value) { loadPincodesForCreate(value); });
+            })
+            .catch(err => console.error('Failed to load states', err));
+    }
+
+    function loadCitiesForCreate(state) {
+        if (!state) { createCityTS.clearOptions(); return; }
+        fetch('{{ route("locations.cities") }}?state=' + encodeURIComponent(state))
+            .then(res => res.json())
+            .then(data => {
+                createCityTS.clearOptions();
+                (data.cities || []).forEach(c => createCityTS.addOption({value: c, text: c}));
+            })
+            .catch(err => console.error('Failed to load cities', err));
+    }
+
+    function loadPincodesForCreate(city) {
+        if (!city) return;
+        fetch('{{ route("locations.pincodes") }}?city=' + encodeURIComponent(city))
+            .then(res => res.json())
+            .then(data => {
+                if (data.pincodes && data.pincodes.length) {
+                    const el = document.getElementById('zip_code');
+                    if (el) el.value = data.pincodes[0];
+                }
+            })
+            .catch(err => console.error('Failed to load pincodes', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() { initCreateAddressSelects(); });
+</script>
 @endsection

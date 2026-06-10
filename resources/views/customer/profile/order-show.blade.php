@@ -21,7 +21,7 @@
                     </div>
                 </div>
                 <div class="text-right">
-                    <div class="text-2xl font-bold text-gray-900">${{ number_format($order->total ?? 0, 2) }}</div>
+                    <div class="text-2xl font-bold text-gray-900">{{ format_currency($order->total ?? 0, 2) }}</div>
                     <div class="mt-1">
                         <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
                             {{ ($order->status ?? 'pending') === 'delivered' ? 'bg-green-100 text-green-800' : 
@@ -62,13 +62,13 @@
                                         <p class="text-gray-600 mt-1">{{ $item->product->description ?? '' }}</p>
                                         <div class="flex items-center space-x-4 mt-2">
                                             <span class="text-sm text-gray-500">Quantity: {{ $item->quantity }}</span>
-                                            <span class="text-sm text-gray-500">Price: ${{ number_format($item->price ?? 0, 2) }}</span>
+                                            <span class="text-sm text-gray-500">Price: {{ format_currency($item->price ?? 0, 2) }}</span>
                                         </div>
                                     </div>
                                     
                                     <div class="text-right">
                                         <div class="text-lg font-semibold text-gray-900">
-                                            ${{ number_format(($item->price ?? 0) * $item->quantity, 2) }}
+                                            {{ format_currency(($item->price ?? 0) * $item->quantity, 2) }}
                                         </div>
                                     </div>
                                 </div>
@@ -143,28 +143,28 @@
                     <div class="space-y-3">
                         <div class="flex justify-between">
                             <span class="text-gray-600">Subtotal</span>
-                            <span class="text-gray-900">${{ number_format(($order->subtotal ?? $order->total ?? 0), 2) }}</span>
+                            <span class="text-gray-900">{{ format_currency(($order->subtotal ?? $order->total ?? 0), 2) }}</span>
                         </div>
                         <div class="flex justify-between">
                             <span class="text-gray-600">Shipping</span>
-                            <span class="text-gray-900">${{ number_format($order->shipping_cost ?? 0, 2) }}</span>
+                            <span class="text-gray-900">{{ format_currency($order->shipping_cost ?? 0, 2) }}</span>
                         </div>
                         @if(isset($order->tax) && $order->tax > 0)
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Tax</span>
-                                <span class="text-gray-900">${{ number_format($order->tax, 2) }}</span>
+                                <span class="text-gray-900">{{ format_currency($order->tax, 2) }}</span>
                             </div>
                         @endif
                         @if(isset($order->discount) && $order->discount > 0)
                             <div class="flex justify-between text-green-600">
                                 <span>Discount</span>
-                                <span>-${{ number_format($order->discount, 2) }}</span>
+                                <span>-{{ format_currency($order->discount, 2) }}</span>
                             </div>
                         @endif
                         <hr>
                         <div class="flex justify-between font-semibold text-lg">
                             <span>Total</span>
-                            <span>${{ number_format($order->total ?? 0, 2) }}</span>
+                            <span>{{ format_currency($order->total ?? 0, 2) }}</span>
                         </div>
                     </div>
                 </div>

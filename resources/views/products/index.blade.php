@@ -16,10 +16,7 @@
             <!-- Top Bar -->
             <div class="py-2 border-b border-gray-200">
                 <div class="flex justify-between items-center text-sm text-gray-600">
-                    <div>
-                        <i class="fas fa-phone mr-2"></i>+1 234 567 8900
-                        <i class="fas fa-envelope ml-4 mr-2"></i>info@store.com
-                    </div>
+                    <div></div>
                     <div class="flex items-center space-x-4">
                         @guest('customer')
                             <a href="{{ route('login') }}" class="hover:text-blue-600">Login</a>
@@ -318,10 +315,10 @@
                             <div class="flex items-center justify-between">
                                 <div class="flex items-center space-x-2">
                                     @if($product->special_price && $product->special_price < $product->price)
-                                        <span class="text-xl font-bold text-red-600">${{ number_format($product->special_price, 2) }}</span>
-                                        <span class="text-sm text-gray-500 line-through">${{ number_format($product->price, 2) }}</span>
+                                            <span class="text-xl font-bold text-red-600">{{ format_currency($product->special_price, 2) }}</span>
+                                            <span class="text-sm text-gray-500 line-through">{{ format_currency($product->price, 2) }}</span>
                                     @else
-                                        <span class="text-xl font-bold text-blue-600">${{ number_format($product->price, 2) }}</span>
+                                            <span class="text-xl font-bold text-gray-900">{{ format_currency($product->price, 2) }}</span>
                                     @endif
                                 </div>
                                 <div class="flex items-center space-x-1">

@@ -78,18 +78,20 @@
                 </div>
 
                 <!-- City, State, ZIP -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
                     <div>
                         <label for="city" class="block text-sm font-medium text-gray-700 mb-2">City *</label>
-                        <input type="text" name="city" id="city" value="{{ old('city', $address->city ?? '') }}" required
+                        <input list="cities-datalist" type="text" name="city" id="city" value="{{ old('city', $address->city ?? '') }}" required
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="City">
+                               placeholder="Start typing city">
+                        <datalist id="cities-datalist"></datalist>
                     </div>
                     <div>
                         <label for="state" class="block text-sm font-medium text-gray-700 mb-2">State *</label>
-                        <input type="text" name="state" id="state" value="{{ old('state', $address->state ?? '') }}" required
+                        <input list="states-datalist" type="text" name="state" id="state" value="{{ old('state', $address->state ?? '') }}" required onchange="onStateChangeEdit(this.value)"
                                class="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-                               placeholder="State">
+                               placeholder="Start typing state">
+                        <datalist id="states-datalist"></datalist>
                     </div>
                     <div>
                         <label for="zip_code" class="block text-sm font-medium text-gray-700 mb-2">ZIP Code *</label>
@@ -141,4 +143,52 @@
         </div>
     </div>
 </div>
+<script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+<script>
+    let editStateTS, editCityTS;
+    function initEditAddressSelects() {
+        fetch('{{ route("locations.states") }}')
+            .then(res => res.json())
+            .then(data => {
+                const states = data.states || [];
+                const stateEl = document.getElementById('state');
+                stateEl.innerHTML = '<option value="">Select state</option>' + states.map(s => `<option value="${s}">${s}</option>`).join('');
+                editStateTS = new TomSelect('#state', { create: false, sortField: {field: 'text'} });
+
+                editCityTS = new TomSelect('#city', { create: true, sortField: {field: 'text'} });
+
+                const pre = editStateTS.getValue();
+                if (pre) loadCitiesForEdit(pre);
+                editStateTS.on('change', loadCitiesForEdit);
+                editCityTS.on('change', function(value) { loadPincodesForEdit(value); });
+            })
+            .catch(err => console.error('Failed to load states', err));
+    }
+
+    function loadCitiesForEdit(state) {
+        if (!state) { editCityTS.clearOptions(); return; }
+        fetch('{{ route("locations.cities") }}?state=' + encodeURIComponent(state))
+            .then(res => res.json())
+            .then(data => {
+                editCityTS.clearOptions();
+                (data.cities || []).forEach(c => editCityTS.addOption({value: c, text: c}));
+            })
+            .catch(err => console.error('Failed to load cities', err));
+    }
+
+    function loadPincodesForEdit(city) {
+        if (!city) return;
+        fetch('{{ route("locations.pincodes") }}?city=' + encodeURIComponent(city))
+            .then(res => res.json())
+            .then(data => {
+                if (data.pincodes && data.pincodes.length) {
+                    const el = document.getElementById('zip_code');
+                    if (el) el.value = data.pincodes[0];
+                }
+            })
+            .catch(err => console.error('Failed to load pincodes', err));
+    }
+
+    document.addEventListener('DOMContentLoaded', function() { initEditAddressSelects(); });
+</script>
 @endsection

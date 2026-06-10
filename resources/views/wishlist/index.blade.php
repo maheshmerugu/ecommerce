@@ -117,11 +117,11 @@
                                 <div class="flex items-center justify-between mb-4">
                                     @if($item->product->special_price && $item->product->special_price < $item->product->price)
                                         <div class="flex items-center space-x-2">
-                                            <span class="text-xl font-bold text-red-600">₹{{ number_format($item->product->special_price, 0) }}</span>
-                                            <span class="text-sm text-gray-500 line-through">₹{{ number_format($item->product->price, 0) }}</span>
+                                            <span class="text-xl font-bold text-red-600">{{ format_currency($item->product->special_price) }}</span>
+                                            <span class="text-sm text-gray-500 line-through">{{ format_currency($item->product->price) }}</span>
                                         </div>
                                     @else
-                                        <span class="text-xl font-bold text-blue-600">₹{{ number_format($item->product->price, 0) }}</span>
+                                        <span class="text-xl font-bold text-blue-600">{{ format_currency($item->product->price) }}</span>
                                     @endif
                                 </div>
 

@@ -76,7 +76,7 @@
                     <div class="ml-5 w-0 flex-1">
                         <dl>
                             <dt class="text-sm font-medium text-gray-500 truncate">Total Spent</dt>
-                            <dd class="text-lg font-medium text-gray-900">${{ number_format($stats['total_spent'] ?? 0, 2) }}</dd>
+                            <dd class="text-lg font-medium text-gray-900">{{ format_currency($stats['total_spent'] ?? 0, 2) }}</dd>
                         </dl>
                     </div>
                 </div>
@@ -104,7 +104,7 @@
                                     <p class="text-sm text-gray-500">{{ $order->created_at->format('M d, Y') }}</p>
                                 </div>
                                 <div class="text-right">
-                                    <p class="text-sm font-medium text-gray-900">${{ number_format($order->total, 2) }}</p>
+                                    <p class="text-sm font-medium text-gray-900">{{ format_currency($order->total, 2) }}</p>
                                     <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full
                                         {{ $order->status === 'pending' ? 'bg-yellow-100 text-yellow-800' : '' }}
                                         {{ $order->status === 'processing' ? 'bg-blue-100 text-blue-800' : '' }}

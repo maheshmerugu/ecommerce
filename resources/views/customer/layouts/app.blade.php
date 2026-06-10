@@ -222,5 +222,6 @@
         window.updateWishlistCount = updateWishlistCount;
         window.updateAllCounts = updateAllCounts;
     </script>
+        @stack('scripts')
 </body>
 </html>

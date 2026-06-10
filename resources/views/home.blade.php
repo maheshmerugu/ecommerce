@@ -256,45 +256,42 @@
             <div class="bg-white rounded shadow-sm mb-3 md:mb-4 overflow-hidden">
                 <div class="swiper hero-swiper banner-slide">
                     <div class="swiper-wrapper">
-                        <div class="swiper-slide bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
-                            <div class="w-full md:w-1/2 text-center md:text-left">
-                                <h2 class="text-2xl md:text-3xl font-bold mb-2">Super Sale!</h2>
-                                <p class="text-sm md:text-lg mb-4">Up to 70% off on Electronics</p>
-                                <a href="{{ route('products.index', ['category' => 'electronics']) }}"
-                                    class="bg-white text-blue-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
-                                    Shop Now
-                                </a>
+                        @if(isset($carouselProducts) && $carouselProducts->count() > 0)
+                            @foreach($carouselProducts as $product)
+                            <div class="swiper-slide p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
+                                <div class="w-full md:w-1/2 text-center md:text-left">
+                                    <h2 class="text-2xl md:text-3xl font-bold mb-2">{{ Str::limit($product->name, 40) }}</h2>
+                                    <p class="text-sm md:text-lg mb-4">{{ $product->short_description ?? 'Explore this model' }}</p>
+                                    <a href="{{ route('products.show', $product->slug) }}"
+                                        class="bg-white text-blue-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
+                                        View Product
+                                    </a>
+                                </div>
+                                <div class="hidden md:block w-1/2 text-right">
+                                    @if($product->images && $product->images->count() > 0)
+                                    <img src="{{ asset('public/storage/' . $product->images->first()->image_path) }}" alt="{{ $product->name }}" class="mx-auto h-40 object-contain">
+                                    @else
+                                    <i class="fas fa-car-side text-6xl opacity-30"></i>
+                                    @endif
+                                </div>
                             </div>
-                            <div class="hidden md:block w-1/2 text-right">
-                                <i class="fas fa-laptop text-6xl opacity-30"></i>
+                            @endforeach
+                        @else
+                            <!-- Fallback static slides -->
+                            <div class="swiper-slide bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
+                                <div class="w-full md:w-1/2 text-center md:text-left">
+                                    <h2 class="text-2xl md:text-3xl font-bold mb-2">Super Sale!</h2>
+                                    <p class="text-sm md:text-lg mb-4">Up to 70% off on Electronics</p>
+                                    <a href="{{ route('products.index', ['category' => 'electronics']) }}"
+                                        class="bg-white text-blue-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
+                                        Shop Now
+                                    </a>
+                                </div>
+                                <div class="hidden md:block w-1/2 text-right">
+                                    <i class="fas fa-laptop text-6xl opacity-30"></i>
+                                </div>
                             </div>
-                        </div>
-                        <div class="swiper-slide bg-gradient-to-r from-green-600 to-teal-600 text-white p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
-                            <div class="w-full md:w-1/2 text-center md:text-left">
-                                <h2 class="text-2xl md:text-3xl font-bold mb-2">Fashion Week</h2>
-                                <p class="text-sm md:text-lg mb-4">Trending styles at best prices</p>
-                                <a href="{{ route('products.index', ['category' => 'clothing']) }}"
-                                    class="bg-white text-green-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
-                                    Explore
-                                </a>
-                            </div>
-                            <div class="hidden md:block w-1/2 text-right">
-                                <i class="fas fa-tshirt text-6xl opacity-30"></i>
-                            </div>
-                        </div>
-                        <div class="swiper-slide bg-gradient-to-r from-orange-600 to-red-600 text-white p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
-                            <div class="w-full md:w-1/2 text-center md:text-left">
-                                <h2 class="text-2xl md:text-3xl font-bold mb-2">Home Essentials</h2>
-                                <p class="text-sm md:text-lg mb-4">Transform your living space</p>
-                                <a href="{{ route('products.index', ['category' => 'home-garden']) }}"
-                                    class="bg-white text-orange-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
-                                    Discover
-                                </a>
-                            </div>
-                            <div class="hidden md:block w-1/2 text-right">
-                                <i class="fas fa-home text-6xl opacity-30"></i>
-                            </div>
-                        </div>
+                        @endif
                     </div>
                     <div class="swiper-pagination"></div>
                     <div class="swiper-button-next hidden md:block"></div>
@@ -395,10 +392,10 @@
 
                                         <div class="flex items-center space-x-2">
                                             @if($product->special_price && $product->special_price < $product->price)
-                                                <span class="text-sm md:text-lg font-bold text-gray-900">₹{{ number_format($product->special_price, 0) }}</span>
-                                                <span class="text-xs md:text-sm text-gray-500 line-through">₹{{ number_format($product->price, 0) }}</span>
+                                                <span class="text-sm md:text-lg font-bold text-gray-900">{{ format_currency($product->special_price) }}</span>
+                                                <span class="text-xs md:text-sm text-gray-500 line-through">{{ format_currency($product->price) }}</span>
                                                 @else
-                                                <span class="text-sm md:text-lg font-bold text-gray-900">₹{{ number_format($product->price, 0) }}</span>
+                                                <span class="text-sm md:text-lg font-bold text-gray-900">{{ format_currency($product->price) }}</span>
                                                 @endif
                                         </div>
                                     </div>
@@ -475,10 +472,10 @@
 
                                 <div class="flex items-center space-x-2">
                                     @if($product->special_price && $product->special_price < $product->price)
-                                    <span class="text-lg font-bold text-gray-900">${{ number_format($product->special_price, 0) }}</span>
-                                    <span class="text-sm text-gray-500 line-through">${{ number_format($product->price, 0) }}</span>
+                                    <span class="text-lg font-bold text-gray-900">{{ format_currency($product->special_price) }}</span>
+                                    <span class="text-sm text-gray-500 line-through">{{ format_currency($product->price) }}</span>
                                     @else
-                                    <span class="text-lg font-bold text-gray-900">${{ number_format($product->price, 0) }}</span>
+                                    <span class="text-lg font-bold text-gray-900">{{ format_currency($product->price) }}</span>
                                     @endif
                                 </div>
 
@@ -534,12 +531,7 @@
                                 <a href="#" class="text-gray-300 hover:text-white text-xl"><i class="fab fa-twitter"></i></a>
                                 <a href="#" class="text-gray-300 hover:text-white text-xl"><i class="fab fa-youtube"></i></a>
                             </div>
-                            <div class="space-y-2">
-                                <p class="text-gray-300 text-sm">Mail Us:</p>
-                                <p class="text-gray-400 text-xs">E-Commerce Store<br>
-                                    Buildings Alyssa, Begonia &<br>
-                                    Clover situated in Embassy Tech Village</p>
-                            </div>
+                            <!-- Contact address removed -->
                         </div>
                     </div>
 

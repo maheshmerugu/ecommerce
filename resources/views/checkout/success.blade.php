@@ -118,14 +118,14 @@
                             @endif
                             <div class="flex items-center space-x-4 mt-2 text-sm">
                                 <span class="text-gray-600">Quantity: {{ $item->quantity }}</span>
-                                <span class="text-gray-600">Price: ₹{{ number_format($item->price, 0) }}</span>
+                                <span class="text-gray-600">Price: {{ format_currency($item->price) }}</span>
                                 @if($item->product_sku)
                                 <span class="text-gray-600">SKU: {{ $item->product_sku }}</span>
                                 @endif
                             </div>
                         </div>
                         <div class="text-right">
-                            <div class="font-semibold text-gray-900">₹{{ number_format($item->total, 0) }}</div>
+                            <div class="font-semibold text-gray-900">{{ format_currency($item->total) }}</div>
                         </div>
                     </div>
                     @endforeach
@@ -139,29 +139,29 @@
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span>Subtotal:</span>
-                                <span>₹{{ number_format($order->subtotal, 0) }}</span>
+                                <span>{{ format_currency($order->subtotal) }}</span>
                             </div>
                             @if($order->shipping_amount > 0)
                             <div class="flex justify-between">
                                 <span>Shipping:</span>
-                                <span>₹{{ number_format($order->shipping_amount, 0) }}</span>
+                                <span>{{ format_currency($order->shipping_amount) }}</span>
                             </div>
                             @endif
                             @if($order->tax_amount > 0)
                             <div class="flex justify-between">
                                 <span>Tax:</span>
-                                <span>₹{{ number_format($order->tax_amount, 0) }}</span>
+                                <span>{{ format_currency($order->tax_amount) }}</span>
                             </div>
                             @endif
                             @if($order->discount_amount > 0)
                             <div class="flex justify-between text-green-600">
                                 <span>Discount:</span>
-                                <span>-₹{{ number_format($order->discount_amount, 0) }}</span>
+                                <span>-{{ format_currency($order->discount_amount) }}</span>
                             </div>
                             @endif
                             <div class="flex justify-between text-lg font-semibold pt-2 border-t">
                                 <span>Total:</span>
-                                <span>₹{{ number_format($order->total, 0) }}</span>
+                                <span>{{ format_currency($order->total) }}</span>
                             </div>
                         </div>
                     </div>

@@ -8,6 +8,9 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+    <!-- Tom Select for searchable dropdowns -->
+    <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -114,7 +117,7 @@
                                 @foreach($addresses as $address)
                                 <label class="flex items-center p-3 border rounded-lg cursor-pointer hover:bg-gray-50">
                                     <input type="radio" name="saved_address" value="{{ $address->id }}" 
-                                        class="mr-3" onchange="fillAddress({{ json_encode($address) }})">
+                                        class="mr-3" onchange="fillAddress({{ json_encode($address) }})" {{ $address->is_default ? 'checked' : '' }}>
                                     <div class="flex-1">
                                         <div class="font-medium">{{ $address->full_name }}</div>
                                         <div class="text-sm text-gray-600">{{ $address->formatted_address }}</div>
@@ -130,7 +133,7 @@
                             </div>
                             <div class="mt-2">
                                 <label class="flex items-center">
-                                    <input type="radio" name="saved_address" value="new" checked class="mr-2">
+                                    <input type="radio" name="saved_address" value="new" {{ $addresses->where('is_default',true)->count() ? '' : 'checked' }} class="mr-2">
                                     <span class="text-sm">Use new address</span>
                                 </label>
                             </div>
@@ -151,22 +154,22 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="House number, building name, street name, area"></textarea>
                             </div>
-                            <div class="grid md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
-                                    <input type="text" name="shipping_city" required
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter city name">
-                                </div>
+                                <div class="grid md:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
-                                    <input type="text" name="shipping_state" required
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter state name">
+                                    <select name="shipping_state" id="shipping_state" required class="w-full">
+                                        <option value="">Select state</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-2">City *</label>
+                                    <select name="shipping_city" id="shipping_city" required class="w-full">
+                                        <option value="">Select city</option>
+                                    </select>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">Pincode *</label>
-                                    <input type="text" name="shipping_pincode" required pattern="[0-9]{6}"
+                                    <input type="text" name="shipping_pincode" id="shipping_pincode" required pattern="[0-9]{6}"
                                         class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                         placeholder="6-digit pincode">
                                 </div>
@@ -193,26 +196,22 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="House number, building name, street name, area"></textarea>
                             </div>
-                            <div class="grid md:grid-cols-3 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
-                                    <input type="text" name="billing_city"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter city name">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
-                                    <input type="text" name="billing_state"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="Enter state name">
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
-                                    <input type="text" name="billing_pincode" pattern="[0-9]{6}"
-                                        class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        placeholder="6-digit pincode">
-                                </div>
+                        <div class="grid md:grid-cols-3 gap-4">
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
+                                <select name="billing_state" id="billing_state" class="w-full" onchange="onBillingStateChange(this.value)"><option value="">Select state</option></select>
                             </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">City</label>
+                                <select name="billing_city" id="billing_city" class="w-full"><option value="">Select city</option></select>
+                            </div>
+                            <div>
+                                <label class="block text-sm font-medium text-gray-700 mb-2">Pincode</label>
+                                <input type="text" name="billing_pincode" id="billing_pincode" pattern="[0-9]{6}"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                    placeholder="6-digit pincode">
+                            </div>
+                        </div>
                         </div>
                     </div>
                 </form>
@@ -243,7 +242,7 @@
                                 <div class="text-sm text-gray-500">Qty: {{ $item->quantity }}</div>
                             </div>
                             <div class="text-sm font-medium text-gray-900">
-                                ₹{{ number_format($item->price * $item->quantity, 0) }}
+                                {{ format_currency($item->price * $item->quantity) }}
                             </div>
                         </div>
                         @endforeach
@@ -253,15 +252,15 @@
                     <div class="space-y-2 pt-4 border-t">
                         <div class="flex justify-between text-sm">
                             <span>Subtotal ({{ $cart->total_quantity }} items)</span>
-                            <span>₹{{ number_format($cart->total_price, 0) }}</span>
+                            <span>{{ format_currency($cart->total_price) }}</span>
                         </div>
-                        <div class="flex justify-between text-sm">
-                            <span>Shipping</span>
-                            <span class="text-green-600">FREE</span>
+                           <div class="flex justify-between text-sm">
+                               <span>Shipping</span>
+                               <span class="text-gray-900">{{ format_currency(config('shop.shipping_fee', 150)) }}</span>
                         </div>
                         <div class="flex justify-between font-semibold text-lg pt-2 border-t">
                             <span>Total</span>
-                            <span>₹{{ number_format($cart->total_price, 0) }}</span>
+                            <span>{{ format_currency($cart->total_price + config('shop.shipping_fee', 150)) }}</span>
                         </div>
                     </div>
 
@@ -277,10 +276,10 @@
                     </div>
 
                     <!-- Place Order Button -->
-                    <button type="button" onclick="processCheckout()" 
+                        <button type="button" onclick="processCheckout()" 
                         class="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
                         <i class="fas fa-lock mr-2"></i>
-                        Place Order & Pay ₹{{ number_format($cart->total_price, 0) }}
+                        Place Order & Pay {{ format_currency($cart->total_price + config('shop.shipping_fee', 150)) }}
                     </button>
 
                     <div class="text-xs text-center text-gray-500 mt-3">
@@ -319,13 +318,43 @@
         }
 
         function fillAddress(address) {
-            document.querySelector('input[name="customer_name"]').value = address.first_name + ' ' + address.last_name;
-            document.querySelector('input[name="customer_phone"]').value = address.phone || '';
-            document.querySelector('textarea[name="shipping_address"]').value = address.address_line_1 + (address.address_line_2 ? ', ' + address.address_line_2 : '');
-            document.querySelector('input[name="shipping_city"]').value = address.city;
-            document.querySelector('input[name="shipping_state"]').value = address.state;
-            document.querySelector('input[name="shipping_pincode"]').value = address.postal_code;
+            const nameEl = document.querySelector('input[name="customer_name"]');
+            if (nameEl) nameEl.value = (address.first_name || '') + ' ' + (address.last_name || '');
+            const phoneEl = document.querySelector('input[name="customer_phone"]');
+            if (phoneEl) phoneEl.value = address.phone || '';
+            const addrEl = document.querySelector('textarea[name="shipping_address"]');
+            if (addrEl) addrEl.value = (address.address_line_1 || '') + (address.address_line_2 ? ', ' + address.address_line_2 : '');
+
+            const cityVal = address.city || '';
+            const stateVal = address.state || '';
+            const pinVal = address.postal_code || '';
+
+            // If TomSelect instances exist, use them to set values; otherwise set element values directly
+            if (typeof shippingStateTS !== 'undefined' && shippingStateTS) {
+                shippingStateTS.setValue(stateVal);
+            } else {
+                const sEl = document.getElementById('shipping_state'); if (sEl) sEl.value = stateVal;
+            }
+
+            if (typeof shippingCityTS !== 'undefined' && shippingCityTS) {
+                // attempt to load options for the state and set city after a short delay
+                loadCitiesForState(stateVal, shippingCityTS);
+                setTimeout(() => { try { shippingCityTS.setValue(cityVal); } catch(e){} }, 300);
+            } else {
+                const cEl = document.getElementById('shipping_city'); if (cEl) cEl.value = cityVal;
+            }
+
+            const pEl = document.getElementById('shipping_pincode'); if (pEl) pEl.value = pinVal;
         }
+
+        // On load: if a saved address radio is checked (not 'new'), fill the form
+        document.addEventListener('DOMContentLoaded', function() {
+            const checked = document.querySelector('input[name="saved_address"]:checked');
+            if (checked && checked.value !== 'new' && typeof checked.onchange === 'function') {
+                // Trigger the onchange handler which will call fillAddress
+                checked.dispatchEvent(new Event('change'));
+            }
+        });
 
         function processCheckout() {
             const form = document.getElementById('checkout-form');
@@ -431,6 +460,134 @@
                 alert('An error occurred. Please try again.');
             });
         }
+
+        // Initialize Tom Selects for state/city fields
+        let shippingStateTS, shippingCityTS, billingStateTS, billingCityTS;
+
+        function initLocationSelects() {
+            // Initialize TomSelect with remote loading for states and cities
+            shippingStateTS = new TomSelect('#shipping_state', {
+                valueField: 'value',
+                labelField: 'text',
+                searchField: 'text',
+                create: false,
+                maxOptions: 200,
+                load: function(query, callback) {
+                    fetch('{{ route("locations.states") }}?q=' + encodeURIComponent(query || ''))
+                        .then(res => res.json())
+                        .then(data => callback((data.states || []).map(s => ({ value: s, text: s }))))
+                        .catch(() => callback());
+                }
+            });
+
+            billingStateTS = document.getElementById('billing_state') ? new TomSelect('#billing_state', {
+                valueField: 'value',
+                labelField: 'text',
+                searchField: 'text',
+                create: false,
+                maxOptions: 200,
+                load: function(query, callback) {
+                    fetch('{{ route("locations.states") }}?q=' + encodeURIComponent(query || ''))
+                        .then(r => r.json())
+                        .then(d => callback((d.states || []).map(s => ({ value: s, text: s }))))
+                        .catch(() => callback());
+                }
+            }) : null;
+
+            // City selects use remote load and need selected state param
+            shippingCityTS = new TomSelect('#shipping_city', {
+                valueField: 'value',
+                labelField: 'text',
+                searchField: 'text',
+                create: true,
+                load: function(query, callback) {
+                    const state = shippingStateTS.getValue();
+                    if (!state) return callback();
+                    fetch('{{ route("locations.cities") }}?state=' + encodeURIComponent(state) + '&q=' + encodeURIComponent(query || ''))
+                        .then(res => res.json())
+                        .then(data => callback((data.cities || []).map(c => ({ value: c, text: c })) ))
+                        .catch(() => callback());
+                }
+            });
+
+            if (document.getElementById('billing_city')) {
+                billingCityTS = new TomSelect('#billing_city', {
+                    valueField: 'value',
+                    labelField: 'text',
+                    searchField: 'text',
+                    create: true,
+                    load: function(query, callback) {
+                        const st = billingStateTS.getValue(); if (!st) return callback();
+                        fetch('{{ route("locations.cities") }}?state=' + encodeURIComponent(st) + '&q=' + encodeURIComponent(query || ''))
+                            .then(res => res.json())
+                            .then(data => callback((data.cities || []).map(c => ({ value: c, text: c }))))
+                            .catch(() => callback());
+                    }
+                });
+            }
+
+            // Wire change events to load cities when state selected
+            shippingStateTS.on('change', function(value) {
+                if (shippingCityTS) {
+                    shippingCityTS.clearOptions();
+                    shippingCityTS.load(function(cb) {
+                        fetch('{{ route("locations.cities") }}?state=' + encodeURIComponent(value)).then(r => r.json()).then(d => cb((d.cities || []).map(c => ({ value: c, text: c }))));
+                    });
+                }
+            });
+
+            if (billingStateTS) {
+                billingStateTS.on('change', function(value) {
+                    if (billingCityTS) {
+                        billingCityTS.clearOptions();
+                        billingCityTS.load(function(cb) {
+                            fetch('{{ route("locations.cities") }}?state=' + encodeURIComponent(value)).then(r => r.json()).then(d => cb((d.cities || []).map(c => ({ value: c, text: c }))));
+                        });
+                    }
+                });
+            }
+
+            // When city changes, attempt to load pincodes and autofill
+            shippingCityTS.on('change', function(value) { loadPincodesForCity(value, 'shipping_pincode'); });
+            if (billingCityTS) billingCityTS.on('change', function(value) { loadPincodesForCity(value, 'billing_pincode'); });
+        }
+
+        function loadPincodesForCity(city, inputId) {
+            if (!city) return;
+            fetch('{{ route("locations.pincodes") }}?city=' + encodeURIComponent(city))
+                .then(res => res.json())
+                .then(data => {
+                    if (data.pincodes && data.pincodes.length) {
+                        const el = document.getElementById(inputId);
+                        if (el) el.value = data.pincodes[0];
+                    }
+                })
+                .catch(err => console.error('Failed to load pincodes', err));
+        }
+
+        function loadCitiesForState(state, targetTS) {
+            if (!state) {
+                if (targetTS) targetTS.clearOptions();
+                return;
+            }
+            fetch('{{ route("locations.cities") }}?state=' + encodeURIComponent(state))
+                .then(res => res.json())
+                .then(data => {
+                    const cities = data.cities || [];
+                    if (!targetTS) return;
+                    targetTS.clearOptions();
+                    cities.forEach(c => targetTS.addOption({value: c, text: c}));
+                    // Optionally set value if empty
+                    if (!targetTS.getValue() && cities.length) targetTS.setValue(cities[0]);
+                })
+                .catch(err => console.error('Failed to load cities', err));
+        }
+
+        function onBillingStateChange(value) {
+            loadCitiesForState(value, billingCityTS);
+        }
+
+        document.addEventListener('DOMContentLoaded', function() { initLocationSelects(); });
 
         function handlePaymentSuccess(response, orderId) {
             console.log('Payment Success Response:', response);

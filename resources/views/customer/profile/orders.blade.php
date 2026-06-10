@@ -37,7 +37,7 @@
                                     </div>
                                 </div>
                                 <div class="text-right">
-                                    <div class="text-lg font-semibold text-gray-900">₹{{ number_format($order->total ?? 0, 0) }}</div>
+                                    <div class="text-lg font-semibold text-gray-900">{{ format_currency($order->total ?? 0) }}</div>
                                     <div class="mt-1">
                                         <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                             {{ ($order->status ?? 'pending') === 'delivered' ? 'bg-green-100 text-green-800' : 

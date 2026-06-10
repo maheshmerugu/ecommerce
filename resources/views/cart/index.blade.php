@@ -104,10 +104,10 @@
                                                 <!-- Mobile Price -->
                                                 <div class="md:hidden mt-2">
                                                     <span class="text-lg font-bold text-gray-900 item-price">
-                                                        ₹{{ number_format($item->price * $item->quantity, 0) }}
+                                                        {{ format_currency($item->price * $item->quantity) }}
                                                     </span>
                                                     <span class="text-sm text-gray-500 ml-2">
-                                                        (₹{{ number_format($item->price, 0) }} each)
+                                                        ({{ format_currency($item->price) }} each)
                                                     </span>
                                                 </div>
                                             </div>
@@ -115,10 +115,10 @@
                                             <!-- Desktop Price -->
                                             <div class="hidden md:block text-right">
                                                 <span class="text-lg font-bold text-gray-900 item-price">
-                                                    ₹{{ number_format($item->price * $item->quantity, 0) }}
+                                                    {{ format_currency($item->price * $item->quantity) }}
                                                 </span>
                                                 <p class="text-sm text-gray-500">
-                                                    ₹{{ number_format($item->price, 0) }} each
+                                                    {{ format_currency($item->price) }} each
                                                 </p>
                                             </div>
                                         </div>
@@ -164,11 +164,11 @@
                         <div class="space-y-3">
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Subtotal</span>
-                                <span class="font-medium" id="cart-subtotal">₹{{ number_format($cart->total_price, 0) }}</span>
+                                <span class="font-medium" id="cart-subtotal">{{ format_currency($cart->total_price) }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Shipping</span>
-                                <span class="font-medium text-green-600">FREE</span>
+                                <span class="font-medium text-gray-900">{{ format_currency(config('shop.shipping_fee', 150)) }}</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Tax</span>
@@ -177,7 +177,7 @@
                             <hr>
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-semibold">Total</span>
-                                <span class="text-xl font-bold text-blue-600" id="cart-total">₹{{ number_format($cart->total_price, 0) }}</span>
+                                <span class="text-xl font-bold text-blue-600" id="cart-total">{{ format_currency($cart->total_price + ($cart->items()->count() ? config('shop.shipping_fee', 150) : 0)) }}</span>
                             </div>
                         </div>
 
@@ -211,14 +211,6 @@
                             <div class="flex items-center">
                                 <i class="fas fa-shield-alt text-green-500 mr-2"></i>
                                 Secure checkout
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-truck text-blue-500 mr-2"></i>
-                                Free shipping on orders over ₹499
-                            </div>
-                            <div class="flex items-center">
-                                <i class="fas fa-undo text-orange-500 mr-2"></i>
-                                Easy returns & exchanges
                             </div>
                         </div>
                     </div>
@@ -308,7 +300,7 @@
                 }
                 return response.json();
             })
-            .then(data => {
+                        .then(data => {
                 if (data.success) {
                     // Update quantity display
                     const cartItem = document.querySelector(`[data-item-id="${itemId}"]`);
@@ -320,7 +312,8 @@
                         const subtotalElement = document.getElementById('cart-subtotal');
                         const totalElement = document.getElementById('cart-total');
                         if (subtotalElement) subtotalElement.textContent = `₹${data.cart_total}`;
-                        if (totalElement) totalElement.textContent = `₹${data.cart_total}`;
+                        // total should include shipping fee when items exist
+                        if (totalElement) totalElement.textContent = `₹${data.cart_total_with_shipping}`;
                         
                         // Update cart counter in header if exists
                         const cartCountElement = document.getElementById('cart-count');
@@ -376,7 +369,7 @@
                     const subtotalElement = document.getElementById('cart-subtotal');
                     const totalElement = document.getElementById('cart-total');
                     if (subtotalElement) subtotalElement.textContent = `₹${data.cart_total}`;
-                    if (totalElement) totalElement.textContent = `₹${data.cart_total}`;
+                    if (totalElement) totalElement.textContent = `₹${data.cart_total_with_shipping}`;
                     
                     // Update cart counter in header if exists
                     const cartCountElement = document.getElementById('cart-count');

@@ -10,11 +10,20 @@ class HomeController extends Controller
 {
     public function index()
     {
-        // Get featured categories (up to 6)
+        // Get only the Toys Cars category for the categories carousel
         $categories = Category::where('status', true)
-            ->whereNull('parent_id')
+            ->where('name', 'Toys Cars')
             ->orderBy('sort_order')
-            ->take(6)
+            ->get();
+
+        // Get products for the hero carousel: any product in categories matching 'car'
+        $carouselProducts = Product::whereHas('categories', function ($q) {
+                $q->where('name', 'like', '%car%');
+            })
+            ->where('status', true)
+            ->with('images')
+            ->orderBy('created_at', 'desc')
+            ->take(8)
             ->get();
 
         // Get featured products (up to 8)
@@ -32,6 +41,6 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        return view('home', compact('categories', 'featuredProducts', 'latestProducts'));
+        return view('home', compact('categories', 'carouselProducts', 'featuredProducts', 'latestProducts'));
     }
 }

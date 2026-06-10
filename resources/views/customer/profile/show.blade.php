@@ -81,7 +81,7 @@
                                             <div class="text-sm text-gray-600 mt-1">{{ $order->created_at->format('M j, Y g:i A') }}</div>
                                         </div>
                                         <div class="text-right">
-                                            <div class="font-semibold text-gray-900">${{ number_format($order->total, 2) }}</div>
+                                            <div class="font-semibold text-gray-900">{{ format_currency($order->total, 2) }}</div>
                                             <div class="text-sm">
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
                                                     {{ $order->status === 'delivered' ? 'bg-green-100 text-green-800' : 

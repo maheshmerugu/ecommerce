@@ -98,9 +98,9 @@
                             </td>
                             <td>
                                 <div>
-                                    <strong>${{ number_format($product->price, 2) }}</strong>
+                                    <strong>{{ format_currency($product->price, 2) }}</strong>
                                     @if($product->special_price)
-                                        <br><small class="text-success">${{ number_format($product->special_price, 2) }}</small>
+                                        <br><small class="text-success">{{ format_currency($product->special_price, 2) }}</small>
                                     @endif
                                 </div>
                             </td>

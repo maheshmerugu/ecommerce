@@ -103,7 +103,9 @@ class CartController extends Controller
                     'success' => true,
                     'message' => $message,
                     'cart_count' => $cart->total_quantity,
-                    'cart_total' => number_format($cart->total_price, 2)
+                    'cart_total' => number_format($cart->total_price, 2),
+                    'shipping_fee' => $cart->items()->count() ? number_format((float) config('shop.shipping_fee', 150), 0) : number_format(0, 0),
+                    'cart_total_with_shipping' => number_format($cart->total_price + ($cart->items()->count() ? (float) config('shop.shipping_fee', 150) : 0), 0),
                 ]);
             }
 
@@ -151,6 +153,8 @@ class CartController extends Controller
                 'message' => 'Cart updated successfully!',
                 'cart_count' => $cart->total_quantity,
                 'cart_total' => number_format($cart->total_price, 0),
+                'shipping_fee' => $cart->items()->count() ? number_format((float) config('shop.shipping_fee', 150), 0) : number_format(0, 0),
+                'cart_total_with_shipping' => number_format($cart->total_price + ($cart->items()->count() ? (float) config('shop.shipping_fee', 150) : 0), 0),
                 'item_total' => number_format($cartItem->quantity * $cartItem->price, 0)
             ]);
         }
@@ -171,12 +175,14 @@ class CartController extends Controller
 
         $cartItem->delete();
 
-        if (request()->ajax() || request()->expectsJson()) {
+            if (request()->ajax() || request()->expectsJson()) {
             return response()->json([
                 'success' => true,
                 'message' => 'Product removed from cart!',
                 'cart_count' => $cart->total_quantity,
-                'cart_total' => number_format($cart->total_price, 0)
+                'cart_total' => number_format($cart->total_price, 0),
+                'shipping_fee' => $cart->items()->count() ? number_format((float) config('shop.shipping_fee', 150), 0) : number_format(0, 0),
+                'cart_total_with_shipping' => number_format($cart->total_price + ($cart->items()->count() ? (float) config('shop.shipping_fee', 150) : 0), 0)
             ]);
         }
 
@@ -209,7 +215,9 @@ class CartController extends Controller
                     'success' => true,
                     'message' => 'Cart cleared successfully!',
                     'cart_count' => 0,
-                    'cart_total' => '0.00'
+                    'cart_total' => '0.00',
+                    'shipping_fee' => number_format(0, 0),
+                    'cart_total_with_shipping' => number_format(0, 0)
                 ]);
             }
 

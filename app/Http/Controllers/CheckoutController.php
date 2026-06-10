@@ -289,6 +289,8 @@ class CheckoutController extends Controller
         
         $orderNumber = 'ORD-' . strtoupper(Str::random(8)) . '-' . time();
         
+        $shippingFee = (float) config('shop.shipping_fee', 150);
+
         $order = Order::create([
             'order_number' => $orderNumber,
             'customer_id' => $customerId,
@@ -299,9 +301,9 @@ class CheckoutController extends Controller
             'status' => 'pending',
             'subtotal' => $cart->total_price,
             'tax_amount' => 0,
-            'shipping_amount' => 0,
+            'shipping_amount' => $shippingFee,
             'discount_amount' => 0,
-            'total' => $cart->total_price,
+            'total' => $cart->total_price + $shippingFee,
             'currency' => 'INR',
             'billing_address' => json_encode([
                 'address' => $sameAsShipping ? $request->shipping_address : $request->billing_address,

@@ -2,6 +2,99 @@
 
 namespace Database\Seeders;
 
+use App\Models\Category;
+use App\Models\Product;
+use Illuminate\Database\Seeder;
+
+class ProductSeeder extends Seeder
+{
+    /**
+     * Run the database seeds.
+     */
+    public function run(): void
+    {
+        $electronics = Category::firstOrCreate([
+            'name' => 'Electronics'
+        ], [
+            'description' => 'Electronic gadgets and devices',
+            'status' => true,
+        ]);
+
+        $apparel = Category::firstOrCreate([
+            'name' => 'Apparel'
+        ], [
+            'description' => 'Clothing and accessories',
+            'status' => true,
+        ]);
+
+        $products = [
+            [
+                'name' => 'Wireless Headphones',
+                'description' => 'Comfortable wireless headphones with noise cancellation.',
+                'sku' => 'WH-1000',
+                'price' => 99.99,
+                'quantity' => 50,
+                'track_quantity' => true,
+                'status' => true,
+                'featured' => true,
+            ],
+            [
+                'name' => 'Smartphone X200',
+                'description' => 'Latest generation smartphone with excellent camera.',
+                'sku' => 'SPX-200',
+                'price' => 699.00,
+                'quantity' => 25,
+                'track_quantity' => true,
+                'status' => true,
+            ],
+            [
+                'name' => 'Classic White T-Shirt',
+                'description' => '100% cotton white t-shirt available in all sizes.',
+                'sku' => 'TS-WHITE-01',
+                'price' => 19.99,
+                'quantity' => 200,
+                'track_quantity' => true,
+                'status' => true,
+            ],
+            [
+                'name' => 'Running Shoes',
+                'description' => 'Lightweight running shoes for daily training.',
+                'sku' => 'RS-500',
+                'price' => 79.50,
+                'quantity' => 80,
+                'track_quantity' => true,
+                'status' => true,
+            ],
+            [
+                'name' => 'Bluetooth Speaker',
+                'description' => 'Portable Bluetooth speaker with deep bass.',
+                'sku' => 'BS-300',
+                'price' => 45.00,
+                'quantity' => 60,
+                'track_quantity' => true,
+                'status' => true,
+            ],
+        ];
+
+        foreach ($products as $data) {
+            $product = Product::firstOrCreate(
+                ['sku' => $data['sku']],
+                array_merge($data, ['slug' => null, 'short_description' => null])
+            );
+
+            // Attach category: electronics for electronics products, apparel for clothes
+            if (in_array($product->sku, ['WH-1000', 'SPX-200', 'BS-300'])) {
+                $product->categories()->syncWithoutDetaching([$electronics->id]);
+            } else {
+                $product->categories()->syncWithoutDetaching([$apparel->id]);
+            }
+        }
+    }
+}
+<?php
+
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
 use App\Models\Product;
 use App\Models\Category;

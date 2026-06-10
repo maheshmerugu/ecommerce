@@ -37,11 +37,17 @@
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
                 </div>
-                <div>
+                <div class="relative">
                     <label for="password" class="sr-only">Password</label>
                     <input id="password" name="password" type="password" autocomplete="current-password" required 
                            class="relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-b-md focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 focus:z-10 sm:text-sm @error('password') border-red-500 @enderror" 
                            placeholder="Password">
+                    <button type="button" id="togglePassword" class="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-500" aria-label="Show password">
+                        <svg id="eyeIcon" xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="none" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M2.458 10C3.732 6.943 6.523 5 10 5s6.268 1.943 7.542 5c-1.274 3.057-4.065 5-7.542 5S3.732 13.057 2.458 10z" />
+                            <path id="pupil" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M10 13a3 3 0 100-6 3 3 0 000 6z" />
+                        </svg>
+                    </button>
                     @error('password')
                         <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -58,7 +64,7 @@
                 </div>
 
                 <div class="text-sm">
-                    <a href="#" class="font-medium text-indigo-600 hover:text-indigo-500">
+                    <a href="{{ route('password.request') }}" class="font-medium text-indigo-600 hover:text-indigo-500">
                         Forgot your password?
                     </a>
                 </div>
@@ -74,3 +80,19 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+    (function(){
+        const toggle = document.getElementById('togglePassword');
+        const input = document.getElementById('password');
+        if (!toggle || !input) return;
+        toggle.addEventListener('click', function(){
+            const type = input.getAttribute('type') === 'password' ? 'text' : 'password';
+            input.setAttribute('type', type);
+            // toggle aria-label
+            toggle.setAttribute('aria-label', type === 'password' ? 'Show password' : 'Hide password');
+        });
+    })();
+</script>
+@endpush

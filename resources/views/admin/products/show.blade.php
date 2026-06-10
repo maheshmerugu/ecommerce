@@ -66,12 +66,12 @@
                             <table class="table table-borderless">
                                 <tr>
                                     <th width="150">Price:</th>
-                                    <td class="h5 text-primary">${{ number_format($product->price, 2) }}</td>
+                                    <td class="h5 text-primary">{{ format_currency($product->price, 2) }}</td>
                                 </tr>
                                 @if($product->special_price)
                                 <tr>
                                     <th>Special Price:</th>
-                                    <td class="h5 text-danger">${{ number_format($product->special_price, 2) }}</td>
+                                    <td class="h5 text-danger">{{ format_currency($product->special_price, 2) }}</td>
                                 </tr>
                                 <tr>
                                     <th>Special Price Period:</th>

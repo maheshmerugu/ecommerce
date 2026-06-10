@@ -8,6 +8,9 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Str;
+use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Validation\Rules;
 use Illuminate\Validation\ValidationException;
 
@@ -54,6 +57,63 @@ class AuthController extends Controller
         throw ValidationException::withMessages([
             'email' => __('The provided credentials do not match our records.'),
         ]);
+    }
+
+    /**
+     * Show the form to request a password reset link.
+     */
+    public function showForgotForm()
+    {
+        return view('customer.auth.forgot');
+    }
+
+    /**
+     * Send a password reset link to the given user.
+     */
+    public function sendResetLinkEmail(Request $request)
+    {
+        $request->validate(['email' => 'required|email']);
+
+        $status = Password::broker('customers')->sendResetLink($request->only('email'));
+
+        return $status === Password::RESET_LINK_SENT
+                    ? back()->with(['status' => __($status)])
+                    : back()->withErrors(['email' => __($status)]);
+    }
+
+    /**
+     * Show the password reset form for the given token.
+     */
+    public function showResetForm($token)
+    {
+        return view('customer.auth.reset', ['token' => $token]);
+    }
+
+    /**
+     * Handle the password reset.
+     */
+    public function reset(Request $request)
+    {
+        $request->validate([
+            'token' => 'required',
+            'email' => 'required|email',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        $status = Password::broker('customers')->reset(
+            $request->only('email', 'password', 'password_confirmation', 'token'),
+            function ($user, $password) use ($request) {
+                $user->password = Hash::make($password);
+                $user->setRememberToken(Str::random(60));
+                $user->save();
+
+                event(new PasswordReset($user));
+            }
+        );
+
+        return $status === Password::PASSWORD_RESET
+                    ? redirect()->route('login')->with('status', __($status))
+                    : back()->withErrors(['email' => [__($status)]]);
     }
 
     /**

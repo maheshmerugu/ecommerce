@@ -355,13 +355,13 @@
                 <div class="border-b pb-4">
                     <div class="flex items-center space-x-4">
                         @if($product->special_price && $product->special_price < $product->price)
-                            <span class="text-3xl md:text-4xl font-bold text-gray-900">₹{{ number_format($product->special_price, 0) }}</span>
-                            <span class="text-xl text-gray-500 line-through">₹{{ number_format($product->price, 0) }}</span>
+                            <span class="text-3xl md:text-4xl font-bold text-gray-900">{{ format_currency($product->special_price) }}</span>
+                            <span class="text-xl text-gray-500 line-through">{{ format_currency($product->price) }}</span>
                             <span class="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm font-semibold">
                                 {{ round((($product->price - $product->special_price) / $product->price) * 100) }}% OFF
                             </span>
                         @else
-                            <span class="text-3xl md:text-4xl font-bold text-gray-900">₹{{ number_format($product->price, 0) }}</span>
+                            <span class="text-3xl md:text-4xl font-bold text-gray-900">{{ format_currency($product->price) }}</span>
                         @endif
                     </div>
                     <p class="text-green-600 font-semibold mt-2">
@@ -458,10 +458,10 @@
                             </h3>
                             <div class="flex items-center space-x-2">
                                 @if($relatedProduct->special_price && $relatedProduct->special_price < $relatedProduct->price)
-                                    <span class="text-lg font-bold text-gray-900">₹{{ number_format($relatedProduct->special_price, 0) }}</span>
-                                    <span class="text-sm text-gray-500 line-through">₹{{ number_format($relatedProduct->price, 0) }}</span>
+                                    <span class="text-lg font-bold text-gray-900">{{ format_currency($relatedProduct->special_price) }}</span>
+                                    <span class="text-sm text-gray-500 line-through">{{ format_currency($relatedProduct->price) }}</span>
                                 @else
-                                    <span class="text-lg font-bold text-gray-900">₹{{ number_format($relatedProduct->price, 0) }}</span>
+                                    <span class="text-lg font-bold text-gray-900">{{ format_currency($relatedProduct->price) }}</span>
                                 @endif
                             </div>
                             <div class="flex text-yellow-400 text-xs mt-1">

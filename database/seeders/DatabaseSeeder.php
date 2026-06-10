@@ -17,6 +17,7 @@ class DatabaseSeeder extends Seeder
             AdminSeeder::class,
             CustomerSeeder::class,
             AdditionalUsersSeeder::class,
+            StateCityPincodeSeeder::class,
             CategorySeeder::class,
             ProductSeeder::class,
             ProductImageSeeder::class,
