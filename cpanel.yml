@@ -1,9 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/$USER/public_html/fourwheels.co.in/
-    - /bin/mkdir -p $DEPLOYPATH
-    - /bin/cp -R . $DEPLOYPATH
+    - export DEPLOYPATH=/home/p865jltij03r/public_html/fourwheels.co.in
     - export PHP=$(which php8.3 php8.2 php8.1 php8.0 php 2>/dev/null | head -1)
     - export COMPOSER=$(which composer composer2 2>/dev/null | head -1)
     - cd $DEPLOYPATH && $COMPOSER install --no-dev --optimize-autoloader --no-interaction
