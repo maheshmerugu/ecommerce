@@ -1,7 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/$USER/ecommerce/
+    - export DEPLOYPATH=/home/$USER/public_html/fourwheels.co.in/
     - /bin/mkdir -p $DEPLOYPATH
     - /bin/cp -R . $DEPLOYPATH
     - cd $DEPLOYPATH && /usr/local/bin/composer install --no-dev --optimize-autoloader --no-interaction
