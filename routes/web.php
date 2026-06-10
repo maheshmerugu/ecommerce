@@ -150,6 +150,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Settings
         Route::get('settings', [AdminSettingController::class, 'index'])->name('settings.index');
         Route::put('settings', [AdminSettingController::class, 'update'])->name('settings.update');
+        Route::post('settings/test-email', [AdminSettingController::class, 'testEmail'])->name('settings.test-email');
     });
 });
 
