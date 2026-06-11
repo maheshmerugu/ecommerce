@@ -4,7 +4,14 @@
 
 set -u
 
-DEPLOYPATH="$(cd "$(dirname "$0")/.." && pwd)"
+# Exact cPanel deployment path for account p865jltij03r
+DEPLOYPATH="/home/p865jltij03r/public_html/fourwheels.co.in"
+
+# Fallback: auto-detect from script location if hardcoded path doesn't exist
+if [ ! -d "$DEPLOYPATH" ]; then
+    DEPLOYPATH="$(cd "$(dirname "$0")/.." && pwd)"
+fi
+
 cd "$DEPLOYPATH"
 
 LOG_FILE="$DEPLOYPATH/storage/logs/cpanel-deploy.log"

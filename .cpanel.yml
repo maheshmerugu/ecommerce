@@ -1,7 +1,7 @@
 ---
-# cPanel Git Version Control — post-pull deployment
-# Docs: each task runs in a NEW shell, so use one script (exports do NOT persist)
+# cPanel Git Version Control — post-pull deployment for p865jltij03r
+# Repository path: /home/p865jltij03r/public_html/fourwheels.co.in
 deployment:
   tasks:
-    - /bin/chmod +x deploy/cpanel-deploy.sh
-    - /bin/bash deploy/cpanel-deploy.sh
+    - /bin/chmod +x /home/p865jltij03r/public_html/fourwheels.co.in/deploy/cpanel-deploy.sh
+    - /bin/bash /home/p865jltij03r/public_html/fourwheels.co.in/deploy/cpanel-deploy.sh
