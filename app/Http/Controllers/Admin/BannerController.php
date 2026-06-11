@@ -28,6 +28,7 @@ class BannerController extends Controller
             'image'     => 'required|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
             'link'      => 'nullable|max:500',
             'position'  => 'nullable|integer|min:0',
+            'type'      => 'nullable|in:hero,promo',
             'is_active' => 'nullable',
         ]);
 
@@ -37,6 +38,7 @@ class BannerController extends Controller
             'image'     => $request->file('image')->store('banners', 'public'),
             'link'      => $request->link,
             'position'  => $request->input('position', 0),
+            'type'      => $request->input('type', 'hero'),
             'is_active' => $request->input('is_active', 0) == '1',
         ]);
 
@@ -56,6 +58,7 @@ class BannerController extends Controller
             'image'     => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:4096',
             'link'      => 'nullable|max:500',
             'position'  => 'nullable|integer|min:0',
+            'type'      => 'nullable|in:hero,promo',
             'is_active' => 'nullable',
         ]);
 
@@ -64,6 +67,7 @@ class BannerController extends Controller
             'caption'   => $request->caption,
             'link'      => $request->link,
             'position'  => $request->input('position', $banner->position),
+            'type'      => $request->input('type', $banner->type ?? 'hero'),
             'is_active' => $request->input('is_active', 0) == '1',
         ];
 

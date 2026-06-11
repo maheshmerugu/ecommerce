@@ -2,32 +2,34 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
 use App\Models\Banner;
 use App\Models\Category;
 use App\Models\Product;
+use Illuminate\Http\Request;
 
 class HomeController extends Controller
 {
     public function index()
     {
-        // Get only the Toys Cars category for the categories carousel
         $categories = Category::where('status', true)
-            ->where('name', 'Toys Cars')
             ->orderBy('sort_order')
             ->get();
 
-        // Get products for the hero carousel: any product in categories matching 'car'
-        $carouselProducts = Product::whereHas('categories', function ($q) {
-                $q->where('name', 'like', '%car%');
-            })
-            ->where('status', true)
-            ->with('images')
-            ->orderBy('created_at', 'desc')
-            ->take(8)
-            ->get();
+        // Hero carousel banners (type = hero)
+        $heroBanners = Banner::hero()->get();
 
-        // Get featured products (up to 8)
+        // Promotional banners (type = promo) — shown below categories
+        $promoBanners = Banner::promo()->get();
+
+        // Fallback product carousel when no hero banners exist
+        $carouselProducts = $heroBanners->isEmpty()
+            ? Product::where('status', true)
+                ->with('images')
+                ->orderBy('created_at', 'desc')
+                ->take(6)
+                ->get()
+            : collect();
+
         $featuredProducts = Product::where('status', true)
             ->where('featured', true)
             ->with(['images', 'categories'])
@@ -35,16 +37,23 @@ class HomeController extends Controller
             ->take(8)
             ->get();
 
-        // Get latest products (up to 8)
         $latestProducts = Product::where('status', true)
             ->with(['images', 'categories'])
             ->orderBy('created_at', 'desc')
             ->take(8)
             ->get();
 
-        // Get active banners for hero carousel
-        $banners = Banner::active()->orderBy('position')->get();
+        // Keep $banners for backward compatibility
+        $banners = $heroBanners;
 
-        return view('home', compact('categories', 'carouselProducts', 'featuredProducts', 'latestProducts', 'banners'));
+        return view('home', compact(
+            'categories',
+            'heroBanners',
+            'promoBanners',
+            'carouselProducts',
+            'featuredProducts',
+            'latestProducts',
+            'banners'
+        ));
     }
 }

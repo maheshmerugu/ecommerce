@@ -19,8 +19,8 @@
                         <tr>
                             <th width="100">Image</th>
                             <th>Title</th>
+                            <th>Type</th>
                             <th>Caption</th>
-                            <th>Link</th>
                             <th>Position</th>
                             <th>Status</th>
                             <th width="120">Actions</th>
@@ -35,16 +35,16 @@
                                      style="width:90px;height:50px;object-fit:cover;" class="img-thumbnail">
                             </td>
                             <td><strong>{{ $banner->title ?? '—' }}</strong></td>
-                            <td><small>{{ Str::limit($banner->caption, 60) }}</small></td>
                             <td>
-                                @if($banner->link)
-                                    <a href="{{ $banner->link }}" target="_blank" class="text-truncate d-inline-block" style="max-width:150px;">
-                                        {{ $banner->link }}
-                                    </a>
+                                @if(($banner->type ?? 'hero') === 'hero')
+                                    <span class="badge badge-primary">HERO</span>
+                                    <small class="d-block text-muted">Main Carousel</small>
                                 @else
-                                    <span class="text-muted">—</span>
+                                    <span class="badge badge-warning">PROMO</span>
+                                    <small class="d-block text-muted">Offers Section</small>
                                 @endif
                             </td>
+                            <td><small>{{ Str::limit($banner->caption, 50) }}</small></td>
                             <td>{{ $banner->position }}</td>
                             <td>
                                 <form method="POST" action="{{ route('admin.banners.toggle-status', $banner) }}"
@@ -73,8 +73,12 @@
                         </tr>
                         @empty
                         <tr>
-                            <td colspan="7" class="text-center text-muted py-4">
-                                <i class="fas fa-images fa-3x mb-3"></i><br>No banners yet
+                            <td colspan="7" class="text-center text-muted py-5">
+                                <i class="fas fa-images fa-3x mb-3 d-block"></i>
+                                No banners yet.<br>
+                                <a href="{{ route('admin.banners.create') }}" class="btn btn-primary mt-3">
+                                    <i class="fas fa-plus mr-1"></i>Add Your First Banner
+                                </a>
                             </td>
                         </tr>
                         @endforelse

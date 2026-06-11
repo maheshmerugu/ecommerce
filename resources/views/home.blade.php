@@ -252,75 +252,106 @@
     <div class="container mx-auto px-3 md:px-4 py-2 md:py-4">
         <!-- Main Content Area -->
         <div class="w-full">
-            <!-- Hero Banner Carousel -->
+            <!-- ─── Hero / Super Sale Banner Carousel ─── -->
             <div class="bg-white rounded shadow-sm mb-3 md:mb-4 overflow-hidden">
                 <div class="swiper hero-swiper banner-slide">
                     <div class="swiper-wrapper">
-                        @if(isset($banners) && $banners->count() > 0)
-                            @foreach($banners as $banner)
-                            <div class="swiper-slide relative min-h-[200px] md:min-h-[280px] overflow-hidden"
-                                 style="background: linear-gradient(135deg, #1e3a5f 0%, #2563eb 100%);">
+
+                        {{-- Admin-managed HERO banners (car images + promotions) --}}
+                        @if(isset($heroBanners) && $heroBanners->count() > 0)
+                            @foreach($heroBanners as $banner)
+                            <div class="swiper-slide relative overflow-hidden"
+                                 style="min-height:280px; background: linear-gradient(135deg, #1e3a5f 0%, #1d4ed8 100%);">
+                                {{-- Full banner image --}}
                                 <img src="{{ asset('storage/' . $banner->image) }}"
                                      alt="{{ $banner->title }}"
-                                     class="absolute inset-0 w-full h-full object-cover opacity-70">
-                                <div class="relative z-10 flex items-center h-full p-6 md:p-12 min-h-[200px] md:min-h-[280px]">
-                                    <div class="text-white max-w-lg">
+                                     class="absolute inset-0 w-full h-full object-cover"
+                                     style="opacity: {{ ($banner->title || $banner->caption) ? '0.65' : '1' }};">
+                                {{-- Overlay text (only if title/caption/link set) --}}
+                                @if($banner->title || $banner->caption || $banner->link)
+                                <div class="relative z-10 flex items-end md:items-center h-full p-5 md:p-12"
+                                     style="min-height:280px; background: linear-gradient(to right, rgba(0,0,0,0.55) 0%, rgba(0,0,0,0.1) 70%, transparent 100%);">
+                                    <div class="text-white max-w-xl">
                                         @if($banner->title)
-                                            <h2 class="text-2xl md:text-4xl font-bold mb-2 drop-shadow">{{ $banner->title }}</h2>
+                                            <h2 class="text-2xl md:text-4xl font-bold mb-2 drop-shadow-lg leading-tight">
+                                                {{ $banner->title }}
+                                            </h2>
                                         @endif
                                         @if($banner->caption)
-                                            <p class="text-sm md:text-lg mb-4 opacity-90">{{ $banner->caption }}</p>
+                                            <p class="text-sm md:text-lg mb-4 opacity-90 leading-snug">
+                                                {{ $banner->caption }}
+                                            </p>
                                         @endif
                                         @if($banner->link)
                                             <a href="{{ $banner->link }}"
-                                               class="bg-white text-blue-700 px-5 py-2 rounded font-semibold hover:bg-gray-100 transition inline-block">
-                                                Shop Now
+                                               class="inline-block bg-white text-blue-700 px-6 py-2 rounded font-bold hover:bg-yellow-400 hover:text-gray-900 transition-all duration-200 shadow">
+                                                Shop Now &rarr;
                                             </a>
                                         @endif
                                     </div>
                                 </div>
+                                @endif
                             </div>
                             @endforeach
+
+                        {{-- Fallback: show product images if no hero banners --}}
                         @elseif(isset($carouselProducts) && $carouselProducts->count() > 0)
                             @foreach($carouselProducts as $product)
-                            <div class="swiper-slide p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
+                            <div class="swiper-slide bg-gradient-to-r from-blue-900 to-blue-600 text-white p-4 md:p-8 flex items-center"
+                                 style="min-height:280px;">
                                 <div class="w-full md:w-1/2 text-center md:text-left">
-                                    <h2 class="text-2xl md:text-3xl font-bold mb-2">{{ Str::limit($product->name, 40) }}</h2>
-                                    <p class="text-sm md:text-lg mb-4">{{ $product->short_description ?? 'Explore this model' }}</p>
+                                    <p class="text-yellow-300 text-xs md:text-sm font-semibold uppercase tracking-widest mb-1">Featured</p>
+                                    <h2 class="text-2xl md:text-3xl font-bold mb-2 leading-tight">{{ Str::limit($product->name, 40) }}</h2>
+                                    <p class="text-sm md:text-base mb-4 opacity-80">{{ $product->short_description ?? 'Explore this model' }}</p>
                                     <a href="{{ route('products.show', $product->slug) }}"
-                                        class="bg-white text-blue-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
-                                        View Product
+                                       class="inline-block bg-white text-blue-700 px-5 py-2 rounded font-bold hover:bg-yellow-400 hover:text-gray-900 transition">
+                                        View Details
                                     </a>
                                 </div>
-                                <div class="hidden md:block w-1/2 text-right">
+                                <div class="hidden md:flex w-1/2 justify-end items-center">
                                     @if($product->images && $product->images->count() > 0)
-                                    <img src="{{ asset('public/storage/' . $product->images->first()->image_path) }}" alt="{{ $product->name }}" class="mx-auto h-40 object-contain">
+                                        <img src="{{ asset('storage/' . $product->images->first()->image_path) }}"
+                                             alt="{{ $product->name }}"
+                                             class="max-h-52 object-contain drop-shadow-xl">
                                     @else
-                                    <i class="fas fa-car-side text-6xl opacity-30"></i>
+                                        <i class="fas fa-car-side text-8xl opacity-20"></i>
                                     @endif
                                 </div>
                             </div>
                             @endforeach
+
+                        {{-- Static fallback when nothing is in DB --}}
                         @else
-                            <!-- Fallback static slides -->
-                            <div class="swiper-slide bg-gradient-to-r from-purple-600 to-blue-600 text-white p-4 md:p-8 flex items-center min-h-[200px] md:min-h-[280px]">
-                                <div class="w-full md:w-1/2 text-center md:text-left">
-                                    <h2 class="text-2xl md:text-3xl font-bold mb-2">Super Sale!</h2>
-                                    <p class="text-sm md:text-lg mb-4">Up to 70% off on Electronics</p>
-                                    <a href="{{ route('products.index', ['category' => 'electronics']) }}"
-                                        class="bg-white text-blue-600 px-4 md:px-6 py-2 rounded font-semibold hover:bg-gray-100 transition duration-300 inline-block">
-                                        Shop Now
+                            <div class="swiper-slide bg-gradient-to-r from-blue-900 to-indigo-700 text-white p-8 flex items-center"
+                                 style="min-height:280px;">
+                                <div>
+                                    <p class="text-yellow-300 text-sm font-semibold uppercase tracking-widest mb-2">Super Sale</p>
+                                    <h2 class="text-4xl font-bold mb-3">Big Deals on Cars & Accessories</h2>
+                                    <p class="text-lg mb-5 opacity-80">Shop the best prices on SUVs, Sedans, and more</p>
+                                    <a href="{{ route('products.index') }}"
+                                       class="inline-block bg-white text-blue-700 px-6 py-2 rounded font-bold hover:bg-yellow-400 hover:text-gray-900 transition">
+                                        Shop Now &rarr;
                                     </a>
                                 </div>
-                                <div class="hidden md:block w-1/2 text-right">
-                                    <i class="fas fa-laptop text-6xl opacity-30"></i>
+                            </div>
+                            <div class="swiper-slide bg-gradient-to-r from-green-800 to-teal-600 text-white p-8 flex items-center"
+                                 style="min-height:280px;">
+                                <div>
+                                    <p class="text-yellow-300 text-sm font-semibold uppercase tracking-widest mb-2">New Arrivals</p>
+                                    <h2 class="text-4xl font-bold mb-3">Latest Models Just In!</h2>
+                                    <p class="text-lg mb-5 opacity-80">Explore our newest collection of vehicles</p>
+                                    <a href="{{ route('products.index') }}"
+                                       class="inline-block bg-white text-green-700 px-6 py-2 rounded font-bold hover:bg-yellow-400 hover:text-gray-900 transition">
+                                        Explore Now &rarr;
+                                    </a>
                                 </div>
                             </div>
                         @endif
+
                     </div>
                     <div class="swiper-pagination"></div>
-                    <div class="swiper-button-next hidden md:block"></div>
-                    <div class="swiper-button-prev hidden md:block"></div>
+                    <div class="swiper-button-next hidden md:flex"></div>
+                    <div class="swiper-button-prev hidden md:flex"></div>
                 </div>
             </div>
 
@@ -335,6 +366,32 @@
                             <i class="fas fa-tag text-blue-600 text-sm md:text-xl"></i>
                         </div>
                         <span class="text-xs text-gray-700 group-hover:text-blue-600 font-medium block leading-tight">{{ Str::limit($category->name, 10) }}</span>
+                    </a>
+                    @endforeach
+                </div>
+            </div>
+            @endif
+
+            <!-- ─── Promotional / Offers Banners ─── -->
+            @if(isset($promoBanners) && $promoBanners->count() > 0)
+            <div class="mb-4 md:mb-6">
+                <div class="grid grid-cols-1 {{ $promoBanners->count() >= 2 ? 'sm:grid-cols-2' : '' }} {{ $promoBanners->count() >= 3 ? 'md:grid-cols-3' : '' }} gap-3 md:gap-4">
+                    @foreach($promoBanners->take(3) as $promo)
+                    <a href="{{ $promo->link ?: '#' }}" class="block rounded overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200 relative group" style="min-height:140px;">
+                        <img src="{{ asset('storage/' . $promo->image) }}"
+                             alt="{{ $promo->title }}"
+                             class="w-full h-full object-cover absolute inset-0 group-hover:scale-105 transition-transform duration-300"
+                             style="min-height:140px;">
+                        @if($promo->title || $promo->caption)
+                        <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex flex-col justify-end p-3 md:p-4">
+                            @if($promo->title)
+                                <h3 class="text-white font-bold text-sm md:text-base leading-tight drop-shadow">{{ $promo->title }}</h3>
+                            @endif
+                            @if($promo->caption)
+                                <p class="text-white/80 text-xs mt-0.5">{{ $promo->caption }}</p>
+                            @endif
+                        </div>
+                        @endif
                     </a>
                     @endforeach
                 </div>
