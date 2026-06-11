@@ -176,179 +176,6 @@
                 </div>
             </div>
 
-            <!-- ─── EMAIL TAB ─── -->
-            <div class="tab-pane fade" id="email" role="tabpanel">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                            <i class="fas fa-envelope mr-2"></i>Gmail SMTP Settings
-                        </h6>
-                        <a href="https://myaccount.google.com/apppasswords" target="_blank"
-                           class="btn btn-sm btn-outline-danger ml-auto">
-                            <i class="fab fa-google mr-1"></i>Get Gmail App Password
-                        </a>
-                    </div>
-                    <div class="card-body">
-
-                        <!-- Gmail quick-fill -->
-                        <div class="alert alert-info d-flex align-items-center justify-content-between mb-4">
-                            <div>
-                                <i class="fab fa-google mr-2"></i>
-                                <strong>Using Gmail?</strong> Click the button to auto-fill Gmail SMTP settings.
-                            </div>
-                            <button type="button" class="btn btn-sm btn-danger ml-3" onclick="fillGmail()">
-                                <i class="fab fa-google mr-1"></i>Auto-fill Gmail Settings
-                            </button>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Mail Driver</label>
-                                    <select name="mail_mailer" id="mail_mailer" class="form-control">
-                                        <option value="smtp" {{ ($settings['mail_mailer'] ?? 'smtp') === 'smtp' ? 'selected' : '' }}>SMTP</option>
-                                        <option value="sendmail" {{ ($settings['mail_mailer'] ?? '') === 'sendmail' ? 'selected' : '' }}>Sendmail</option>
-                                        <option value="log" {{ ($settings['mail_mailer'] ?? '') === 'log' ? 'selected' : '' }}>Log (for testing)</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">SMTP Host</label>
-                                    <input type="text" name="mail_host" id="mail_host" class="form-control"
-                                           value="{{ $settings['mail_host'] ?? '' }}"
-                                           placeholder="smtp.gmail.com">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Port</label>
-                                    <input type="number" name="mail_port" id="mail_port" class="form-control"
-                                           value="{{ $settings['mail_port'] ?? '587' }}"
-                                           placeholder="587">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Encryption</label>
-                                    <select name="mail_encryption" id="mail_encryption" class="form-control">
-                                        <option value="tls" {{ ($settings['mail_encryption'] ?? 'tls') === 'tls' ? 'selected' : '' }}>TLS (port 587)</option>
-                                        <option value="ssl" {{ ($settings['mail_encryption'] ?? '') === 'ssl' ? 'selected' : '' }}>SSL (port 465)</option>
-                                        <option value="" {{ ($settings['mail_encryption'] ?? 'tls') === '' ? 'selected' : '' }}>None</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Gmail Address (Username)</label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-user"></i></span>
-                                        </div>
-                                        <input type="email" name="mail_username" id="mail_username" class="form-control"
-                                               value="{{ $settings['mail_username'] ?? '' }}"
-                                               placeholder="yourname@gmail.com">
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">
-                                        App Password
-                                        <a href="https://myaccount.google.com/apppasswords" target="_blank"
-                                           class="text-muted small ml-1">(not your Gmail password!)</a>
-                                    </label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-lock"></i></span>
-                                        </div>
-                                        <input type="password" name="mail_password" id="mail_password" class="form-control"
-                                               value="{{ $settings['mail_password'] ?? '' }}"
-                                               placeholder="xxxx xxxx xxxx xxxx"
-                                               autocomplete="new-password">
-                                        <div class="input-group-append">
-                                            <button type="button" class="btn btn-outline-secondary" onclick="toggleMailSecret()">
-                                                <i class="fas fa-eye" id="mail-secret-eye"></i>
-                                            </button>
-                                        </div>
-                                    </div>
-                                    <small class="text-muted">Generate at Google Account → Security → App Passwords</small>
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr>
-                        <h6 class="font-weight-bold text-muted mb-3">From Address (displayed to recipients)</h6>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">From Email</label>
-                                    <input type="email" name="mail_from_address" id="mail_from_address" class="form-control"
-                                           value="{{ $settings['mail_from_address'] ?? ($settings['store_email'] ?? '') }}"
-                                           placeholder="noreply@fourwheels.co.in">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">From Name</label>
-                                    <input type="text" name="mail_from_name" id="mail_from_name" class="form-control"
-                                           value="{{ $settings['mail_from_name'] ?? ($settings['store_name'] ?? '') }}"
-                                           placeholder="FourWheels Store">
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr>
-
-                        <!-- Test Email -->
-                        <h6 class="font-weight-bold text-muted mb-3">Send Test Email</h6>
-                        <div class="row align-items-end">
-                            <div class="col-md-5">
-                                <div class="form-group mb-0">
-                                    <label>Send test to</label>
-                                    <input type="email" id="test_email_input" class="form-control"
-                                           placeholder="your@email.com">
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <button type="button" class="btn btn-outline-primary" onclick="sendTestEmail()">
-                                    <i class="fas fa-paper-plane mr-1"></i>Send Test Email
-                                </button>
-                            </div>
-                            <div class="col-md-4">
-                                <div id="test-email-result" class="mt-2"></div>
-                            </div>
-                        </div>
-
-                        <!-- How to get Gmail App Password -->
-                        <div class="card border-left-danger mt-4">
-                            <div class="card-body py-3">
-                                <h6 class="font-weight-bold text-danger mb-2">
-                                    <i class="fab fa-google mr-1"></i>How to get Gmail App Password
-                                </h6>
-                                <ol class="mb-0 small">
-                                    <li>Go to your <a href="https://myaccount.google.com" target="_blank">Google Account</a></li>
-                                    <li>Click <strong>Security</strong> in the left menu</li>
-                                    <li>Under "How you sign in to Google", enable <strong>2-Step Verification</strong> (required)</li>
-                                    <li>Go back to Security → scroll down → click <strong>App Passwords</strong></li>
-                                    <li>Select app: <strong>Mail</strong> → Select device: <strong>Other</strong> → type "Laravel"</li>
-                                    <li>Click <strong>Generate</strong> → copy the 16-character password</li>
-                                    <li>Paste it in the <strong>App Password</strong> field above (spaces are OK)</li>
-                                </ol>
-                            </div>
-                        </div>
-
-                    </div>
-                </div>
-            </div>
-
             <!-- ─── SHIPPING TAB ─── -->
             <div class="tab-pane fade" id="shipping" role="tabpanel">
                 <div class="card shadow mb-4">
@@ -447,6 +274,141 @@
                 </div>
             </div>
 
+            <!-- ─── EMAIL TAB ─── -->
+            <div class="tab-pane fade" id="email" role="tabpanel">
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-envelope mr-2"></i>Gmail SMTP Settings
+                        </h6>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Gmail guide -->
+                        <div class="alert alert-info mb-4">
+                            <h6 class="font-weight-bold"><i class="fab fa-google mr-2"></i>How to set up Gmail SMTP</h6>
+                            <ol class="mb-0 small">
+                                <li>Go to your Google Account → <strong>Security</strong></li>
+                                <li>Enable <strong>2-Step Verification</strong> (required)</li>
+                                <li>Go to <strong>Security → App passwords</strong></li>
+                                <li>Select app: <em>Mail</em> → Select device: <em>Other</em> → type "Laravel"</li>
+                                <li>Click <strong>Generate</strong> — copy the 16-character password</li>
+                                <li>Use that password below (NOT your regular Gmail password)</li>
+                            </ol>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bold">SMTP Host</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="mail_host" class="form-control"
+                                       value="{{ $settings['mail_host'] ?? 'smtp.gmail.com' }}"
+                                       placeholder="smtp.gmail.com">
+                                <small class="text-muted">For Gmail use: <code>smtp.gmail.com</code></small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bold">SMTP Port</label>
+                            <div class="col-sm-3">
+                                <select name="mail_port" class="form-control">
+                                    <option value="587" {{ ($settings['mail_port'] ?? '587') == '587' ? 'selected' : '' }}>587 — TLS (Recommended)</option>
+                                    <option value="465" {{ ($settings['mail_port'] ?? '') == '465' ? 'selected' : '' }}>465 — SSL</option>
+                                    <option value="25"  {{ ($settings['mail_port'] ?? '') == '25'  ? 'selected' : '' }}>25 — No encryption</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bold">Encryption</label>
+                            <div class="col-sm-3">
+                                <select name="mail_encryption" class="form-control">
+                                    <option value="tls" {{ ($settings['mail_encryption'] ?? 'tls') == 'tls' ? 'selected' : '' }}>TLS (Recommended)</option>
+                                    <option value="ssl" {{ ($settings['mail_encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bold">Gmail Address <span class="text-danger">*</span></label>
+                            <div class="col-sm-5">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fab fa-google"></i></span>
+                                    </div>
+                                    <input type="email" name="mail_username" class="form-control"
+                                           value="{{ $settings['mail_username'] ?? '' }}"
+                                           placeholder="yourname@gmail.com">
+                                </div>
+                                <small class="text-muted">Your full Gmail address</small>
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bold">App Password <span class="text-danger">*</span></label>
+                            <div class="col-sm-5">
+                                <div class="input-group">
+                                    <div class="input-group-prepend">
+                                        <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                    </div>
+                                    <input type="password" name="mail_password" id="mail_password" class="form-control"
+                                           value="{{ $settings['mail_password'] ?? '' }}"
+                                           placeholder="16-character App Password"
+                                           autocomplete="new-password">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-secondary" onclick="toggleMailPass()">
+                                            <i class="fas fa-eye" id="mail-pass-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                                <small class="text-danger font-weight-bold">Use Gmail App Password — NOT your regular Gmail password!</small>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h6 class="font-weight-bold text-muted mb-3">From Details (shown to recipients)</h6>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bold">From Name</label>
+                            <div class="col-sm-5">
+                                <input type="text" name="mail_from_name" class="form-control"
+                                       value="{{ $settings['mail_from_name'] ?? ($settings['store_name'] ?? $storeName) }}"
+                                       placeholder="Your Store Name">
+                            </div>
+                        </div>
+
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bold">From Email</label>
+                            <div class="col-sm-5">
+                                <input type="email" name="mail_from_address" class="form-control"
+                                       value="{{ $settings['mail_from_address'] ?? ($settings['mail_username'] ?? '') }}"
+                                       placeholder="noreply@yourdomain.com">
+                                <small class="text-muted">Must match or be an alias of your Gmail address.</small>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <!-- Test Email -->
+                        <div class="form-group row">
+                            <label class="col-sm-3 col-form-label font-weight-bold">Send Test Email</label>
+                            <div class="col-sm-6">
+                                <div class="input-group">
+                                    <input type="email" id="test_email_addr" class="form-control"
+                                           placeholder="recipient@example.com">
+                                    <div class="input-group-append">
+                                        <button type="button" class="btn btn-outline-primary" onclick="sendTestEmail()">
+                                            <i class="fas fa-paper-plane mr-1"></i>Send Test
+                                        </button>
+                                    </div>
+                                </div>
+                                <div id="test-email-result" class="mt-2"></div>
+                                <small class="text-muted">Save settings first, then send a test email to verify.</small>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
         </div><!-- end tab-content -->
 
         <div class="mt-3 mb-5">
@@ -475,31 +437,9 @@ document.querySelectorAll('input[name="razorpay_mode"]').forEach(function(radio)
     }
 })();
 
-function toggleSecret() {
-    var el = document.getElementById('razorpay_key_secret');
-    var eye = document.getElementById('secret-eye');
-    if (el.type === 'password') {
-        el.type = 'text';
-        eye.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
-        el.type = 'password';
-        eye.classList.replace('fa-eye-slash', 'fa-eye');
-    }
-}
-
-// ── Gmail auto-fill ──
-function fillGmail() {
-    document.getElementById('mail_host').value       = 'smtp.gmail.com';
-    document.getElementById('mail_port').value       = '587';
-    document.getElementById('mail_encryption').value = 'tls';
-    document.getElementById('mail_mailer').value     = 'smtp';
-    document.getElementById('mail_username').focus();
-    alert('Gmail SMTP settings filled! Now enter your Gmail address and App Password, then save.');
-}
-
-function toggleMailSecret() {
-    var el  = document.getElementById('mail_password');
-    var eye = document.getElementById('mail-secret-eye');
+function toggleMailPass() {
+    var el = document.getElementById('mail_password');
+    var eye = document.getElementById('mail-pass-eye');
     if (el.type === 'password') {
         el.type = 'text';
         eye.classList.replace('fa-eye', 'fa-eye-slash');
@@ -510,23 +450,21 @@ function toggleMailSecret() {
 }
 
 function sendTestEmail() {
-    var email     = document.getElementById('test_email_input').value.trim();
-    var resultEl  = document.getElementById('test-email-result');
-
-    if (!email) {
-        resultEl.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle mr-1"></i>Enter an email address first.</span>';
+    var addr = document.getElementById('test_email_addr').value.trim();
+    var resultEl = document.getElementById('test-email-result');
+    if (!addr) {
+        resultEl.innerHTML = '<span class="text-danger">Please enter a recipient email address.</span>';
         return;
     }
-
     resultEl.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin mr-1"></i>Sending...</span>';
 
     fetch('{{ route("admin.settings.test-email") }}', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
-            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content')
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
         },
-        body: JSON.stringify({ test_email: email })
+        body: JSON.stringify({ test_email: addr })
     })
     .then(r => r.json())
     .then(data => {
@@ -537,8 +475,20 @@ function sendTestEmail() {
         }
     })
     .catch(() => {
-        resultEl.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle mr-1"></i>Request failed.</span>';
+        resultEl.innerHTML = '<span class="text-danger">Request failed. Check your network.</span>';
     });
+}
+
+function toggleSecret() {
+    var el = document.getElementById('razorpay_key_secret');
+    var eye = document.getElementById('secret-eye');
+    if (el.type === 'password') {
+        el.type = 'text';
+        eye.classList.replace('fa-eye', 'fa-eye-slash');
+    } else {
+        el.type = 'password';
+        eye.classList.replace('fa-eye-slash', 'fa-eye');
+    }
 }
 
 function testRazorpay() {

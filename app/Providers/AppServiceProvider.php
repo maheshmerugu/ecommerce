@@ -14,10 +14,10 @@ class AppServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        // Apply dynamic settings from DB once per request
-        $this->applyDynamicSettings();
+        // Apply DB-stored mail config on every request
+        $this->bootMailConfig();
 
-        // Share store name globally with every view
+        // Resolve store name once per request and share with every view
         View::composer('*', function ($view) {
             static $storeName = null;
 
@@ -35,30 +35,30 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
-    private function applyDynamicSettings(): void
+    private function bootMailConfig(): void
     {
         try {
-            $mailHost = Setting::get('mail_host');
-            if (!$mailHost) return; // No mail settings saved yet, use .env defaults
+            $host     = Setting::where('key', 'mail_host')->value('value');
+            $username = Setting::where('key', 'mail_username')->value('value');
+            $password = Setting::where('key', 'mail_password')->value('value');
 
-            $map = [
-                'mail.mailers.smtp.host'       => Setting::get('mail_host'),
-                'mail.mailers.smtp.port'       => (int) Setting::get('mail_port', 587),
-                'mail.mailers.smtp.username'   => Setting::get('mail_username'),
-                'mail.mailers.smtp.password'   => Setting::get('mail_password'),
-                'mail.mailers.smtp.encryption' => Setting::get('mail_encryption', 'tls') ?: null,
-                'mail.from.address'            => Setting::get('mail_from_address'),
-                'mail.from.name'               => Setting::get('mail_from_name'),
-                'mail.default'                 => Setting::get('mail_mailer', 'smtp'),
-            ];
+            if ($host && $username && $password) {
+                $port       = Setting::where('key', 'mail_port')->value('value') ?: 587;
+                $encryption = Setting::where('key', 'mail_encryption')->value('value') ?: 'tls';
+                $fromAddr   = Setting::where('key', 'mail_from_address')->value('value') ?: $username;
+                $fromName   = Setting::where('key', 'mail_from_name')->value('value') ?: config('app.name');
 
-            foreach ($map as $key => $value) {
-                if ($value !== null && $value !== '') {
-                    Config::set($key, $value);
-                }
+                Config::set('mail.default', 'smtp');
+                Config::set('mail.mailers.smtp.host', $host);
+                Config::set('mail.mailers.smtp.port', (int) $port);
+                Config::set('mail.mailers.smtp.username', $username);
+                Config::set('mail.mailers.smtp.password', $password);
+                Config::set('mail.mailers.smtp.encryption', $encryption);
+                Config::set('mail.from.address', $fromAddr);
+                Config::set('mail.from.name', $fromName);
             }
         } catch (\Exception $e) {
-            // DB not ready yet (e.g. first migration), skip silently
+            // DB not ready yet (migrations), fall back to .env config
         }
     }
 }
