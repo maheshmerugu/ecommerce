@@ -1,6 +1,11 @@
 <IfModule mod_rewrite.c>
     RewriteEngine On
 
-    # Redirect all requests to /public (Laravel front controller)
+    # If request is already inside /public, do nothing
+    RewriteCond %{REQUEST_URI} ^/ecommerce/public/ [NC]
+    RewriteRule ^ - [L]
+
+    # Redirect all other requests to /public (for cPanel shared hosting)
+    RewriteCond %{REQUEST_URI} !^/ecommerce/public/
     RewriteRule ^(.*)$ public/$1 [L]
 </IfModule>
