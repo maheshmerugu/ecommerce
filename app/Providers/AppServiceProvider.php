@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Models\EmailSetting;
 use App\Models\Setting;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
@@ -35,30 +36,32 @@ class AppServiceProvider extends ServiceProvider
         });
     }
 
+    /**
+     * Load SMTP credentials from the dedicated email_settings table and
+     * override Laravel's runtime mail configuration so every Mailable and
+     * Mail::raw() call in this request uses the admin-configured settings.
+     */
     private function bootMailConfig(): void
     {
         try {
-            $host     = Setting::where('key', 'mail_host')->value('value');
-            $username = Setting::where('key', 'mail_username')->value('value');
-            $password = Setting::where('key', 'mail_password')->value('value');
+            $cfg = Cache::remember('email_settings:active', 3600, function () {
+                return EmailSetting::where('is_active', true)->first();
+            });
 
-            if ($host && $username && $password) {
-                $port       = Setting::where('key', 'mail_port')->value('value') ?: 587;
-                $encryption = Setting::where('key', 'mail_encryption')->value('value') ?: 'tls';
-                $fromAddr   = Setting::where('key', 'mail_from_address')->value('value') ?: $username;
-                $fromName   = Setting::where('key', 'mail_from_name')->value('value') ?: config('app.name');
-
-                Config::set('mail.default', 'smtp');
-                Config::set('mail.mailers.smtp.host', $host);
-                Config::set('mail.mailers.smtp.port', (int) $port);
-                Config::set('mail.mailers.smtp.username', $username);
-                Config::set('mail.mailers.smtp.password', $password);
-                Config::set('mail.mailers.smtp.encryption', $encryption);
-                Config::set('mail.from.address', $fromAddr);
-                Config::set('mail.from.name', $fromName);
+            if (!$cfg || !$cfg->host || !$cfg->username || !$cfg->password) {
+                return;
             }
-        } catch (\Exception $e) {
-            // DB not ready yet (migrations), fall back to .env config
+
+            Config::set('mail.default', $cfg->mailer ?: 'smtp');
+            Config::set('mail.mailers.smtp.host',       $cfg->host);
+            Config::set('mail.mailers.smtp.port',       (int) ($cfg->port ?: 587));
+            Config::set('mail.mailers.smtp.username',   $cfg->username);
+            Config::set('mail.mailers.smtp.password',   $cfg->password); // decrypted via accessor
+            Config::set('mail.mailers.smtp.encryption', $cfg->encryption ?: 'tls');
+            Config::set('mail.from.address',            $cfg->from_address ?: $cfg->username);
+            Config::set('mail.from.name',               $cfg->from_name    ?: config('app.name'));
+        } catch (\Exception) {
+            // DB not ready yet (migrations / fresh install) — fall back to .env values
         }
     }
 }

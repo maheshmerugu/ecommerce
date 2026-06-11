@@ -8,38 +8,49 @@
         <h1 class="h3 mb-0 text-gray-800">Settings</h1>
     </div>
 
-    <form method="POST" action="{{ route('admin.settings.update') }}">
-        @csrf
-        @method('PUT')
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show">
+            <i class="fas fa-check-circle mr-2"></i>{{ session('success') }}
+            <button type="button" class="close" data-dismiss="alert"><span>&times;</span></button>
+        </div>
+    @endif
 
-        <!-- Nav Tabs -->
-        <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
-            <li class="nav-item">
-                <a class="nav-link active" id="payment-tab" data-toggle="tab" href="#payment" role="tab">
-                    <i class="fas fa-credit-card mr-1"></i> Payment (Razorpay)
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab">
-                    <i class="fas fa-envelope mr-1"></i> Email (SMTP)
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="shipping-tab" data-toggle="tab" href="#shipping" role="tab">
-                    <i class="fas fa-truck mr-1"></i> Shipping
-                </a>
-            </li>
-            <li class="nav-item">
-                <a class="nav-link" id="store-tab" data-toggle="tab" href="#store" role="tab">
-                    <i class="fas fa-store mr-1"></i> Store Info
-                </a>
-            </li>
-        </ul>
+    <!-- Nav Tabs -->
+    <ul class="nav nav-tabs mb-4" id="settingsTabs" role="tablist">
+        <li class="nav-item">
+            <a class="nav-link active" id="payment-tab" data-toggle="tab" href="#payment" role="tab">
+                <i class="fas fa-credit-card mr-1"></i> Payment (Razorpay)
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab">
+                <i class="fas fa-envelope mr-1"></i> Email (SMTP)
+                @if($emailSetting->is_active)
+                    <span class="badge badge-success ml-1">Active</span>
+                @else
+                    <span class="badge badge-secondary ml-1">Not configured</span>
+                @endif
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="shipping-tab" data-toggle="tab" href="#shipping" role="tab">
+                <i class="fas fa-truck mr-1"></i> Shipping
+            </a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" id="store-tab" data-toggle="tab" href="#store" role="tab">
+                <i class="fas fa-store mr-1"></i> Store Info
+            </a>
+        </li>
+    </ul>
 
-        <div class="tab-content" id="settingsTabContent">
+    <div class="tab-content" id="settingsTabContent">
 
-            <!-- ─── PAYMENT TAB ─── -->
-            <div class="tab-pane fade show active" id="payment" role="tabpanel">
+        <!-- ─── PAYMENT TAB ─── -->
+        <div class="tab-pane fade show active" id="payment" role="tabpanel">
+            <form method="POST" action="{{ route('admin.settings.update') }}">
+                @csrf
+                @method('PUT')
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-flex align-items-center">
                         <h6 class="m-0 font-weight-bold text-primary">
@@ -56,7 +67,7 @@
                         <div class="form-group row mb-4">
                             <label class="col-sm-3 col-form-label font-weight-bold">Mode</label>
                             <div class="col-sm-9">
-                                <div class="d-flex gap-3">
+                                <div class="d-flex">
                                     <div class="custom-control custom-radio mr-4">
                                         <input type="radio" id="mode_test" name="razorpay_mode" value="test"
                                                class="custom-control-input"
@@ -74,11 +85,10 @@
                                         </label>
                                     </div>
                                 </div>
-                                <small class="form-text text-muted">Use Test mode during development. Switch to Live when your store is ready.</small>
+                                <small class="form-text text-muted">Use Test mode during development.</small>
                             </div>
                         </div>
 
-                        <!-- Test Keys -->
                         <div id="test-key-section">
                             <div class="alert alert-info">
                                 <i class="fas fa-info-circle mr-2"></i>
@@ -90,8 +100,7 @@
                         <div id="live-key-section" style="display:none;">
                             <div class="alert alert-warning">
                                 <i class="fas fa-exclamation-triangle mr-2"></i>
-                                <strong>Live Mode Keys</strong> — Use only when your store is ready to accept real payments.
-                                Live keys start with <code>rzp_live_</code>.
+                                <strong>Live Mode Keys</strong> — Live keys start with <code>rzp_live_</code>.
                             </div>
                         </div>
 
@@ -108,13 +117,11 @@
                                     <input type="text" name="razorpay_key_id" id="razorpay_key_id"
                                            class="form-control @error('razorpay_key_id') is-invalid @enderror"
                                            value="{{ $settings['razorpay_key_id'] ?? '' }}"
-                                           placeholder="rzp_test_XXXXXXXXXXXXXXXX"
-                                           autocomplete="off">
+                                           placeholder="rzp_test_XXXXXXXXXXXXXXXX" autocomplete="off">
                                 </div>
                                 @error('razorpay_key_id')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
-                                <small class="form-text text-muted">This is your <strong>public</strong> key — safe to use in frontend.</small>
                             </div>
                         </div>
 
@@ -131,8 +138,7 @@
                                     <input type="password" name="razorpay_key_secret" id="razorpay_key_secret"
                                            class="form-control @error('razorpay_key_secret') is-invalid @enderror"
                                            value="{{ $settings['razorpay_key_secret'] ?? '' }}"
-                                           placeholder="••••••••••••••••••••"
-                                           autocomplete="new-password">
+                                           placeholder="••••••••••••••••••••" autocomplete="new-password">
                                     <div class="input-group-append">
                                         <button type="button" class="btn btn-outline-secondary" onclick="toggleSecret()">
                                             <i class="fas fa-eye" id="secret-eye"></i>
@@ -142,42 +148,222 @@
                                 @error('razorpay_key_secret')
                                     <div class="text-danger small mt-1">{{ $message }}</div>
                                 @enderror
-                                <small class="form-text text-muted">Never share this with anyone. Used for server-side signature verification.</small>
                             </div>
                         </div>
 
-                        <!-- Test connection button -->
                         <div class="form-group row">
                             <div class="col-sm-9 offset-sm-3">
                                 <button type="button" class="btn btn-outline-primary" onclick="testRazorpay()">
-                                    <i class="fas fa-plug mr-2"></i>Test Connection
+                                    <i class="fas fa-plug mr-2"></i>Validate Key Format
                                 </button>
                                 <span id="test-result" class="ml-3"></span>
                             </div>
                         </div>
 
-                        <!-- How to get keys guide -->
                         <div class="card border-left-info mt-4">
                             <div class="card-body py-3">
                                 <h6 class="font-weight-bold text-info mb-2">
                                     <i class="fas fa-question-circle mr-1"></i>How to get Razorpay API Keys
                                 </h6>
                                 <ol class="mb-0 small">
-                                    <li>Go to <a href="https://dashboard.razorpay.com" target="_blank">dashboard.razorpay.com</a> and sign in (or create a free account)</li>
-                                    <li>Click <strong>Settings</strong> in the left sidebar</li>
-                                    <li>Click <strong>API Keys</strong> tab</li>
-                                    <li>Click <strong>Generate Test Key</strong> (for testing) or <strong>Generate Live Key</strong> (for production)</li>
-                                    <li>Copy the <strong>Key ID</strong> and <strong>Key Secret</strong> and paste them above</li>
-                                    <li>Save settings and your checkout will start working!</li>
+                                    <li>Go to <a href="https://dashboard.razorpay.com" target="_blank">dashboard.razorpay.com</a> and sign in</li>
+                                    <li>Click <strong>Settings → API Keys</strong> in the left sidebar</li>
+                                    <li>Click <strong>Generate Test Key</strong> for testing</li>
+                                    <li>Copy the <strong>Key ID</strong> and <strong>Key Secret</strong> above</li>
                                 </ol>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="mt-3 mb-5">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save mr-2"></i>Save Payment Settings
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <!-- ─── SHIPPING TAB ─── -->
-            <div class="tab-pane fade" id="shipping" role="tabpanel">
+        <!-- ─── EMAIL TAB (dedicated email_settings table) ─── -->
+        <div class="tab-pane fade" id="email" role="tabpanel">
+            <form method="POST" action="{{ route('admin.settings.update-email') }}">
+                @csrf
+                @method('PUT')
+
+                <div class="card shadow mb-4">
+                    <div class="card-header py-3 d-flex align-items-center">
+                        <h6 class="m-0 font-weight-bold text-primary">
+                            <i class="fas fa-envelope mr-2"></i>Gmail SMTP Configuration
+                        </h6>
+                        @if($emailSetting->is_active)
+                            <span class="badge badge-success ml-3 px-3 py-2">
+                                <i class="fas fa-check-circle mr-1"></i>Active — connected as {{ $emailSetting->username }}
+                            </span>
+                        @else
+                            <span class="badge badge-secondary ml-3 px-3 py-2">
+                                <i class="fas fa-times-circle mr-1"></i>Not configured
+                            </span>
+                        @endif
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Gmail setup guide -->
+                        <div class="alert alert-info mb-4">
+                            <h6 class="font-weight-bold"><i class="fab fa-google mr-2"></i>How to set up Gmail SMTP</h6>
+                            <ol class="mb-0 small">
+                                <li>Go to <strong>Google Account → Security</strong></li>
+                                <li>Enable <strong>2-Step Verification</strong> (required for App Passwords)</li>
+                                <li>Visit <a href="https://myaccount.google.com/apppasswords" target="_blank"><strong>myaccount.google.com/apppasswords</strong></a></li>
+                                <li>Select app: <em>Mail</em>, device: <em>Other</em> → type <em>Laravel</em> → click <strong>Generate</strong></li>
+                                <li>Copy the <strong>16-character App Password</strong> (spaces are OK) and paste below</li>
+                                <li>Do <strong>NOT</strong> use your regular Gmail password here</li>
+                            </ol>
+                        </div>
+
+                        <!-- Hidden mailer type -->
+                        <input type="hidden" name="mail_mailer" value="smtp">
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">SMTP Host</label>
+                                    <input type="text" name="mail_host" class="form-control"
+                                           value="{{ old('mail_host', $emailSetting->host ?: 'smtp.gmail.com') }}"
+                                           placeholder="smtp.gmail.com">
+                                    <small class="text-muted">For Gmail: <code>smtp.gmail.com</code></small>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Port</label>
+                                    <select name="mail_port" class="form-control">
+                                        <option value="587" {{ (old('mail_port', $emailSetting->port) == 587) ? 'selected' : '' }}>587 — TLS (Recommended)</option>
+                                        <option value="465" {{ (old('mail_port', $emailSetting->port) == 465) ? 'selected' : '' }}>465 — SSL</option>
+                                        <option value="25"  {{ (old('mail_port', $emailSetting->port) == 25)  ? 'selected' : '' }}>25 — None</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-3">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Encryption</label>
+                                    <select name="mail_encryption" class="form-control">
+                                        <option value="tls"  {{ (old('mail_encryption', $emailSetting->encryption) === 'tls')  ? 'selected' : '' }}>TLS (Recommended)</option>
+                                        <option value="ssl"  {{ (old('mail_encryption', $emailSetting->encryption) === 'ssl')  ? 'selected' : '' }}>SSL</option>
+                                        <option value="none" {{ (old('mail_encryption', $emailSetting->encryption) === 'none') ? 'selected' : '' }}>None</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">Gmail Address <span class="text-danger">*</span></label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fab fa-google"></i></span>
+                                        </div>
+                                        <input type="email" name="mail_username" class="form-control"
+                                               value="{{ old('mail_username', $emailSetting->username) }}"
+                                               placeholder="yourname@gmail.com">
+                                    </div>
+                                    <small class="text-muted">Your full Gmail address</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">
+                                        App Password <span class="text-danger">*</span>
+                                        @if($emailSetting->password)
+                                            <small class="text-success font-weight-normal ml-2">
+                                                <i class="fas fa-lock mr-1"></i>Saved (leave blank to keep current)
+                                            </small>
+                                        @endif
+                                    </label>
+                                    <div class="input-group">
+                                        <div class="input-group-prepend">
+                                            <span class="input-group-text"><i class="fas fa-key"></i></span>
+                                        </div>
+                                        <input type="password" name="mail_password" id="mail_password" class="form-control"
+                                               placeholder="{{ $emailSetting->password ? 'Leave blank to keep current password' : '16-character App Password' }}"
+                                               autocomplete="new-password">
+                                        <div class="input-group-append">
+                                            <button type="button" class="btn btn-outline-secondary" onclick="toggleMailPass()">
+                                                <i class="fas fa-eye" id="mail-pass-eye"></i>
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <small class="text-danger font-weight-bold">
+                                        <i class="fas fa-exclamation-triangle mr-1"></i>Use the Google App Password — NOT your Gmail login password!
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <h6 class="font-weight-bold text-muted mb-3">Sender Details (shown to email recipients)</h6>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">From Name</label>
+                                    <input type="text" name="mail_from_name" class="form-control"
+                                           value="{{ old('mail_from_name', $emailSetting->from_name ?: ($settings['store_name'] ?? $storeName)) }}"
+                                           placeholder="Your Store Name">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="font-weight-bold">From Email</label>
+                                    <input type="email" name="mail_from_address" class="form-control"
+                                           value="{{ old('mail_from_address', $emailSetting->from_address ?: $emailSetting->username) }}"
+                                           placeholder="noreply@yourdomain.com">
+                                    <small class="text-muted">Must match your Gmail address (or a verified alias).</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr>
+                        <!-- Test Email Section -->
+                        <div class="card border-left-primary mb-0">
+                            <div class="card-body py-3">
+                                <h6 class="font-weight-bold mb-3">
+                                    <i class="fas fa-paper-plane mr-2 text-primary"></i>Send Test Email
+                                </h6>
+                                <div class="row align-items-end">
+                                    <div class="col-md-6">
+                                        <div class="input-group">
+                                            <input type="email" id="test_email_addr" class="form-control"
+                                                   placeholder="recipient@example.com">
+                                            <div class="input-group-append">
+                                                <button type="button" class="btn btn-primary" onclick="sendTestEmail()">
+                                                    <i class="fas fa-paper-plane mr-1"></i>Send Test
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <small class="text-muted">Save settings first, then verify by sending a test email.</small>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <div id="test-email-result" class="mt-2"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-3 mb-5">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save mr-2"></i>Save Email Settings
+                    </button>
+                </div>
+            </form>
+        </div>
+
+        <!-- ─── SHIPPING TAB ─── -->
+        <div class="tab-pane fade" id="shipping" role="tabpanel">
+            <form method="POST" action="{{ route('admin.settings.update') }}">
+                @csrf
+                @method('PUT')
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">
@@ -186,9 +372,7 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">
-                                Flat Shipping Fee (₹)
-                            </label>
+                            <label class="col-sm-3 col-form-label font-weight-bold">Flat Shipping Fee (₹)</label>
                             <div class="col-sm-4">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -202,9 +386,7 @@
                             </div>
                         </div>
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">
-                                Free Shipping Above (₹)
-                            </label>
+                            <label class="col-sm-3 col-form-label font-weight-bold">Free Shipping Above (₹)</label>
                             <div class="col-sm-4">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -212,18 +394,26 @@
                                     </div>
                                     <input type="number" name="free_shipping_above" class="form-control"
                                            value="{{ $settings['free_shipping_above'] ?? '' }}"
-                                           min="0" step="0.01"
-                                           placeholder="Leave empty to disable">
+                                           min="0" step="0.01" placeholder="Leave empty to disable">
                                 </div>
-                                <small class="form-text text-muted">Orders above this amount get free shipping. Leave empty to disable.</small>
+                                <small class="form-text text-muted">Orders above this amount get free shipping.</small>
                             </div>
                         </div>
                     </div>
                 </div>
-            </div>
+                <div class="mt-3 mb-5">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save mr-2"></i>Save Shipping Settings
+                    </button>
+                </div>
+            </form>
+        </div>
 
-            <!-- ─── STORE TAB ─── -->
-            <div class="tab-pane fade" id="store" role="tabpanel">
+        <!-- ─── STORE TAB ─── -->
+        <div class="tab-pane fade" id="store" role="tabpanel">
+            <form method="POST" action="{{ route('admin.settings.update') }}">
+                @csrf
+                @method('PUT')
                 <div class="card shadow mb-4">
                     <div class="card-header py-3">
                         <h6 class="m-0 font-weight-bold text-primary">
@@ -237,6 +427,7 @@
                                 <input type="text" name="store_name" class="form-control"
                                        value="{{ $settings['store_name'] ?? $storeName }}"
                                        placeholder="My Store">
+                                <small class="text-muted">Displayed across the site header and emails.</small>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -272,163 +463,27 @@
                         </div>
                     </div>
                 </div>
-            </div>
-
-            <!-- ─── EMAIL TAB ─── -->
-            <div class="tab-pane fade" id="email" role="tabpanel">
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                            <i class="fas fa-envelope mr-2"></i>Gmail SMTP Settings
-                        </h6>
-                    </div>
-                    <div class="card-body">
-
-                        <!-- Gmail guide -->
-                        <div class="alert alert-info mb-4">
-                            <h6 class="font-weight-bold"><i class="fab fa-google mr-2"></i>How to set up Gmail SMTP</h6>
-                            <ol class="mb-0 small">
-                                <li>Go to your Google Account → <strong>Security</strong></li>
-                                <li>Enable <strong>2-Step Verification</strong> (required)</li>
-                                <li>Go to <strong>Security → App passwords</strong></li>
-                                <li>Select app: <em>Mail</em> → Select device: <em>Other</em> → type "Laravel"</li>
-                                <li>Click <strong>Generate</strong> — copy the 16-character password</li>
-                                <li>Use that password below (NOT your regular Gmail password)</li>
-                            </ol>
-                        </div>
-
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">SMTP Host</label>
-                            <div class="col-sm-5">
-                                <input type="text" name="mail_host" class="form-control"
-                                       value="{{ $settings['mail_host'] ?? 'smtp.gmail.com' }}"
-                                       placeholder="smtp.gmail.com">
-                                <small class="text-muted">For Gmail use: <code>smtp.gmail.com</code></small>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">SMTP Port</label>
-                            <div class="col-sm-3">
-                                <select name="mail_port" class="form-control">
-                                    <option value="587" {{ ($settings['mail_port'] ?? '587') == '587' ? 'selected' : '' }}>587 — TLS (Recommended)</option>
-                                    <option value="465" {{ ($settings['mail_port'] ?? '') == '465' ? 'selected' : '' }}>465 — SSL</option>
-                                    <option value="25"  {{ ($settings['mail_port'] ?? '') == '25'  ? 'selected' : '' }}>25 — No encryption</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">Encryption</label>
-                            <div class="col-sm-3">
-                                <select name="mail_encryption" class="form-control">
-                                    <option value="tls" {{ ($settings['mail_encryption'] ?? 'tls') == 'tls' ? 'selected' : '' }}>TLS (Recommended)</option>
-                                    <option value="ssl" {{ ($settings['mail_encryption'] ?? '') == 'ssl' ? 'selected' : '' }}>SSL</option>
-                                </select>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">Gmail Address <span class="text-danger">*</span></label>
-                            <div class="col-sm-5">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="fab fa-google"></i></span>
-                                    </div>
-                                    <input type="email" name="mail_username" class="form-control"
-                                           value="{{ $settings['mail_username'] ?? '' }}"
-                                           placeholder="yourname@gmail.com">
-                                </div>
-                                <small class="text-muted">Your full Gmail address</small>
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">App Password <span class="text-danger">*</span></label>
-                            <div class="col-sm-5">
-                                <div class="input-group">
-                                    <div class="input-group-prepend">
-                                        <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                    </div>
-                                    <input type="password" name="mail_password" id="mail_password" class="form-control"
-                                           value="{{ $settings['mail_password'] ?? '' }}"
-                                           placeholder="16-character App Password"
-                                           autocomplete="new-password">
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-outline-secondary" onclick="toggleMailPass()">
-                                            <i class="fas fa-eye" id="mail-pass-eye"></i>
-                                        </button>
-                                    </div>
-                                </div>
-                                <small class="text-danger font-weight-bold">Use Gmail App Password — NOT your regular Gmail password!</small>
-                            </div>
-                        </div>
-
-                        <hr>
-                        <h6 class="font-weight-bold text-muted mb-3">From Details (shown to recipients)</h6>
-
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">From Name</label>
-                            <div class="col-sm-5">
-                                <input type="text" name="mail_from_name" class="form-control"
-                                       value="{{ $settings['mail_from_name'] ?? ($settings['store_name'] ?? $storeName) }}"
-                                       placeholder="Your Store Name">
-                            </div>
-                        </div>
-
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">From Email</label>
-                            <div class="col-sm-5">
-                                <input type="email" name="mail_from_address" class="form-control"
-                                       value="{{ $settings['mail_from_address'] ?? ($settings['mail_username'] ?? '') }}"
-                                       placeholder="noreply@yourdomain.com">
-                                <small class="text-muted">Must match or be an alias of your Gmail address.</small>
-                            </div>
-                        </div>
-
-                        <hr>
-                        <!-- Test Email -->
-                        <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">Send Test Email</label>
-                            <div class="col-sm-6">
-                                <div class="input-group">
-                                    <input type="email" id="test_email_addr" class="form-control"
-                                           placeholder="recipient@example.com">
-                                    <div class="input-group-append">
-                                        <button type="button" class="btn btn-outline-primary" onclick="sendTestEmail()">
-                                            <i class="fas fa-paper-plane mr-1"></i>Send Test
-                                        </button>
-                                    </div>
-                                </div>
-                                <div id="test-email-result" class="mt-2"></div>
-                                <small class="text-muted">Save settings first, then send a test email to verify.</small>
-                            </div>
-                        </div>
-
-                    </div>
+                <div class="mt-3 mb-5">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="fas fa-save mr-2"></i>Save Store Settings
+                    </button>
                 </div>
-            </div>
-
-        </div><!-- end tab-content -->
-
-        <div class="mt-3 mb-5">
-            <button type="submit" class="btn btn-primary btn-lg">
-                <i class="fas fa-save mr-2"></i>Save All Settings
-            </button>
+            </form>
         </div>
-    </form>
+
+    </div><!-- end tab-content -->
 </div>
+@endsection
 
 @section('scripts')
 <script>
-// Show/hide key info based on mode
+// Razorpay mode toggle
 document.querySelectorAll('input[name="razorpay_mode"]').forEach(function(radio) {
     radio.addEventListener('change', function() {
         document.getElementById('test-key-section').style.display = this.value === 'test' ? '' : 'none';
         document.getElementById('live-key-section').style.display = this.value === 'live' ? '' : 'none';
     });
 });
-// Set initial state
 (function() {
     var checked = document.querySelector('input[name="razorpay_mode"]:checked');
     if (checked && checked.value === 'live') {
@@ -437,26 +492,30 @@ document.querySelectorAll('input[name="razorpay_mode"]').forEach(function(radio)
     }
 })();
 
+function toggleSecret() {
+    var el = document.getElementById('razorpay_key_secret');
+    var eye = document.getElementById('secret-eye');
+    el.type = el.type === 'password' ? 'text' : 'password';
+    eye.classList.toggle('fa-eye');
+    eye.classList.toggle('fa-eye-slash');
+}
+
 function toggleMailPass() {
     var el = document.getElementById('mail_password');
     var eye = document.getElementById('mail-pass-eye');
-    if (el.type === 'password') {
-        el.type = 'text';
-        eye.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
-        el.type = 'password';
-        eye.classList.replace('fa-eye-slash', 'fa-eye');
-    }
+    el.type = el.type === 'password' ? 'text' : 'password';
+    eye.classList.toggle('fa-eye');
+    eye.classList.toggle('fa-eye-slash');
 }
 
 function sendTestEmail() {
     var addr = document.getElementById('test_email_addr').value.trim();
     var resultEl = document.getElementById('test-email-result');
     if (!addr) {
-        resultEl.innerHTML = '<span class="text-danger">Please enter a recipient email address.</span>';
+        resultEl.innerHTML = '<span class="text-danger"><i class="fas fa-exclamation-circle mr-1"></i>Please enter a recipient email address.</span>';
         return;
     }
-    resultEl.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin mr-1"></i>Sending...</span>';
+    resultEl.innerHTML = '<span class="text-muted"><i class="fas fa-spinner fa-spin mr-1"></i>Sending…</span>';
 
     fetch('{{ route("admin.settings.test-email") }}', {
         method: 'POST',
@@ -479,33 +538,27 @@ function sendTestEmail() {
     });
 }
 
-function toggleSecret() {
-    var el = document.getElementById('razorpay_key_secret');
-    var eye = document.getElementById('secret-eye');
-    if (el.type === 'password') {
-        el.type = 'text';
-        eye.classList.replace('fa-eye', 'fa-eye-slash');
-    } else {
-        el.type = 'password';
-        eye.classList.replace('fa-eye-slash', 'fa-eye');
-    }
-}
-
 function testRazorpay() {
     var keyId = document.getElementById('razorpay_key_id').value.trim();
     var resultEl = document.getElementById('test-result');
-
     if (!keyId) {
         resultEl.innerHTML = '<span class="text-danger"><i class="fas fa-times-circle mr-1"></i>Please enter a Key ID first.</span>';
         return;
     }
-
     if (keyId.startsWith('rzp_test_') || keyId.startsWith('rzp_live_')) {
-        resultEl.innerHTML = '<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Key ID format looks valid! Save settings and try a test order.</span>';
+        resultEl.innerHTML = '<span class="text-success"><i class="fas fa-check-circle mr-1"></i>Key ID format is valid! Save and try a test order.</span>';
     } else {
         resultEl.innerHTML = '<span class="text-warning"><i class="fas fa-exclamation-circle mr-1"></i>Key should start with <code>rzp_test_</code> or <code>rzp_live_</code>.</span>';
     }
 }
+
+// Re-activate the correct tab on page reload after form submission
+(function() {
+    var hash = window.location.hash;
+    if (hash) {
+        var tab = document.querySelector('a[href="' + hash + '"]');
+        if (tab) { tab.click(); }
+    }
+})();
 </script>
-@endsection
 @endsection
