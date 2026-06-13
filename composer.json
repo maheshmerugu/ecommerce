@@ -13,6 +13,7 @@
         "laravel/tinker": "^2.10.1",
         "maatwebsite/excel": "^1.1",
         "razorpay/razorpay": "^2.9",
+        "resend/resend-laravel": "^1.4",
         "spatie/laravel-permission": "^6.21",
         "spatie/laravel-sluggable": "^3.7"
     },

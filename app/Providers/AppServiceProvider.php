@@ -37,9 +37,8 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load SMTP credentials from the dedicated email_settings table and
-     * override Laravel's runtime mail configuration so every Mailable and
-     * Mail::raw() call in this request uses the admin-configured settings.
+     * Load mail credentials from the email_settings table and override
+     * Laravel's runtime config. Supports smtp, resend, and log drivers.
      */
     private function bootMailConfig(): void
     {
@@ -48,28 +47,42 @@ class AppServiceProvider extends ServiceProvider
                 return EmailSetting::where('is_active', true)->first();
             });
 
-            if (!$cfg || !$cfg->host || !$cfg->username || !$cfg->password) {
+            if (!$cfg || !$cfg->password) {
                 return;
             }
 
-            // Laravel 11 uses 'scheme' (not 'encryption').
-            // port 587 STARTTLS → scheme null  |  port 465 SSL → scheme 'smtps'
+            $mailer = strtolower(trim($cfg->mailer ?: 'smtp'));
+
+            Config::set('mail.default',      $mailer);
+            Config::set('mail.from.address', trim($cfg->from_address ?: $cfg->username ?? ''));
+            Config::set('mail.from.name',    trim($cfg->from_name    ?: config('app.name')));
+
+            if ($mailer === 'resend') {
+                // HTTP API — no SMTP ports, works on GoDaddy / any shared host
+                Config::set('resend.api_key', trim($cfg->password));
+                return;
+            }
+
+            // ── SMTP driver ───────────────────────────────────────────────────
+            if (!$cfg->host || !$cfg->username) {
+                return;
+            }
+
+            // Laravel 11 uses 'scheme' not 'encryption'
+            // port 465 SSL → smtps  |  port 587 STARTTLS → null
             $encryption = strtolower(trim($cfg->encryption ?? ''));
             $scheme = match ($encryption) {
                 'ssl', 'smtps' => 'smtps',
-                default        => null,   // 'tls' / '' / null → STARTTLS on 587
+                default        => null,
             };
 
-            Config::set('mail.default', $cfg->mailer ?: 'smtp');
             Config::set('mail.mailers.smtp.host',     trim($cfg->host));
-            Config::set('mail.mailers.smtp.port',     (int) ($cfg->port ?: 587));
+            Config::set('mail.mailers.smtp.port',     (int) ($cfg->port ?: 465));
             Config::set('mail.mailers.smtp.scheme',   $scheme);
             Config::set('mail.mailers.smtp.username', trim($cfg->username));
-            Config::set('mail.mailers.smtp.password', trim($cfg->password)); // decrypted & trimmed via accessor
-            Config::set('mail.from.address',          trim($cfg->from_address ?: $cfg->username));
-            Config::set('mail.from.name',             trim($cfg->from_name    ?: config('app.name')));
+            Config::set('mail.mailers.smtp.password', trim($cfg->password));
         } catch (\Exception) {
-            // DB not ready yet (migrations / fresh install) — fall back to .env values
+            // DB not ready yet — fall back to .env values
         }
     }
 }
