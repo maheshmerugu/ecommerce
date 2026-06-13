@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Customer;
 
 use App\Http\Controllers\Controller;
+use App\Mail\WelcomeEmail;
 use App\Models\Cart;
 use App\Models\CartItem;
 use App\Models\Customer;
@@ -10,6 +11,7 @@ use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Str;
@@ -188,6 +190,8 @@ class AuthController extends Controller
         ]);
 
         event(new Registered($customer));
+
+        Mail::to($customer->email)->send(new WelcomeEmail($customer));
 
         Auth::guard('customer')->login($customer);
 

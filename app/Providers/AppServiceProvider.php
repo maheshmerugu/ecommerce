@@ -52,14 +52,22 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
+            // Laravel 11 uses 'scheme' (not 'encryption').
+            // port 587 STARTTLS → scheme null  |  port 465 SSL → scheme 'smtps'
+            $encryption = strtolower(trim($cfg->encryption ?? ''));
+            $scheme = match ($encryption) {
+                'ssl', 'smtps' => 'smtps',
+                default        => null,   // 'tls' / '' / null → STARTTLS on 587
+            };
+
             Config::set('mail.default', $cfg->mailer ?: 'smtp');
-            Config::set('mail.mailers.smtp.host',       $cfg->host);
-            Config::set('mail.mailers.smtp.port',       (int) ($cfg->port ?: 587));
-            Config::set('mail.mailers.smtp.username',   $cfg->username);
-            Config::set('mail.mailers.smtp.password',   $cfg->password); // decrypted via accessor
-            Config::set('mail.mailers.smtp.encryption', $cfg->encryption ?: 'tls');
-            Config::set('mail.from.address',            $cfg->from_address ?: $cfg->username);
-            Config::set('mail.from.name',               $cfg->from_name    ?: config('app.name'));
+            Config::set('mail.mailers.smtp.host',     trim($cfg->host));
+            Config::set('mail.mailers.smtp.port',     (int) ($cfg->port ?: 587));
+            Config::set('mail.mailers.smtp.scheme',   $scheme);
+            Config::set('mail.mailers.smtp.username', trim($cfg->username));
+            Config::set('mail.mailers.smtp.password', trim($cfg->password)); // decrypted & trimmed via accessor
+            Config::set('mail.from.address',          trim($cfg->from_address ?: $cfg->username));
+            Config::set('mail.from.name',             trim($cfg->from_name    ?: config('app.name')));
         } catch (\Exception) {
             // DB not ready yet (migrations / fresh install) — fall back to .env values
         }

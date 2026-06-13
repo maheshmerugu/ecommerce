@@ -46,10 +46,10 @@ class EmailSetting extends Model
             return null;
         }
         try {
-            return Crypt::decryptString($value);
+            return trim(Crypt::decryptString($value));
         } catch (\Exception) {
             // Already plain-text (legacy / initial state)
-            return $value;
+            return trim($value);
         }
     }
 
