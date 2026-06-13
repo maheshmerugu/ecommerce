@@ -94,10 +94,13 @@ echo "Running migrations..."
 echo "Storage link..."
 "$PHP_BIN" "$DEPLOYPATH/artisan" storage:link 2>/dev/null || true
 
-echo "Caching config/routes/views..."
+echo "Clearing all caches (config, route, view, app)..."
 "$PHP_BIN" "$DEPLOYPATH/artisan" config:clear  || true
 "$PHP_BIN" "$DEPLOYPATH/artisan" route:clear   || true
 "$PHP_BIN" "$DEPLOYPATH/artisan" view:clear    || true
+"$PHP_BIN" "$DEPLOYPATH/artisan" cache:clear   || true
+
+echo "Rebuilding caches..."
 "$PHP_BIN" "$DEPLOYPATH/artisan" config:cache  || true
 "$PHP_BIN" "$DEPLOYPATH/artisan" route:cache   || true
 "$PHP_BIN" "$DEPLOYPATH/artisan" view:cache    || true
