@@ -68,7 +68,7 @@
 
         <div class="grid lg:grid-cols-2 gap-8">
             <!-- Checkout Form -->
-            <div class="order-2 lg:order-1">
+            <div class="order-1 lg:order-1">
                 <!-- Authenticated User Welcome -->
                 <div class="bg-green-50 border-l-4 border-green-400 p-4 mb-6">
                     <div class="flex">
@@ -225,7 +225,7 @@
             </div>
 
             <!-- Order Summary -->
-            <div class="order-1 lg:order-2">
+            <div class="order-2 lg:order-2">
                 <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border lg:sticky lg:top-4">
                     <h3 class="text-lg font-semibold mb-4">Order Summary</h3>
                     
