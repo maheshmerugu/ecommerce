@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\EmailSetting;
+use App\Models\PincodeShippingRate;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -13,10 +14,11 @@ class SettingController extends Controller
 {
     public function index()
     {
-        $settings     = Setting::all()->pluck('value', 'key')->toArray();
-        $emailSetting = EmailSetting::current();
+        $settings      = Setting::all()->pluck('value', 'key')->toArray();
+        $emailSetting  = EmailSetting::current();
+        $shippingRates = PincodeShippingRate::orderBy('match_type')->orderBy('pincode')->get();
 
-        return view('admin.settings.index', compact('settings', 'emailSetting'));
+        return view('admin.settings.index', compact('settings', 'emailSetting', 'shippingRates'));
     }
 
     // ─────────────────────────────────────────────────

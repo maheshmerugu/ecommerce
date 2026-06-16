@@ -319,7 +319,7 @@
                     </div>
                     <div class="card-body">
                         <div class="form-group row">
-                            <label class="col-sm-3 col-form-label font-weight-bold">Flat Shipping Fee (₹)</label>
+                            <label class="col-sm-3 col-form-label font-weight-bold">Default Shipping Fee (₹)</label>
                             <div class="col-sm-4">
                                 <div class="input-group">
                                     <div class="input-group-prepend">
@@ -329,7 +329,7 @@
                                            value="{{ $settings['shipping_fee'] ?? config('shop.shipping_fee', 150) }}"
                                            min="0" step="0.01">
                                 </div>
-                                <small class="form-text text-muted">Applied to every order.</small>
+                                <small class="form-text text-muted">Fallback when no pincode rule matches.</small>
                             </div>
                         </div>
                         <div class="form-group row">
@@ -348,12 +348,106 @@
                         </div>
                     </div>
                 </div>
-                <div class="mt-3 mb-5">
+                <div class="mt-3">
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="fas fa-save mr-2"></i>Save Shipping Settings
                     </button>
                 </div>
             </form>
+
+            <div class="card shadow mb-4 mt-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-map-marker-alt mr-2"></i>Pincode Shipping Rates
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <p class="text-muted small mb-3">
+                        Set shipping charges by exact pincode (6 digits) or prefix (2–5 digits, e.g. <code>560</code> for Bengaluru).
+                        Exact matches take priority, then longest prefix match, then the default fee above.
+                    </p>
+
+                    @if($errors->any() && (session('active_tab') === 'shipping' || request()->fragment() === 'shipping'))
+                        <div class="alert alert-danger">
+                            @foreach($errors->all() as $error)
+                                <div>{{ $error }}</div>
+                            @endforeach
+                        </div>
+                    @endif
+
+                    <form method="POST" action="{{ route('admin.shipping-rates.store') }}" class="mb-4">
+                        @csrf
+                        <div class="form-row align-items-end">
+                            <div class="form-group col-md-2">
+                                <label class="font-weight-bold">Match type</label>
+                                <select name="match_type" class="form-control" required>
+                                    <option value="exact" {{ old('match_type') === 'exact' ? 'selected' : '' }}>Exact (6-digit)</option>
+                                    <option value="prefix" {{ old('match_type', 'prefix') === 'prefix' ? 'selected' : '' }}>Prefix</option>
+                                </select>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="font-weight-bold">Pincode / Prefix</label>
+                                <input type="text" name="pincode" class="form-control" value="{{ old('pincode') }}"
+                                       pattern="\d{2,6}" maxlength="6" placeholder="e.g. 560 or 560001" required>
+                            </div>
+                            <div class="form-group col-md-2">
+                                <label class="font-weight-bold">Charge (₹)</label>
+                                <input type="number" name="shipping_charge" class="form-control" value="{{ old('shipping_charge') }}"
+                                       min="0" step="0.01" required>
+                            </div>
+                            <div class="form-group col-md-3">
+                                <label class="font-weight-bold">Label (optional)</label>
+                                <input type="text" name="label" class="form-control" value="{{ old('label') }}"
+                                       placeholder="e.g. Metro zone">
+                            </div>
+                            <div class="form-group col-md-3">
+                                <button type="submit" class="btn btn-success btn-block">
+                                    <i class="fas fa-plus mr-1"></i>Add / Update Rate
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-sm">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th>Type</th>
+                                    <th>Pincode / Prefix</th>
+                                    <th>Charge</th>
+                                    <th>Label</th>
+                                    <th width="80">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @forelse($shippingRates as $rate)
+                                <tr>
+                                    <td><span class="badge badge-{{ $rate->match_type === 'exact' ? 'primary' : 'info' }}">{{ ucfirst($rate->match_type) }}</span></td>
+                                    <td><code>{{ $rate->pincode }}</code></td>
+                                    <td>₹{{ number_format($rate->shipping_charge, 2) }}</td>
+                                    <td>{{ $rate->label ?? '—' }}</td>
+                                    <td>
+                                        <form method="POST" action="{{ route('admin.shipping-rates.destroy', $rate) }}"
+                                              onsubmit="return confirm('Remove this shipping rate?');">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="btn btn-sm btn-outline-danger">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                                @empty
+                                <tr>
+                                    <td colspan="5" class="text-center text-muted py-3">No pincode rates yet — default fee applies to all orders.</td>
+                                </tr>
+                                @endforelse
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            <div class="mb-5"></div>
         </div>
 
         <!-- ─── STORE TAB ─── -->
@@ -438,6 +532,13 @@ document.querySelectorAll('input[name="razorpay_mode"]').forEach(function(radio)
         document.getElementById('live-key-section').style.display = '';
     }
 })();
+
+@if(session('active_tab') === 'shipping' || request()->has('tab') && request('tab') === 'shipping')
+(function() {
+    var tab = document.getElementById('shipping-tab');
+    if (tab) tab.click();
+})();
+@endif
 
 function toggleSecret() {
     var el = document.getElementById('razorpay_key_secret');

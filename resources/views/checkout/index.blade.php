@@ -256,11 +256,12 @@
                         </div>
                            <div class="flex justify-between text-sm">
                                <span>Shipping</span>
-                               <span class="text-gray-900">{{ format_currency(config('shop.shipping_fee', 150)) }}</span>
+                               <span class="text-gray-900" id="checkout-shipping">{{ format_currency($defaultShippingFee) }}</span>
                         </div>
+                        <p class="text-xs text-gray-500" id="checkout-shipping-note">Enter pincode to calculate exact shipping</p>
                         <div class="flex justify-between font-semibold text-lg pt-2 border-t">
                             <span>Total</span>
-                            <span>{{ format_currency($cart->total_price + config('shop.shipping_fee', 150)) }}</span>
+                            <span id="checkout-total">{{ format_currency($cart->total_price + $defaultShippingFee) }}</span>
                         </div>
                     </div>
 
@@ -279,7 +280,7 @@
                         <button type="button" onclick="processCheckout()" 
                         class="w-full bg-blue-600 text-white py-3 px-4 rounded-md font-medium hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors">
                         <i class="fas fa-lock mr-2"></i>
-                        Place Order & Pay {{ format_currency($cart->total_price + config('shop.shipping_fee', 150)) }}
+                        <span id="checkout-pay-btn-text">Place Order & Pay {{ format_currency($cart->total_price + $defaultShippingFee) }}</span>
                     </button>
 
                     <div class="text-xs text-center text-gray-500 mt-3">
@@ -303,6 +304,44 @@
     <script>
         // Get Razorpay key from environment
         const RAZORPAY_KEY = '{{ $razorpayKeyId ?? env("RAZORPAY_KEY_ID") }}';
+        const CART_SUBTOTAL = {{ (float) $cart->total_price }};
+        let currentShipping = {{ (float) $defaultShippingFee }};
+        
+        function formatInr(amount) {
+            return '₹' + Number(amount).toLocaleString('en-IN', { maximumFractionDigits: 0, minimumFractionDigits: 0 });
+        }
+
+        function updateCheckoutTotals(shippingCharge, label, isFree) {
+            currentShipping = shippingCharge;
+            const shippingEl = document.getElementById('checkout-shipping');
+            const totalEl = document.getElementById('checkout-total');
+            const noteEl = document.getElementById('checkout-shipping-note');
+            const payBtnEl = document.getElementById('checkout-pay-btn-text');
+
+            if (shippingEl) {
+                shippingEl.textContent = isFree ? 'FREE' : formatInr(shippingCharge);
+                shippingEl.classList.toggle('text-green-600', isFree);
+            }
+            if (totalEl) totalEl.textContent = formatInr(CART_SUBTOTAL + shippingCharge);
+            if (payBtnEl) payBtnEl.textContent = 'Place Order & Pay ' + formatInr(CART_SUBTOTAL + shippingCharge);
+            if (noteEl) {
+                noteEl.textContent = label ? (isFree ? label : label + ' — ' + formatInr(shippingCharge)) : '';
+            }
+        }
+
+        function fetchShippingForPincode(pincode) {
+            const cleaned = (pincode || '').replace(/\D/g, '');
+            if (cleaned.length !== 6) return;
+
+            fetch('{{ route("shipping.calculate") }}?pincode=' + encodeURIComponent(cleaned) + '&subtotal=' + CART_SUBTOTAL)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        updateCheckoutTotals(data.shipping_charge, data.label, data.is_free);
+                    }
+                })
+                .catch(err => console.error('Shipping calculation failed', err));
+        }
         
         console.log('Razorpay Key ID:', RAZORPAY_KEY);
 
@@ -345,14 +384,26 @@
             }
 
             const pEl = document.getElementById('shipping_pincode'); if (pEl) pEl.value = pinVal;
+            fetchShippingForPincode(pinVal);
         }
 
         // On load: if a saved address radio is checked (not 'new'), fill the form
         document.addEventListener('DOMContentLoaded', function() {
             const checked = document.querySelector('input[name="saved_address"]:checked');
             if (checked && checked.value !== 'new' && typeof checked.onchange === 'function') {
-                // Trigger the onchange handler which will call fillAddress
                 checked.dispatchEvent(new Event('change'));
+            }
+
+            const pinInput = document.getElementById('shipping_pincode');
+            if (pinInput) {
+                pinInput.addEventListener('input', function() {
+                    if (this.value.replace(/\D/g, '').length === 6) {
+                        fetchShippingForPincode(this.value);
+                    }
+                });
+                if (pinInput.value.replace(/\D/g, '').length === 6) {
+                    fetchShippingForPincode(pinInput.value);
+                }
             }
         });
 
@@ -559,7 +610,12 @@
                 .then(data => {
                     if (data.pincodes && data.pincodes.length) {
                         const el = document.getElementById(inputId);
-                        if (el) el.value = data.pincodes[0];
+                        if (el) {
+                            el.value = data.pincodes[0];
+                            if (inputId === 'shipping_pincode') {
+                                fetchShippingForPincode(data.pincodes[0]);
+                            }
+                        }
                     }
                 })
                 .catch(err => console.error('Failed to load pincodes', err));

@@ -167,7 +167,7 @@
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Shipping</span>
-                                <span class="font-medium text-gray-900">{{ format_currency(config('shop.shipping_fee', 150)) }}</span>
+                                <span class="font-medium text-gray-500 text-sm">At checkout (by pincode)</span>
                             </div>
                             <div class="flex justify-between">
                                 <span class="text-gray-600">Tax</span>
@@ -176,7 +176,8 @@
                             <hr>
                             <div class="flex justify-between items-center">
                                 <span class="text-lg font-semibold">Total</span>
-                                <span class="text-xl font-bold text-blue-600" id="cart-total">{{ format_currency($cart->total_price + ($cart->items()->count() ? config('shop.shipping_fee', 150) : 0)) }}</span>
+                                <span class="text-xl font-bold text-blue-600" id="cart-total">{{ format_currency($cart->total_price) }}</span>
+                                <p class="text-xs text-gray-500 mt-1">+ shipping calculated at checkout</p>
                             </div>
                         </div>
 

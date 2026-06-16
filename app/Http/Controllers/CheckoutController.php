@@ -10,6 +10,7 @@ use App\Models\Address;
 use App\Models\Payment;
 use App\Models\Product;
 use App\Models\Setting;
+use App\Services\ShippingService;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\DB;
@@ -63,7 +64,9 @@ class CheckoutController extends Controller
         // Pass Razorpay Key ID to view (DB setting first, then .env fallback)
         $razorpayKeyId = Setting::get('razorpay_key_id') ?: env('RAZORPAY_KEY_ID', '');
 
-        return view('checkout.index', compact('cart', 'cartItems', 'addresses', 'user', 'razorpayKeyId'));
+        $defaultShippingFee = ShippingService::defaultFee();
+
+        return view('checkout.index', compact('cart', 'cartItems', 'addresses', 'user', 'razorpayKeyId', 'defaultShippingFee'));
     }
 
     /**
@@ -336,8 +339,8 @@ class CheckoutController extends Controller
         
         $orderNumber = 'ORD-' . strtoupper(Str::random(8)) . '-' . time();
         
-        // Shipping fee: DB setting > config > default 150
-        $shippingFee = (float) (Setting::get('shipping_fee') ?: config('shop.shipping_fee', 150));
+        $shipping = ShippingService::calculate($request->shipping_pincode, (float) $cart->total_price);
+        $shippingFee = $shipping['charge'];
 
         $order = Order::create([
             'order_number' => $orderNumber,

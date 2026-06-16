@@ -8,6 +8,7 @@ use App\Http\Controllers\CartController;
 use App\Http\Controllers\LocationController;
 use App\Http\Controllers\WishlistController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\ShippingController;
 use App\Http\Controllers\Admin\AuthController as AdminAuthController;
 use App\Http\Controllers\Admin\DashboardController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
@@ -16,6 +17,7 @@ use App\Http\Controllers\Admin\OrderController as AdminOrderController;
 use App\Http\Controllers\Admin\CustomerController as AdminCustomerController;
 use App\Http\Controllers\Admin\BannerController as AdminBannerController;
 use App\Http\Controllers\Admin\SettingController as AdminSettingController;
+use App\Http\Controllers\Admin\ShippingRateController as AdminShippingRateController;
 use App\Http\Controllers\Customer\AuthController as CustomerAuthController;
 use App\Http\Controllers\Customer\DashboardController as CustomerDashboardController;
 use App\Http\Controllers\Customer\ProfileController as CustomerProfileController;
@@ -62,6 +64,7 @@ Route::prefix('cart')->name('cart.')->group(function () {
 Route::get('locations/states', [LocationController::class, 'states'])->name('locations.states');
 Route::get('locations/cities', [LocationController::class, 'cities'])->name('locations.cities');
 Route::get('locations/pincodes', [LocationController::class, 'pincodes'])->name('locations.pincodes');
+Route::get('shipping/calculate', [ShippingController::class, 'calculate'])->name('shipping.calculate');
 
 // Wishlist Routes (available for both guests and logged-in users)
 Route::prefix('wishlist')->name('wishlist.')->group(function () {
@@ -152,6 +155,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::put('settings', [AdminSettingController::class, 'update'])->name('settings.update');
         Route::put('settings/email', [AdminSettingController::class, 'updateEmail'])->name('settings.update-email');
         Route::post('settings/test-email', [AdminSettingController::class, 'testEmail'])->name('settings.test-email');
+        Route::post('shipping-rates', [AdminShippingRateController::class, 'store'])->name('shipping-rates.store');
+        Route::delete('shipping-rates/{shippingRate}', [AdminShippingRateController::class, 'destroy'])->name('shipping-rates.destroy');
     });
 });
 
