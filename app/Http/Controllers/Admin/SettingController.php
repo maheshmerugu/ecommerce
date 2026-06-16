@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\EmailSetting;
 use App\Models\PincodeShippingRate;
 use App\Models\Setting;
+use App\Support\MailFrom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -76,13 +77,9 @@ class SettingController extends Controller
             'mail_from_name'    => 'nullable|string|max:255',
         ]);
 
-        $fromDomain = strtolower((string) substr(strrchr($request->input('mail_from_address'), '@'), 1));
-        $blockedFromDomains = [
-            'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.in', 'hotmail.com',
-            'outlook.com', 'live.com', 'icloud.com', 'me.com', 'protonmail.com', 'zoho.com',
-        ];
+        $fromDomain = MailFrom::domain($request->input('mail_from_address'));
 
-        if (in_array($fromDomain, $blockedFromDomains, true)) {
+        if (MailFrom::isBlocked($request->input('mail_from_address'))) {
             return redirect()->back()
                 ->withErrors([
                     'mail_from_address' => 'Resend cannot send from personal email domains like @' . $fromDomain . '. Use an address on your verified domain (e.g. support@fourwheels.co.in).',
@@ -139,10 +136,14 @@ class SettingController extends Controller
             // No local Config::set() needed — just send directly.
             $storeName = Setting::get('store_name') ?: config('app.name');
 
+            $fromAddress = config('mail.from.address');
+            $fromName = config('mail.from.name');
+
             Mail::raw(
                 "This is a test email from {$storeName}.\n\nYour email configuration is working correctly!",
-                function ($message) use ($request, $storeName) {
-                    $message->to($request->test_email)
+                function ($message) use ($request, $storeName, $fromAddress, $fromName) {
+                    $message->from($fromAddress, $fromName)
+                            ->to($request->test_email)
                             ->subject("Test Email — {$storeName}");
                 }
             );
@@ -152,9 +153,10 @@ class SettingController extends Controller
                 'message' => 'Test email sent to ' . $request->test_email . ' successfully!',
             ]);
         } catch (\Exception $e) {
+            $from = config('mail.from.address');
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage(),
+                'message' => $e->getMessage() . ' (From address used: ' . $from . ')',
             ]);
         }
     }

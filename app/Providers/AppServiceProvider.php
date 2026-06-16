@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use App\Models\EmailSetting;
 use App\Models\Setting;
+use App\Support\MailFrom;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Schema;
@@ -46,22 +47,18 @@ class AppServiceProvider extends ServiceProvider
                 return;
             }
 
-            $fromAddress = trim((string) env('MAIL_FROM_ADDRESS', config('mail.from.address')));
-            $fromName    = trim((string) env('MAIL_FROM_NAME', config('mail.from.name')));
-
             $cfg = Cache::remember('email_settings:row', 3600, function () {
                 return EmailSetting::find(1);
             });
 
-            if ($cfg) {
-                if ($cfg->from_address) {
-                    $fromAddress = trim($cfg->from_address);
-                } elseif ($cfg->username) {
-                    $fromAddress = trim($cfg->username);
-                }
-                if ($cfg->from_name) {
-                    $fromName = trim($cfg->from_name);
-                }
+            $fromAddress = MailFrom::resolve(
+                $cfg?->from_address,
+                env('MAIL_FROM_ADDRESS'),
+                config('mail.from.address')
+            );
+            $fromName = trim((string) env('MAIL_FROM_NAME', config('mail.from.name')));
+            if ($cfg?->from_name) {
+                $fromName = trim($cfg->from_name);
             }
 
             // Priority: .env RESEND_API_KEY → DB password (re_…)
