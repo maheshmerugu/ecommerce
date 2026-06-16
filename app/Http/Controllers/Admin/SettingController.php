@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\PincodeShippingRate;
 use App\Models\Setting;
+use App\Support\ResendMailHelper;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -103,7 +104,7 @@ class SettingController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage() . ' (From: ' . config('mail.from.address') . ')',
+                'message' => ResendMailHelper::friendlyError($e->getMessage()),
             ]);
         }
     }

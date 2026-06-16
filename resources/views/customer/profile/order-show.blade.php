@@ -4,29 +4,27 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-6xl mx-auto">
         <!-- Page Header -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between">
-                <div class="flex items-center space-x-4">
+        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                <div class="flex items-center space-x-3">
                     <a href="{{ route('customer.orders.index') }}" 
                        class="text-gray-500 hover:text-gray-700">
                         <i class="fas fa-arrow-left"></i>
                     </a>
                     <div>
-                        <h1 class="text-2xl font-bold text-gray-900">Order #{{ $order->order_number ?? $order->id }}</h1>
-                        <p class="text-gray-600 mt-1">Placed on {{ $order->created_at->format('M j, Y g:i A') }}</p>
+                        <h1 class="text-lg sm:text-2xl font-bold text-gray-900">Order #{{ $order->order_number ?? $order->id }}</h1>
+                        <p class="text-sm text-gray-600 mt-1">{{ $order->created_at->format('M j, Y g:i A') }}</p>
                     </div>
                 </div>
-                <div class="text-right">
-                    <div class="text-2xl font-bold text-gray-900">{{ format_currency($order->total ?? 0, 2) }}</div>
-                    <div class="mt-1">
-                        <span class="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium 
-                            {{ ($order->status ?? 'pending') === 'delivered' ? 'bg-green-100 text-green-800' : 
-                               (($order->status ?? 'pending') === 'processing' ? 'bg-blue-100 text-blue-800' : 
-                                (($order->status ?? 'pending') === 'shipped' ? 'bg-yellow-100 text-yellow-800' : 
-                                 'bg-gray-100 text-gray-800')) }}">
-                            {{ ucfirst($order->status ?? 'Pending') }}
-                        </span>
-                    </div>
+                <div class="flex items-center sm:flex-col sm:items-end gap-2 ml-8 sm:ml-0">
+                    <div class="text-xl sm:text-2xl font-bold text-gray-900">{{ format_currency($order->total ?? 0, 2) }}</div>
+                    <span class="inline-flex items-center px-3 py-1 rounded-full text-xs sm:text-sm font-medium 
+                        {{ ($order->status ?? 'pending') === 'delivered' ? 'bg-green-100 text-green-800' : 
+                           (($order->status ?? 'pending') === 'processing' ? 'bg-blue-100 text-blue-800' : 
+                            (($order->status ?? 'pending') === 'shipped' ? 'bg-yellow-100 text-yellow-800' : 
+                             'bg-gray-100 text-gray-800')) }}">
+                        {{ ucfirst($order->status ?? 'Pending') }}
+                    </span>
                 </div>
             </div>
         </div>
@@ -42,27 +40,28 @@
                     <div class="divide-y divide-gray-200">
                         @if(isset($order->items) && $order->items->count() > 0)
                             @foreach($order->items as $item)
-                                <div class="p-6 flex items-center space-x-4">
-                                    @if($item->product && ($item->product->image || ($item->product->images && $item->product->images->count())))
-                                        <img src="{{ product_image_url($item->product->image ?: $item->product->images->first()->image_path) }}" 
-                                             alt="{{ $item->product->name }}" 
-                                             class="w-20 h-20 object-cover rounded-lg">
-                                    @else
-                                        <div class="w-20 h-20 bg-gray-200 rounded-lg flex items-center justify-center">
-                                            <i class="fas fa-image text-gray-400 text-2xl"></i>
-                                        </div>
-                                    @endif
-                                    
-                                    <div class="flex-1">
-                                        <h3 class="text-lg font-semibold text-gray-900">{{ $item->product->name ?? 'Product' }}</h3>
-                                        <p class="text-gray-600 mt-1">{{ $item->product->description ?? '' }}</p>
-                                        <div class="flex items-center space-x-4 mt-2">
-                                            <span class="text-sm text-gray-500">Quantity: {{ $item->quantity }}</span>
-                                            <span class="text-sm text-gray-500">Price: {{ format_currency($item->price ?? 0, 2) }}</span>
+                                <div class="p-4 sm:p-6 flex flex-col sm:flex-row sm:items-center gap-3">
+                                    <div class="flex items-center space-x-3 flex-1 min-w-0">
+                                        @if($item->product && ($item->product->image || ($item->product->images && $item->product->images->count())))
+                                            <img src="{{ product_image_url($item->product->image ?: $item->product->images->first()->image_path) }}" 
+                                                 alt="{{ $item->product->name }}" 
+                                                 class="w-16 h-16 sm:w-20 sm:h-20 object-cover rounded-lg flex-shrink-0">
+                                        @else
+                                            <div class="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-lg flex items-center justify-center flex-shrink-0">
+                                                <i class="fas fa-image text-gray-400 text-xl sm:text-2xl"></i>
+                                            </div>
+                                        @endif
+                                        
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="text-base sm:text-lg font-semibold text-gray-900 truncate">{{ $item->product->name ?? 'Product' }}</h3>
+                                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1">
+                                                <span class="text-sm text-gray-500">Qty: {{ $item->quantity }}</span>
+                                                <span class="text-sm text-gray-500">{{ format_currency($item->price ?? 0, 2) }} each</span>
+                                            </div>
                                         </div>
                                     </div>
                                     
-                                    <div class="text-right">
+                                    <div class="text-right pl-[4.75rem] sm:pl-0">
                                         <div class="text-lg font-semibold text-gray-900">
                                             {{ format_currency(($item->price ?? 0) * $item->quantity, 2) }}
                                         </div>

@@ -300,14 +300,21 @@
                 <!-- Mobile Action Buttons -->
                 <div class="mobile-sticky-buttons md:hidden">
                     <div class="flex p-3 space-x-3">
-                        <button onclick="addToCart({{ $product->id }})" class="flex-1 bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-shopping-cart mr-2"></i>
-                            Add to Cart
-                        </button>
-                        <button onclick="buyNow({{ $product->id }})" class="flex-1 bg-orange-600 text-white py-3 rounded font-semibold hover:bg-orange-700 transition-colors">
-                            <i class="fas fa-bolt mr-2"></i>
-                            Buy Now
-                        </button>
+                        @if($product->track_quantity && $product->quantity < 1)
+                            <button disabled class="flex-1 bg-gray-400 text-white py-3 rounded font-semibold cursor-not-allowed">
+                                <i class="fas fa-ban mr-2"></i>
+                                Out of Stock
+                            </button>
+                        @else
+                            <button onclick="addToCart({{ $product->id }})" class="flex-1 bg-blue-600 text-white py-3 rounded font-semibold hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-shopping-cart mr-2"></i>
+                                Add to Cart
+                            </button>
+                            <button onclick="buyNow({{ $product->id }})" class="flex-1 bg-orange-600 text-white py-3 rounded font-semibold hover:bg-orange-700 transition-colors">
+                                <i class="fas fa-bolt mr-2"></i>
+                                Buy Now
+                            </button>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -378,22 +385,53 @@
                     @endif
                 </div>
 
+                <!-- Stock Status -->
+                @if($product->track_quantity)
+                    @if($product->quantity < 1)
+                        <div class="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center space-x-2">
+                            <i class="fas fa-exclamation-circle text-red-500"></i>
+                            <span class="text-red-700 font-medium">Out of Stock</span>
+                        </div>
+                    @elseif($product->quantity <= 5)
+                        <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 flex items-center space-x-2">
+                            <i class="fas fa-exclamation-triangle text-yellow-500"></i>
+                            <span class="text-yellow-700 font-medium">Only {{ $product->quantity }} left in stock - order soon!</span>
+                        </div>
+                    @else
+                        <div class="flex items-center space-x-2 text-green-600">
+                            <i class="fas fa-check-circle"></i>
+                            <span class="font-medium">In Stock</span>
+                        </div>
+                    @endif
+                @endif
+
                 <!-- Desktop Action Buttons -->
                 <div class="hidden md:block space-y-3">
-                    <div class="flex space-x-4">
-                        <button onclick="addToCart({{ $product->id }})" class="flex-1 bg-blue-600 text-white py-3 px-6 rounded font-semibold hover:bg-blue-700 transition-colors">
-                            <i class="fas fa-shopping-cart mr-2"></i>
-                            Add to Cart
+                    @if($product->track_quantity && $product->quantity < 1)
+                        <button disabled class="w-full bg-gray-400 text-white py-3 px-6 rounded font-semibold cursor-not-allowed">
+                            <i class="fas fa-ban mr-2"></i>
+                            Out of Stock
                         </button>
-                        <button onclick="buyNow({{ $product->id }})" class="flex-1 bg-orange-600 text-white py-3 px-6 rounded font-semibold hover:bg-orange-700 transition-colors">
-                            <i class="fas fa-bolt mr-2"></i>
-                            Buy Now
+                        <button onclick="addToWishlist({{ $product->id }})" class="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded font-semibold hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-heart mr-2"></i>
+                            Add to Wishlist (Notify When Available)
                         </button>
-                    </div>
-                    <button onclick="addToWishlist({{ $product->id }})" class="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded font-semibold hover:bg-gray-50 transition-colors">
-                        <i class="fas fa-heart mr-2"></i>
-                        Add to Wishlist
-                    </button>
+                    @else
+                        <div class="flex space-x-4">
+                            <button onclick="addToCart({{ $product->id }})" class="flex-1 bg-blue-600 text-white py-3 px-6 rounded font-semibold hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-shopping-cart mr-2"></i>
+                                Add to Cart
+                            </button>
+                            <button onclick="buyNow({{ $product->id }})" class="flex-1 bg-orange-600 text-white py-3 px-6 rounded font-semibold hover:bg-orange-700 transition-colors">
+                                <i class="fas fa-bolt mr-2"></i>
+                                Buy Now
+                            </button>
+                        </div>
+                        <button onclick="addToWishlist({{ $product->id }})" class="w-full border border-gray-300 text-gray-700 py-3 px-6 rounded font-semibold hover:bg-gray-50 transition-colors">
+                            <i class="fas fa-heart mr-2"></i>
+                            Add to Wishlist
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>
@@ -404,7 +442,8 @@
             <h2 class="text-2xl font-bold text-gray-900 mb-6">Related Products</h2>
             <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
                 @foreach($relatedProducts as $relatedProduct)
-                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow">
+                @php $relatedOutOfStock = $relatedProduct->track_quantity && $relatedProduct->quantity < 1; @endphp
+                <div class="bg-white rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow {{ $relatedOutOfStock ? 'opacity-75' : '' }}">
                     <a href="{{ route('products.show', $relatedProduct->slug) }}" class="block">
                         <div class="aspect-square bg-gray-100 relative overflow-hidden">
                             @if($relatedProduct->images && $relatedProduct->images->count() > 0)
@@ -416,7 +455,11 @@
                                     <i class="fas fa-image text-2xl text-gray-400"></i>
                                 </div>
                             @endif
-                            @if($relatedProduct->special_price && $relatedProduct->special_price < $relatedProduct->price)
+                            @if($relatedOutOfStock)
+                                <div class="absolute top-2 left-2">
+                                    <span class="bg-gray-800 text-white px-2 py-1 rounded text-xs font-bold">Out of Stock</span>
+                                </div>
+                            @elseif($relatedProduct->special_price && $relatedProduct->special_price < $relatedProduct->price)
                                 <div class="absolute top-2 left-2">
                                     <span class="bg-green-500 text-white px-2 py-1 rounded text-xs font-bold">
                                         {{ round((($relatedProduct->price - $relatedProduct->special_price) / $relatedProduct->price) * 100) }}% OFF
@@ -436,13 +479,17 @@
                                     <span class="text-lg font-bold text-gray-900">{{ format_currency($relatedProduct->price) }}</span>
                                 @endif
                             </div>
-                            <div class="flex text-yellow-400 text-xs mt-1">
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star"></i>
-                                <i class="fas fa-star-half-alt"></i>
-                            </div>
+                            @if($relatedOutOfStock)
+                                <span class="text-xs text-red-600 font-medium mt-1 inline-block">Out of Stock</span>
+                            @else
+                                <div class="flex text-yellow-400 text-xs mt-1">
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star"></i>
+                                    <i class="fas fa-star-half-alt"></i>
+                                </div>
+                            @endif
                         </div>
                     </a>
                 </div>

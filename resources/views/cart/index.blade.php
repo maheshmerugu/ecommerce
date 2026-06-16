@@ -174,11 +174,11 @@
                                 <span class="font-medium">₹0</span>
                             </div>
                             <hr>
-                            <div class="flex justify-between items-center">
+                            <div class="flex justify-between items-center flex-wrap">
                                 <span class="text-lg font-semibold">Total</span>
                                 <span class="text-xl font-bold text-blue-600" id="cart-total">{{ format_currency($cart->total_price) }}</span>
-                                <p class="text-xs text-gray-500 mt-1">+ shipping calculated at checkout</p>
                             </div>
+                            <p class="text-xs text-gray-500">+ shipping calculated at checkout</p>
                         </div>
 
                         <div class="mt-6 space-y-3">

@@ -10,6 +10,9 @@
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    
     <!-- Alpine.js for interactive components -->
     <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
     
@@ -18,34 +21,41 @@
         [x-cloak] { display: none !important; }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gray-50" x-data="{ mobileMenuOpen: false }">
     <!-- Header -->
     <header class="bg-white shadow">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between items-center py-6">
-                <!-- Logo -->
+            <div class="flex justify-between items-center py-4">
+                <!-- Hamburger + Logo -->
                 <div class="flex items-center">
+                    <button type="button" @click="mobileMenuOpen = !mobileMenuOpen"
+                            class="md:hidden mr-3 p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none"
+                            aria-label="Toggle menu">
+                        <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path x-show="!mobileMenuOpen" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+                            <path x-show="mobileMenuOpen" x-cloak stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"/>
+                        </svg>
+                    </button>
                     <a href="{{ route('home') }}" class="text-xl font-bold text-gray-900">
                         {{ $storeName }}
                     </a>
                 </div>
 
-                <!-- Navigation -->
+                <!-- Desktop Navigation -->
                 <nav class="hidden md:flex space-x-8">
                     <a href="{{ route('home') }}" class="text-gray-500 hover:text-gray-900">Home</a>
                     <a href="{{ route('products.index') }}" class="text-gray-500 hover:text-gray-900">Products</a>
-                    <a href="{{ route('products.index') }}" class="text-gray-500 hover:text-gray-900">Categories</a>
                 </nav>
 
-                <!-- User Menu -->
-                <div class="flex items-center space-x-4">
+                <!-- Right Icons -->
+                <div class="flex items-center space-x-3">
                     @auth('customer')
-                        <div class="relative">
+                        <div class="relative hidden sm:block">
                             <button class="flex items-center text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500" id="user-menu">
                                 <span class="bg-gray-600 text-white h-8 w-8 flex items-center justify-center rounded-full text-sm font-medium">
                                     {{ substr(auth('customer')->user()->first_name, 0, 1) }}
                                 </span>
-                                <span class="ml-2 text-gray-700">{{ auth('customer')->user()->first_name }}</span>
+                                <span class="ml-2 text-gray-700 hidden lg:inline">{{ auth('customer')->user()->first_name }}</span>
                                 <svg class="ml-1 h-4 w-4 text-gray-400" fill="currentColor" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd"></path>
                                 </svg>
@@ -68,8 +78,8 @@
                             </div>
                         </div>
                     @else
-                        <a href="{{ route('login') }}" class="text-gray-500 hover:text-gray-900">Sign in</a>
-                        <a href="{{ route('register') }}" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">Sign up</a>
+                        <a href="{{ route('login') }}" class="hidden sm:inline text-gray-500 hover:text-gray-900 text-sm">Sign in</a>
+                        <a href="{{ route('register') }}" class="hidden sm:inline bg-indigo-600 text-white px-3 py-1.5 rounded-md hover:bg-indigo-700 text-sm">Sign up</a>
                     @endauth
 
                     <!-- Wishlist -->
@@ -90,6 +100,38 @@
                         <span class="absolute -top-2 -right-2 bg-orange-500 text-white text-xs rounded-full h-4 w-4 flex items-center justify-center cart-count" style="display: none;">0</span>
                     </a>
                 </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu Drawer -->
+        <div x-show="mobileMenuOpen" x-cloak
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="opacity-0 -translate-y-1"
+             x-transition:enter-end="opacity-100 translate-y-0"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="opacity-100 translate-y-0"
+             x-transition:leave-end="opacity-0 -translate-y-1"
+             class="md:hidden border-t bg-white shadow-lg">
+            <div class="px-4 py-4 space-y-2">
+                <a href="{{ route('home') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Home</a>
+                <a href="{{ route('products.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Products</a>
+                @auth('customer')
+                    <div class="border-t pt-2 mt-2">
+                        <a href="{{ route('customer.dashboard') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Dashboard</a>
+                        <a href="{{ route('customer.profile.show') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Profile</a>
+                        <a href="{{ route('customer.orders.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Orders</a>
+                        <a href="{{ route('customer.addresses.index') }}" class="block px-3 py-2 rounded-md text-base font-medium text-gray-700 hover:bg-gray-100">Addresses</a>
+                        <form method="POST" action="{{ route('customer.logout') }}" class="mt-2">
+                            @csrf
+                            <button type="submit" class="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-red-600 hover:bg-red-50">Sign out</button>
+                        </form>
+                    </div>
+                @else
+                    <div class="border-t pt-2 mt-2 flex space-x-3">
+                        <a href="{{ route('login') }}" class="flex-1 text-center px-3 py-2 border border-gray-300 rounded-md text-gray-700 hover:bg-gray-50">Sign in</a>
+                        <a href="{{ route('register') }}" class="flex-1 text-center px-3 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700">Sign up</a>
+                    </div>
+                @endauth
             </div>
         </div>
     </header>

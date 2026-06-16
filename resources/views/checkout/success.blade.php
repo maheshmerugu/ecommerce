@@ -17,14 +17,14 @@
                         {{ $storeName }}
                     </a>
                 </div>
-                <div class="flex items-center space-x-4">
+                <div class="flex items-center space-x-2 sm:space-x-4">
                     @auth
-                        <a href="{{ route('customer.profile') }}" class="text-sm text-gray-600 hover:text-blue-600">
+                        <a href="{{ route('customer.profile') }}" class="text-xs sm:text-sm text-gray-600 hover:text-blue-600">
                             My Account
                         </a>
                     @endauth
-                    <a href="{{ route('home') }}" class="text-sm text-gray-600 hover:text-blue-600">
-                        Continue Shopping
+                    <a href="{{ route('home') }}" class="text-xs sm:text-sm text-gray-600 hover:text-blue-600">
+                        Shopping
                     </a>
                 </div>
             </div>
@@ -37,7 +37,7 @@
             <div class="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-4">
                 <i class="fas fa-check text-3xl"></i>
             </div>
-            <h1 class="text-3xl font-bold text-gray-900 mb-2">Order Placed Successfully!</h1>
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">Order Placed Successfully!</h1>
             <p class="text-gray-600">Thank you for your purchase. Your order has been confirmed.</p>
         </div>
 
@@ -99,32 +99,28 @@
                 <h3 class="font-semibold text-gray-900 mb-4">Items Ordered</h3>
                 <div class="space-y-4">
                     @foreach($order->items as $item)
-                    <div class="flex items-center space-x-4 p-4 bg-gray-50 rounded-lg">
-                        <div class="flex-shrink-0">
-                            @if($item->product && $item->product->images && $item->product->images->count() > 0)
-                                <img src="{{ product_image_url( $item->product->images->first()->image_path) }}" 
-                                    alt="{{ $item->product_name }}" 
-                                    class="w-16 h-16 object-cover rounded border">
-                            @else
-                                <div class="w-16 h-16 bg-gray-200 flex items-center justify-center rounded border">
-                                    <i class="fas fa-image text-gray-400"></i>
-                                </div>
-                            @endif
-                        </div>
-                        <div class="flex-1">
-                            <h4 class="font-medium text-gray-900">{{ $item->product_name }}</h4>
-                            @if($item->product && $item->product->short_description)
-                            <p class="text-sm text-gray-600 mt-1">{{ Str::limit($item->product->short_description, 100) }}</p>
-                            @endif
-                            <div class="flex items-center space-x-4 mt-2 text-sm">
-                                <span class="text-gray-600">Quantity: {{ $item->quantity }}</span>
-                                <span class="text-gray-600">Price: {{ format_currency($item->price) }}</span>
-                                @if($item->product_sku)
-                                <span class="text-gray-600">SKU: {{ $item->product_sku }}</span>
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-3 p-4 bg-gray-50 rounded-lg">
+                        <div class="flex items-center space-x-3 flex-1 min-w-0">
+                            <div class="flex-shrink-0">
+                                @if($item->product && $item->product->images && $item->product->images->count() > 0)
+                                    <img src="{{ product_image_url( $item->product->images->first()->image_path) }}" 
+                                        alt="{{ $item->product_name }}" 
+                                        class="w-14 h-14 sm:w-16 sm:h-16 object-cover rounded border">
+                                @else
+                                    <div class="w-14 h-14 sm:w-16 sm:h-16 bg-gray-200 flex items-center justify-center rounded border">
+                                        <i class="fas fa-image text-gray-400"></i>
+                                    </div>
                                 @endif
                             </div>
+                            <div class="flex-1 min-w-0">
+                                <h4 class="font-medium text-gray-900 truncate">{{ $item->product_name }}</h4>
+                                <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-1 text-sm">
+                                    <span class="text-gray-600">Qty: {{ $item->quantity }}</span>
+                                    <span class="text-gray-600">{{ format_currency($item->price) }} each</span>
+                                </div>
+                            </div>
                         </div>
-                        <div class="text-right">
+                        <div class="text-right sm:text-right pl-[4.25rem] sm:pl-0">
                             <div class="font-semibold text-gray-900">{{ format_currency($item->total) }}</div>
                         </div>
                     </div>
@@ -134,8 +130,8 @@
 
             <!-- Order Total -->
             <div class="mt-6 pt-6 border-t">
-                <div class="flex justify-end">
-                    <div class="w-64">
+                <div class="flex sm:justify-end">
+                    <div class="w-full sm:w-64">
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
                                 <span>Subtotal:</span>

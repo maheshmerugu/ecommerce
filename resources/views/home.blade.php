@@ -423,8 +423,9 @@
                     <div class="swiper featured-swiper">
                         <div class="swiper-wrapper">
                             @foreach($featuredProducts as $product)
+                            @php $featuredOOS = $product->track_quantity && $product->quantity < 1; @endphp
                             <div class="swiper-slide">
-                                <div class="product-card bg-white border border-gray-200 rounded p-3 md:p-4 group h-full">
+                                <div class="product-card bg-white border border-gray-200 rounded p-3 md:p-4 group h-full {{ $featuredOOS ? 'opacity-75' : '' }}">
                                     <a href="{{ route('products.show', $product->slug) }}" class="block">
                                         <div class="relative mb-3">
                                             @if($product->main_image_url)
@@ -437,13 +438,17 @@
                                             </div>
                                             @endif
 
-                                            @if($product->special_price && $product->special_price < $product->price)
+                                            @if($featuredOOS)
+                                                <div class="absolute top-1 left-1">
+                                                    <span class="bg-gray-800 text-white px-1 md:px-2 py-1 rounded text-xs font-bold">Out of Stock</span>
+                                                </div>
+                                            @elseif($product->special_price && $product->special_price < $product->price)
                                                 <div class="absolute top-1 left-1">
                                                     <span class="bg-green-500 text-white px-1 md:px-2 py-1 rounded text-xs font-bold">
                                                         {{ round((($product->price - $product->special_price) / $product->price) * 100) }}% OFF
                                                     </span>
                                                 </div>
-                                                @endif
+                                            @endif
 
                                                 <div class="absolute top-1 right-1">
                                                     <button onclick="addToWishlist({{ $product->id }})" class="w-6 h-6 md:w-8 md:h-8 bg-white rounded-full shadow-sm flex items-center justify-center hover:bg-red-50 group">
@@ -461,14 +466,18 @@
                                         </a>
 
                                         <div class="flex items-center space-x-1">
-                                            <div class="flex text-yellow-400 text-xs">
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star"></i>
-                                                <i class="fas fa-star-half-alt"></i>
-                                            </div>
-                                            <span class="text-xs text-gray-500">({{ rand(50, 500) }})</span>
+                                            @if($featuredOOS)
+                                                <span class="text-xs text-red-600 font-medium">Out of Stock</span>
+                                            @else
+                                                <div class="flex text-yellow-400 text-xs">
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star"></i>
+                                                    <i class="fas fa-star-half-alt"></i>
+                                                </div>
+                                                <span class="text-xs text-gray-500">({{ rand(50, 500) }})</span>
+                                            @endif
                                         </div>
 
                                         <div class="flex items-center space-x-2">
@@ -504,7 +513,8 @@
                 <div class="p-4">
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                         @foreach($latestProducts->take(6) as $product)
-                        <div class="product-card bg-white border border-gray-200 rounded p-3 group">
+                        @php $latestOOS = $product->track_quantity && $product->quantity < 1; @endphp
+                        <div class="product-card bg-white border border-gray-200 rounded p-3 group {{ $latestOOS ? 'opacity-75' : '' }}">
                             <a href="{{ route('products.show', $product->slug) }}" class="block">
                                 <div class="relative mb-3">
                                     @if($product->main_image_url)
@@ -517,7 +527,11 @@
                                     </div>
                                     @endif
 
-                                    @if($product->special_price && $product->special_price < $product->price)
+                                    @if($latestOOS)
+                                    <div class="absolute top-1 left-1">
+                                        <span class="bg-gray-800 text-white px-1 py-1 rounded text-xs font-bold">Out of Stock</span>
+                                    </div>
+                                    @elseif($product->special_price && $product->special_price < $product->price)
                                     <div class="absolute top-1 left-1">
                                         <span class="bg-green-500 text-white px-1 py-1 rounded text-xs font-bold">
                                             {{ round((($product->price - $product->special_price) / $product->price) * 100) }}% OFF
@@ -541,14 +555,18 @@
                                 </a>
 
                                 <div class="flex items-center space-x-1">
-                                    <div class="flex text-yellow-400 text-xs">
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star"></i>
-                                        <i class="fas fa-star-half-alt"></i>
-                                    </div>
-                                    <span class="text-xs text-gray-500">({{ rand(25, 200) }})</span>
+                                    @if($latestOOS)
+                                        <span class="text-xs text-red-600 font-medium">Out of Stock</span>
+                                    @else
+                                        <div class="flex text-yellow-400 text-xs">
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star"></i>
+                                            <i class="fas fa-star-half-alt"></i>
+                                        </div>
+                                        <span class="text-xs text-gray-500">({{ rand(25, 200) }})</span>
+                                    @endif
                                 </div>
 
                                 <div class="flex items-center space-x-2">
@@ -560,9 +578,15 @@
                                     @endif
                                 </div>
 
-                                <button onclick="addToCart({{ $product->id }})" class="w-full bg-blue-600 text-white py-2 rounded text-sm font-semibold hover:bg-blue-700 transition-colors">
-                                    Add to Cart
-                                </button>
+                                @if($latestOOS)
+                                    <button disabled class="w-full bg-gray-400 text-white py-2 rounded text-sm font-semibold cursor-not-allowed">
+                                        Out of Stock
+                                    </button>
+                                @else
+                                    <button onclick="addToCart({{ $product->id }})" class="w-full bg-blue-600 text-white py-2 rounded text-sm font-semibold hover:bg-blue-700 transition-colors">
+                                        Add to Cart
+                                    </button>
+                                @endif
                             </div>
                         </div>
                         @endforeach

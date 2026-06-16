@@ -26,49 +26,66 @@
     </style>
 </head>
 <body class="bg-gray-100">
-    <div class="min-h-screen flex">
+    <div class="min-h-screen flex" x-data="{ sidebarOpen: false }">
+        <!-- Mobile overlay -->
+        <div x-show="sidebarOpen"
+             x-transition:enter="transition-opacity ease-linear duration-200"
+             x-transition:enter-start="opacity-0"
+             x-transition:enter-end="opacity-100"
+             x-transition:leave="transition-opacity ease-linear duration-200"
+             x-transition:leave-start="opacity-100"
+             x-transition:leave-end="opacity-0"
+             @click="sidebarOpen = false"
+             class="fixed inset-0 bg-black/50 z-20 md:hidden"
+             x-cloak></div>
+
         <!-- Sidebar -->
-        <div class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 absolute inset-y-0 left-0 transform -translate-x-full md:relative md:translate-x-0 transition duration-200 ease-in-out">
-            <!-- Logo -->
-            <a href="{{ route('admin.dashboard') }}" class="text-white flex items-center space-x-2 px-4">
-                <span class="text-2xl font-extrabold">{{ $storeName }}</span>
-            </a>
+        <div class="bg-gray-800 text-white w-64 space-y-6 py-7 px-2 fixed md:relative inset-y-0 left-0 z-30 transform transition duration-200 ease-in-out"
+             :class="sidebarOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'">
+            <div class="flex items-center justify-between px-4">
+                <a href="{{ route('admin.dashboard') }}" class="text-white flex items-center space-x-2" @click="sidebarOpen = false">
+                    <span class="text-2xl font-extrabold">{{ $storeName }}</span>
+                </a>
+                <button type="button" @click="sidebarOpen = false" class="md:hidden text-gray-300 hover:text-white p-1" aria-label="Close menu">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
 
             <!-- Navigation -->
             <nav class="space-y-1">
-                <a href="{{ route('admin.dashboard') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-700' : '' }}">
+                <a href="{{ route('admin.dashboard') }}" @click="sidebarOpen = false" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.dashboard') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-tachometer-alt w-5 mr-2"></i> Dashboard
                 </a>
 
                 <div class="pt-2 pb-1 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Catalog</div>
 
-                <a href="{{ route('admin.categories.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.categories.*') ? 'bg-gray-700' : '' }}">
+                <a href="{{ route('admin.categories.index') }}" @click="sidebarOpen = false" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.categories.*') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-tags w-5 mr-2"></i> Categories
                 </a>
 
-                <a href="{{ route('admin.products.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.products.*') ? 'bg-gray-700' : '' }}">
+                <a href="{{ route('admin.products.index') }}" @click="sidebarOpen = false" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.products.*') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-box w-5 mr-2"></i> Products
                 </a>
 
                 <div class="pt-2 pb-1 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Sales</div>
 
-                <a href="{{ route('admin.orders.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.orders.*') ? 'bg-gray-700' : '' }}">
+                <a href="{{ route('admin.orders.index') }}" @click="sidebarOpen = false" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.orders.*') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-shopping-bag w-5 mr-2"></i> Orders
                 </a>
 
-                <a href="{{ route('admin.customers.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.customers.*') ? 'bg-gray-700' : '' }}">
+                <a href="{{ route('admin.customers.index') }}" @click="sidebarOpen = false" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.customers.*') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-users w-5 mr-2"></i> Customers
                 </a>
 
                 <div class="pt-2 pb-1 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">Content</div>
 
-                <a href="{{ route('admin.banners.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.banners.*') ? 'bg-gray-700' : '' }}">
+                <a href="{{ route('admin.banners.index') }}" @click="sidebarOpen = false" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.banners.*') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-images w-5 mr-2"></i> Banners
                 </a>
 
                 <div class="pt-2 pb-1 px-4 text-xs font-semibold text-gray-400 uppercase tracking-wider">System</div>
 
-                <a href="{{ route('admin.settings.index') }}" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.settings.*') ? 'bg-gray-700' : '' }}">
+                <a href="{{ route('admin.settings.index') }}" @click="sidebarOpen = false" class="flex items-center py-2.5 px-4 rounded transition duration-200 hover:bg-gray-700 {{ request()->routeIs('admin.settings.*') ? 'bg-gray-700' : '' }}">
                     <i class="fas fa-cog w-5 mr-2"></i> Settings
                 </a>
             </nav>
@@ -77,9 +94,15 @@
         <!-- Content -->
         <div class="flex-1 flex flex-col overflow-hidden">
             <!-- Header -->
-            <header class="flex justify-between items-center py-4 px-6 bg-white border-b-4 border-indigo-600">
-                <div class="flex items-center">
-                    <h1 class="text-2xl font-semibold text-gray-800">@yield('title', 'Admin Panel')</h1>
+            <header class="flex justify-between items-center py-4 px-4 sm:px-6 bg-white border-b-4 border-indigo-600">
+                <div class="flex items-center min-w-0">
+                    <button type="button"
+                            @click="sidebarOpen = true"
+                            class="md:hidden mr-3 p-2 rounded-md text-gray-600 hover:bg-gray-100 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            aria-label="Open menu">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
+                    <h1 class="text-lg sm:text-2xl font-semibold text-gray-800 truncate">@yield('title', 'Admin Panel')</h1>
                 </div>
 
                 <!-- User Menu -->

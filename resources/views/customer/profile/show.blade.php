@@ -4,13 +4,13 @@
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-4xl mx-auto">
         <!-- Page Header -->
-        <div class="bg-white rounded-lg shadow-sm p-6 mb-6">
-            <div class="flex items-center justify-between">
+        <div class="bg-white rounded-lg shadow-sm p-4 sm:p-6 mb-6">
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
                 <div>
-                    <h1 class="text-2xl font-bold text-gray-900">My Profile</h1>
-                    <p class="text-gray-600 mt-1">Manage your account settings and personal information</p>
+                    <h1 class="text-xl sm:text-2xl font-bold text-gray-900">My Profile</h1>
+                    <p class="text-gray-600 mt-1 text-sm">Manage your account settings</p>
                 </div>
-                <a href="{{ route('customer.profile.edit') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                <a href="{{ route('customer.profile.edit') }}" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors text-sm text-center">
                     <i class="fas fa-edit mr-2"></i>Edit Profile
                 </a>
             </div>
@@ -75,21 +75,19 @@
                         <div class="space-y-4">
                             @foreach($recentOrders as $order)
                                 <div class="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition-colors">
-                                    <div class="flex items-center justify-between">
+                                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
                                         <div>
                                             <div class="font-medium text-gray-900">Order #{{ $order->order_number }}</div>
-                                            <div class="text-sm text-gray-600 mt-1">{{ $order->created_at->format('M j, Y g:i A') }}</div>
+                                            <div class="text-sm text-gray-600 mt-1">{{ $order->created_at->format('M j, Y') }}</div>
                                         </div>
-                                        <div class="text-right">
+                                        <div class="flex items-center sm:flex-col sm:items-end gap-2">
                                             <div class="font-semibold text-gray-900">{{ format_currency($order->total, 2) }}</div>
-                                            <div class="text-sm">
-                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
-                                                    {{ $order->status === 'delivered' ? 'bg-green-100 text-green-800' : 
-                                                       ($order->status === 'processing' ? 'bg-blue-100 text-blue-800' : 
-                                                        'bg-yellow-100 text-yellow-800') }}">
-                                                    {{ ucfirst($order->status) }}
-                                                </span>
-                                            </div>
+                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium 
+                                                {{ $order->status === 'delivered' ? 'bg-green-100 text-green-800' : 
+                                                   ($order->status === 'processing' ? 'bg-blue-100 text-blue-800' : 
+                                                    'bg-yellow-100 text-yellow-800') }}">
+                                                {{ ucfirst($order->status) }}
+                                            </span>
                                         </div>
                                     </div>
                                 </div>

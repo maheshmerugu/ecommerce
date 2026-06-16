@@ -267,7 +267,8 @@
                 @if($products->count() > 0)
                 <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
                     @foreach($products as $product)
-                    <div class="bg-white rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition duration-300">
+                    @php $outOfStock = $product->track_quantity && $product->quantity < 1; @endphp
+                    <div class="bg-white rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition duration-300 {{ $outOfStock ? 'opacity-80' : '' }}">
                         <div class="relative">
                             @if($product->main_image_url)
                                 <img src="{{ $product->main_image_url }}" 
@@ -279,7 +280,11 @@
                                 </div>
                             @endif
                             
-                            @if($product->featured)
+                            @if($outOfStock)
+                                <div class="absolute top-2 left-2">
+                                    <span class="bg-gray-800 text-white px-2 py-1 rounded text-xs font-semibold">Out of Stock</span>
+                                </div>
+                            @elseif($product->featured)
                                 <div class="absolute top-2 left-2">
                                     <span class="bg-red-500 text-white px-2 py-1 rounded text-xs font-semibold">Featured</span>
                                 </div>
@@ -300,9 +305,15 @@
                                        class="bg-white text-gray-800 px-4 py-2 rounded-lg hover:bg-gray-100 transition duration-300">
                                         <i class="fas fa-eye mr-2"></i>View
                                     </a>
-                                    <button onclick="addToCart({{ $product->id }})" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
-                                        <i class="fas fa-cart-plus mr-2"></i>Add to Cart
-                                    </button>
+                                    @if($outOfStock)
+                                        <button disabled class="bg-gray-400 text-white px-4 py-2 rounded-lg cursor-not-allowed">
+                                            <i class="fas fa-ban mr-2"></i>Out of Stock
+                                        </button>
+                                    @else
+                                        <button onclick="addToCart({{ $product->id }})" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition duration-300">
+                                            <i class="fas fa-cart-plus mr-2"></i>Add to Cart
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>
@@ -322,9 +333,13 @@
                                     @endif
                                 </div>
                                 <div class="flex items-center space-x-1">
-                                    <button class="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-red-500 transition duration-300">
-                                        <i class="fas fa-heart"></i>
-                                    </button>
+                                    @if($outOfStock)
+                                        <span class="text-xs text-red-600 font-medium">Out of Stock</span>
+                                    @else
+                                        <button class="p-2 rounded-full hover:bg-gray-100 text-gray-400 hover:text-red-500 transition duration-300">
+                                            <i class="fas fa-heart"></i>
+                                        </button>
+                                    @endif
                                 </div>
                             </div>
                         </div>

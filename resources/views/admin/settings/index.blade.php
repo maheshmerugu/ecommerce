@@ -202,6 +202,28 @@
                 </div>
                 <div class="card-body">
 
+                    <div class="alert alert-warning mb-4">
+                        <h6 class="font-weight-bold"><i class="fas fa-exclamation-triangle mr-2"></i>Before domain verification (Resend sandbox)</h6>
+                        <p class="mb-2 small mb-0">
+                            Until <strong>fourwheels.co.in</strong> is verified at
+                            <a href="https://resend.com/domains" target="_blank">resend.com/domains</a>,
+                            Resend only delivers to <strong>your Resend account email</strong> (e.g. fourwheelssupport@gmail.com).
+                            Customer signup / password-reset emails to other addresses will fail until the domain is verified.
+                        </p>
+                        <hr class="my-2">
+                        <p class="mb-1 small font-weight-bold">Quick test (sandbox only):</p>
+                        <ul class="mb-0 small">
+                            <li><code>MAIL_FROM_ADDRESS=onboarding@resend.dev</code></li>
+                            <li>Send test email <strong>to</strong> fourwheelssupport@gmail.com only</li>
+                        </ul>
+                        <hr class="my-2">
+                        <p class="mb-0 small font-weight-bold">Production (after DNS verified):</p>
+                        <ul class="mb-0 small">
+                            <li><code>MAIL_FROM_ADDRESS=support@fourwheels.co.in</code></li>
+                            <li>Emails can go to any customer address</li>
+                        </ul>
+                    </div>
+
                     <div class="alert alert-info mb-4">
                         <h6 class="font-weight-bold"><i class="fas fa-info-circle mr-2"></i>Configured via <code>.env</code> file</h6>
                         <p class="mb-2 small">Email is sent through the <strong>Resend HTTP API</strong> (required on GoDaddy — SMTP ports are blocked).</p>
@@ -271,14 +293,15 @@ RESEND_API_KEY=re_your_api_key_here</code></pre>
                                 <div class="col-md-6">
                                     <div class="input-group">
                                         <input type="email" id="test_email_addr" class="form-control"
-                                               placeholder="recipient@example.com">
+                                               placeholder="fourwheelssupport@gmail.com"
+                                               value="fourwheelssupport@gmail.com">
                                         <div class="input-group-append">
                                             <button type="button" class="btn btn-primary" onclick="sendTestEmail()">
                                                 <i class="fas fa-paper-plane mr-1"></i>Send Test
                                             </button>
                                         </div>
                                     </div>
-                                    <small class="text-muted">Uses the .env settings above.</small>
+                                    <small class="text-muted">Until domain is verified, use your Resend account email only.</small>
                                 </div>
                                 <div class="col-md-6">
                                     <div id="test-email-result" class="mt-2"></div>

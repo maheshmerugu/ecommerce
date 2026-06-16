@@ -11,6 +11,13 @@
     <!-- Tom Select for searchable dropdowns -->
     <link href="https://cdn.jsdelivr.net/npm/tom-select/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/tom-select/dist/js/tom-select.complete.min.js"></script>
+    <style>
+        .ts-wrapper { width: 100%; }
+        .ts-control { min-height: 42px; border-radius: 0.375rem; border-color: #d1d5db; }
+        @media (max-width: 640px) {
+            .ts-dropdown { max-width: calc(100vw - 2rem); }
+        }
+    </style>
 </head>
 <body class="bg-gray-50">
     <!-- Header -->
@@ -32,28 +39,28 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <!-- Progress Steps -->
-        <div class="mb-8">
+        <div class="mb-6 sm:mb-8">
             <div class="flex items-center justify-center">
                 <div class="flex items-center">
                     <div class="flex items-center text-blue-600">
-                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs sm:text-sm">
                             <i class="fas fa-shopping-cart"></i>
                         </div>
-                        <span class="ml-2 text-sm font-medium">Cart</span>
+                        <span class="ml-1 sm:ml-2 text-xs sm:text-sm font-medium">Cart</span>
                     </div>
-                    <div class="w-20 h-1 bg-blue-600 mx-2"></div>
+                    <div class="w-8 sm:w-20 h-1 bg-blue-600 mx-1 sm:mx-2"></div>
                     <div class="flex items-center text-blue-600">
-                        <div class="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-sm">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs sm:text-sm">
                             2
                         </div>
-                        <span class="ml-2 text-sm font-medium">Checkout</span>
+                        <span class="ml-1 sm:ml-2 text-xs sm:text-sm font-medium">Checkout</span>
                     </div>
-                    <div class="w-20 h-1 bg-gray-300 mx-2"></div>
+                    <div class="w-8 sm:w-20 h-1 bg-gray-300 mx-1 sm:mx-2"></div>
                     <div class="flex items-center text-gray-400">
-                        <div class="w-8 h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-sm">
+                        <div class="w-7 h-7 sm:w-8 sm:h-8 bg-gray-300 text-gray-600 rounded-full flex items-center justify-center text-xs sm:text-sm">
                             3
                         </div>
-                        <span class="ml-2 text-sm font-medium">Payment</span>
+                        <span class="ml-1 sm:ml-2 text-xs sm:text-sm font-medium">Payment</span>
                     </div>
                 </div>
             </div>
@@ -81,7 +88,7 @@
                     @csrf
                     
                     <!-- Customer Information -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
                         <h3 class="text-lg font-semibold mb-4">Customer Information</h3>
                         <div class="grid md:grid-cols-2 gap-4">
                             <div>
@@ -107,7 +114,7 @@
                     </div>
 
                     <!-- Shipping Address -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm border">
+                    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
                         <h3 class="text-lg font-semibold mb-4">Shipping Address</h3>
                         
                         @if($addresses->count() > 0)
@@ -154,7 +161,7 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="House number, building name, street name, area"></textarea>
                             </div>
-                                <div class="grid md:grid-cols-3 gap-4">
+                                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-2">State *</label>
                                     <select name="shipping_state" id="shipping_state" required class="w-full">
@@ -178,8 +185,8 @@
                     </div>
 
                     <!-- Billing Address -->
-                    <div class="bg-white p-6 rounded-lg shadow-sm border">
-                        <div class="flex items-center justify-between mb-4">
+                    <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border">
+                        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
                             <h3 class="text-lg font-semibold">Billing Address</h3>
                             <label class="flex items-center">
                                 <input type="hidden" name="same_as_shipping" value="0">
@@ -196,7 +203,7 @@
                                     class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     placeholder="House number, building name, street name, area"></textarea>
                             </div>
-                        <div class="grid md:grid-cols-3 gap-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-700 mb-2">State</label>
                                 <select name="billing_state" id="billing_state" class="w-full" onchange="onBillingStateChange(this.value)"><option value="">Select state</option></select>
@@ -219,7 +226,7 @@
 
             <!-- Order Summary -->
             <div class="order-1 lg:order-2">
-                <div class="bg-white p-6 rounded-lg shadow-sm border sticky top-4">
+                <div class="bg-white p-4 sm:p-6 rounded-lg shadow-sm border lg:sticky lg:top-4">
                     <h3 class="text-lg font-semibold mb-4">Order Summary</h3>
                     
                     <!-- Cart Items -->
