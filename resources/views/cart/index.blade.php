@@ -27,9 +27,8 @@
                     <a href="{{ route('home') }}" class="text-gray-600 hover:text-gray-900 mr-4">
                         <i class="fas fa-arrow-left text-xl"></i>
                     </a>
-                    <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600">
-                        <span class="hidden sm:inline">{{ $storeName }}</span>
-                        <span class="sm:hidden">{{ substr($storeName, 0, 2) }}</span>
+                    <a href="{{ route('home') }}" class="text-lg md:text-2xl font-bold text-blue-600 whitespace-nowrap">
+                        {{ $storeName }}
                     </a>
                 </div>
 
@@ -75,7 +74,7 @@
                                     <div class="flex-shrink-0">
                                         <a href="{{ route('products.show', $item->product->slug) }}">
                                             @if($item->product->images && $item->product->images->count() > 0)
-                                                <img src="{{ asset('public/storage/' . $item->product->images->first()->image_path) }}" 
+                                                <img src="{{ product_image_url( $item->product->images->first()->image_path) }}" 
                                                     alt="{{ $item->product->name }}" 
                                                     class="w-20 h-20 md:w-24 md:h-24 object-contain rounded border">
                                             @else

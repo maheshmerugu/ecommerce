@@ -38,7 +38,7 @@
                                     <td>
                                         @php $img = $item->product?->images?->first(); @endphp
                                         @if($img)
-                                            <img src="{{ asset('storage/' . $img->image_path) }}"
+                                            <img src="{{ product_image_url($img->image_path) }}"
                                                  alt="{{ $item->product_name }}"
                                                  style="width:45px;height:45px;object-fit:cover;" class="img-thumbnail">
                                         @else

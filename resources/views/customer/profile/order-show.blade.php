@@ -1,10 +1,6 @@
 @extends('customer.layouts.app')
 
-@section(                                    @if($item->product && $item->product->image)
-                                        <img src="{{ asset('public/storage/' . $item->product->image) }}" 
-                                             alt="{{ $item->product_name }}" 
-                                             class="w-20 h-20 object-cover rounded border mr-4">
-                                    @elseent')
+@section('content')
 <div class="container mx-auto px-4 py-8">
     <div class="max-w-6xl mx-auto">
         <!-- Page Header -->
@@ -47,8 +43,8 @@
                         @if(isset($order->items) && $order->items->count() > 0)
                             @foreach($order->items as $item)
                                 <div class="p-6 flex items-center space-x-4">
-                                    @if($item->product && $item->product->image)
-                                        <img src="{{ asset('storage/' . $item->product->image) }}" 
+                                    @if($item->product && ($item->product->image || ($item->product->images && $item->product->images->count())))
+                                        <img src="{{ product_image_url($item->product->image ?: $item->product->images->first()->image_path) }}" 
                                              alt="{{ $item->product->name }}" 
                                              class="w-20 h-20 object-cover rounded-lg">
                                     @else

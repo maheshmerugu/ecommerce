@@ -56,7 +56,7 @@
                                     @foreach($order->items->take(3) as $item)
                                         <div class="flex items-center space-x-2">
                                             @if($item->product && $item->product->images && $item->product->images->count() > 0)
-                                                <img src="{{ asset('public/storage/' . $item->product->images->first()->image_path) }}" 
+                                                <img src="{{ product_image_url( $item->product->images->first()->image_path) }}" 
                                                      alt="{{ $item->product->name }}" 
                                                      class="w-12 h-12 object-cover rounded">
                                             @else

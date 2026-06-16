@@ -156,7 +156,17 @@ class Product extends Model
      */
     public function getMainImageUrlAttribute(): ?string
     {
-        $mainImage = $this->mainImage()->first();
-        return $mainImage ? asset('storage/' . $mainImage->image_path) : null;
+        if ($this->image) {
+            return product_image_url($this->image);
+        }
+
+        if ($this->relationLoaded('images') && $this->images->isNotEmpty()) {
+            return product_image_url($this->images->first()->image_path);
+        }
+
+        $mainImage = $this->mainImage()->first()
+            ?? $this->images()->orderBy('sort_order')->first();
+
+        return $mainImage ? product_image_url($mainImage->image_path) : null;
     }
 }

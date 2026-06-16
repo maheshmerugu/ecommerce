@@ -167,9 +167,8 @@
             <div class="flex items-center justify-between">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4">
-                        <span class="hidden sm:inline">{{ $storeName }}</span>
-                        <span class="sm:hidden">{{ substr($storeName, 0, 2) }}</span>
+                    <a href="{{ route('home') }}" class="text-lg md:text-2xl font-bold text-blue-600 mr-4 whitespace-nowrap">
+                        {{ $storeName }}
                     </a>
                 </div>
 
@@ -239,14 +238,14 @@
                                 // Add main product image first
                                 if($product->image) {
                                     $images->push([
-                                        'thumb' => asset('public/storage/' . $product->image),
-                                        'full' => asset('public/storage/' . $product->image),
+                                        'thumb' => product_image_url( $product->image),
+                                        'full' => product_image_url( $product->image),
                                         'alt' => $product->name . ' - Main Image'
                                     ]);
                                 } elseif($product->images && $product->images->count() > 0) {
                                     $images->push([
-                                        'thumb' => asset('public/storage/' . $product->images->first()->image_path),
-                                        'full' => asset('public/storage/' . $product->images->first()->image_path),
+                                        'thumb' => product_image_url( $product->images->first()->image_path),
+                                        'full' => product_image_url( $product->images->first()->image_path),
                                         'alt' => $product->name . ' - Main Image'
                                     ]);
                                 }
@@ -256,8 +255,8 @@
                                     $imageIndex = 2; // Start from 2 since main image is 1
                                     foreach($product->images->skip(1)->take(3) as $img) {
                                         $images->push([
-                                            'thumb' => asset('public/storage/' . $img->image_path),
-                                            'full' => asset('public/storage/' . $img->image_path),
+                                            'thumb' => product_image_url( $img->image_path),
+                                            'full' => product_image_url( $img->image_path),
                                             'alt' => $product->name . ' - Image ' . $imageIndex
                                         ]);
                                         $imageIndex++;
@@ -364,10 +363,6 @@
                             <span class="text-3xl md:text-4xl font-bold text-gray-900">{{ format_currency($product->price) }}</span>
                         @endif
                     </div>
-                    <p class="text-green-600 font-semibold mt-2">
-                        <i class="fas fa-truck mr-1"></i>
-                        Free delivery • Return policy
-                    </p>
                 </div>
 
                 <!-- Product Description -->
@@ -381,29 +376,6 @@
                             {!! nl2br(e($product->description)) !!}
                         </div>
                     @endif
-                </div>
-
-                <!-- Key Features -->
-                <div class="bg-blue-50 rounded-lg p-4">
-                    <h4 class="font-semibold text-gray-900 mb-3">Key Highlights</h4>
-                    <ul class="space-y-2 text-sm text-gray-700">
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            Free shipping on orders above ₹499
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            7-day return policy
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            Cash on delivery available
-                        </li>
-                        <li class="flex items-center">
-                            <i class="fas fa-check text-green-500 mr-2"></i>
-                            Warranty included
-                        </li>
-                    </ul>
                 </div>
 
                 <!-- Desktop Action Buttons -->
@@ -436,7 +408,7 @@
                     <a href="{{ route('products.show', $relatedProduct->slug) }}" class="block">
                         <div class="aspect-square bg-gray-100 relative overflow-hidden">
                             @if($relatedProduct->images && $relatedProduct->images->count() > 0)
-                                <img src="{{ asset('public/storage/' . $relatedProduct->images->first()->image_path) }}" 
+                                <img src="{{ product_image_url( $relatedProduct->images->first()->image_path) }}" 
                                     alt="{{ $relatedProduct->name }}" 
                                     class="w-full h-full object-contain hover:scale-105 transition-transform duration-300">
                             @else

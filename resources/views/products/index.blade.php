@@ -269,8 +269,8 @@
                     @foreach($products as $product)
                     <div class="bg-white rounded-lg shadow-md overflow-hidden group hover:shadow-xl transition duration-300">
                         <div class="relative">
-                            @if($product->images->count() > 0)
-                                <img src="{{ asset('public/storage/' . $product->images->first()->image_path) }}" 
+                            @if($product->main_image_url)
+                                <img src="{{ $product->main_image_url }}" 
                                     alt="{{ $product->name }}" 
                                     class="w-full h-48 object-cover group-hover:scale-105 transition duration-300">
                             @else

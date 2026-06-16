@@ -15,9 +15,8 @@
             <div class="flex items-center justify-between">
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4">
-                        <span class="hidden sm:inline">{{ $storeName }}</span>
-                        <span class="sm:hidden">{{ substr($storeName, 0, 2) }}</span>
+                    <a href="{{ route('home') }}" class="text-lg md:text-2xl font-bold text-blue-600 mr-4 whitespace-nowrap">
+                        {{ $storeName }}
                     </a>
                 </div>
 
@@ -81,7 +80,7 @@
                             <!-- Product Image -->
                             <div class="relative aspect-square bg-gray-100 overflow-hidden">
                                 @if($item->product->images && $item->product->images->count() > 0)
-                                    <img src="{{ asset('public/storage/' . $item->product->images->first()->image_path) }}" 
+                                    <img src="{{ product_image_url( $item->product->images->first()->image_path) }}" 
                                          alt="{{ $item->product->name }}" 
                                          class="w-full h-full object-contain group-hover:scale-105 transition-transform duration-300">
                                 @else

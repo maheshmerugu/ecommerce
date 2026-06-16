@@ -63,8 +63,8 @@
                         @forelse($products as $product)
                         <tr>
                             <td>
-                                @if($product->image)
-                                    <img src="{{ asset('public/storage/' . $product->image) }}" 
+                                @if($product->main_image_url)
+                                    <img src="{{ $product->main_image_url }}" 
                                          alt="{{ $product->name }}" 
                                          class="img-thumbnail" 
                                          style="width: 50px; height: 50px; object-fit: cover;">

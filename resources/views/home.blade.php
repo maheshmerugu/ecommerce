@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <title>E-Commerce Store - Online Shopping for Electronics, Fashion, Home & More</title>
+    <title>{{ $storeName }} - Online Shopping for Toy Cars & More</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -118,9 +118,8 @@
 
                 <!-- Logo -->
                 <div class="flex items-center">
-                    <a href="{{ route('home') }}" class="text-xl md:text-2xl font-bold text-blue-600 mr-4 md:mr-8">
-                        <span class="hidden sm:inline">{{ $storeName }}</span>
-                        <span class="sm:hidden">{{ substr($storeName, 0, 2) }}</span>
+                    <a href="{{ route('home') }}" class="text-lg md:text-2xl font-bold text-blue-600 mr-4 md:mr-8 whitespace-nowrap">
+                        {{ $storeName }}
                     </a>
                 </div>
 
@@ -309,8 +308,8 @@
                                     </a>
                                 </div>
                                 <div class="hidden md:flex w-1/2 justify-end items-center">
-                                    @if($product->images && $product->images->count() > 0)
-                                        <img src="{{ asset('storage/' . $product->images->first()->image_path) }}"
+                                    @if($product->main_image_url)
+                                        <img src="{{ $product->main_image_url }}"
                                              alt="{{ $product->name }}"
                                              class="max-h-52 object-contain drop-shadow-xl">
                                     @else
@@ -428,8 +427,8 @@
                                 <div class="product-card bg-white border border-gray-200 rounded p-3 md:p-4 group h-full">
                                     <a href="{{ route('products.show', $product->slug) }}" class="block">
                                         <div class="relative mb-3">
-                                            @if($product->images && $product->images->count() > 0)
-                                            <img src="{{ asset('public/storage/' . $product->images->first()->image_path) }}"
+                                            @if($product->main_image_url)
+                                            <img src="{{ $product->main_image_url }}"
                                                 alt="{{ $product->name }}"
                                                 class="w-full h-24 md:h-32 object-contain group-hover:scale-105 transition duration-300">
                                             @else
@@ -508,8 +507,8 @@
                         <div class="product-card bg-white border border-gray-200 rounded p-3 group">
                             <a href="{{ route('products.show', $product->slug) }}" class="block">
                                 <div class="relative mb-3">
-                                    @if($product->images && $product->images->count() > 0)
-                                    <img src="{{ asset('public/storage/' . $product->images->first()->image_path) }}"
+                                    @if($product->main_image_url)
+                                    <img src="{{ $product->main_image_url }}"
                                         alt="{{ $product->name }}"
                                         class="w-full h-24 md:h-32 object-contain group-hover:scale-105 transition duration-300">
                                     @else

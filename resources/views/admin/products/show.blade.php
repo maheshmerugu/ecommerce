@@ -239,7 +239,7 @@
                             @foreach($product->images as $image)
                                 <div class="col-6 mb-3">
                                     <div class="position-relative">
-                                        <img src="{{ asset('public/storage/' . $image->image_path) }}" 
+                                        <img src="{{ product_image_url( $image->image_path) }}" 
                                              alt="{{ $image->alt_text }}" 
                                              class="img-fluid img-thumbnail" 
                                              style="height: 120px; width: 100%; object-fit: cover;">
