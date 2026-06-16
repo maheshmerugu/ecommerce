@@ -7,7 +7,6 @@ use App\Models\EmailSetting;
 use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
-use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Mail;
 
 class SettingController extends Controller
@@ -119,30 +118,21 @@ class SettingController extends Controller
         try {
             $cfg = EmailSetting::current();
 
-            if (!$cfg->host || !$cfg->username || !$cfg->password) {
+            if (!$cfg->password) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Email settings are not fully configured. Please save your Gmail SMTP details first.',
+                    'message' => 'Email settings are not configured. Please save your Resend API key first.',
                 ]);
             }
 
-            // Apply live config for this request
-            Config::set('mail.default', $cfg->mailer ?: 'smtp');
-            Config::set('mail.mailers.smtp.host',       $cfg->host);
-            Config::set('mail.mailers.smtp.port',       (int) ($cfg->port ?: 587));
-            Config::set('mail.mailers.smtp.username',   $cfg->username);
-            Config::set('mail.mailers.smtp.password',   $cfg->password);
-            Config::set('mail.mailers.smtp.encryption', $cfg->encryption ?: 'tls');
-            Config::set('mail.from.address',            $cfg->from_address ?: $cfg->username);
-            Config::set('mail.from.name',               $cfg->from_name    ?: config('app.name'));
-
+            // AppServiceProvider already applied DB-driven mail config (Resend).
+            // No local Config::set() needed — just send directly.
             $storeName = Setting::get('store_name') ?: config('app.name');
 
             Mail::raw(
-                "This is a test email from {$storeName}.\n\nYour Gmail SMTP configuration is working correctly!",
-                function ($message) use ($request, $cfg, $storeName) {
+                "This is a test email from {$storeName}.\n\nYour email configuration is working correctly!",
+                function ($message) use ($request, $storeName) {
                     $message->to($request->test_email)
-                            ->from($cfg->from_address ?: $cfg->username, $cfg->from_name ?: $storeName)
                             ->subject("Test Email — {$storeName}");
                 }
             );
