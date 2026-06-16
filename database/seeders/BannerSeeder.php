@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class BannerSeeder extends Seeder
 {
     /**
-     * Hero banners: 3 car images for the homepage carousel.
+     * Hero banners: 5 carousel slides for the homepage.
      */
     public function run(): void
     {
@@ -42,6 +42,24 @@ class BannerSeeder extends Seeder
                 'position'  => 3,
                 'image_url' => 'https://images.unsplash.com/photo-1493238792000-8113da705763?w=1920&h=600&fit=crop&q=80',
                 'filename'  => 'hero-car-3.jpg',
+            ],
+            [
+                'type'      => 'hero',
+                'title'     => 'Kids Collection — Toy Cars & Playsets',
+                'caption'   => 'Colorful toy cars perfect for little drivers — ages 3+',
+                'link'      => '/products',
+                'position'  => 4,
+                'image_url' => 'https://images.unsplash.com/photo-1566576912321-d58ddd7a6088?w=1920&h=600&fit=crop&q=80',
+                'filename'  => 'hero-kids-1.jpg',
+            ],
+            [
+                'type'      => 'hero',
+                'title'     => 'RC & Diecast — Build Your Garage',
+                'caption'   => 'Remote-control cars, 1:64 models & track sets — shop now',
+                'link'      => '/products',
+                'position'  => 5,
+                'image_url' => 'https://images.unsplash.com/photo-1471444928139-48c5bf5173f8?w=1920&h=600&fit=crop&q=80',
+                'filename'  => 'hero-car-5.jpg',
             ],
         ];
 
@@ -78,6 +96,6 @@ class BannerSeeder extends Seeder
         $activeFiles = collect($banners)->pluck('filename')->map(fn ($f) => 'banners/' . $f);
         Banner::where('type', 'hero')->whereNotIn('image', $activeFiles)->update(['is_active' => false]);
 
-        $this->command->info('✓ Banner seeder complete — ' . count($banners) . ' car hero banners added.');
+        $this->command->info('✓ Banner seeder complete — ' . count($banners) . ' hero banners added.');
     }
 }
