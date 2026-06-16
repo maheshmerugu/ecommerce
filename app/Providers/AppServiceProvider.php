@@ -2,12 +2,11 @@
 
 namespace App\Providers;
 
-use App\Models\EmailSetting;
 use App\Models\Setting;
 use App\Support\MailFrom;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\View;
 use Illuminate\Support\ServiceProvider;
 
@@ -37,53 +36,26 @@ class AppServiceProvider extends ServiceProvider
     }
 
     /**
-     * Load mail config — always use Resend (HTTP API) on shared hosting.
-     * GoDaddy blocks SMTP ports 587 and 465, so SMTP must never be used in production.
+     * All outbound mail uses Resend via .env — welcome, password reset, admin test, etc.
      */
     private function bootMailConfig(): void
     {
-        try {
-            if (!Schema::hasTable('email_settings')) {
-                return;
-            }
+        $fromAddress = MailFrom::resolve(
+            env('MAIL_FROM_ADDRESS'),
+            config('mail.from.address')
+        );
+        $fromName = trim((string) env('MAIL_FROM_NAME', config('mail.from.name')));
+        $mailer = trim((string) env('MAIL_MAILER', 'resend'));
+        $apiKey = trim((string) env('RESEND_API_KEY', env('RESEND_KEY', '')));
 
-            $cfg = Cache::remember('email_settings:row', 3600, function () {
-                return EmailSetting::find(1);
-            });
+        Config::set('mail.default', $mailer !== '' ? $mailer : 'resend');
+        Config::set('mail.from.address', $fromAddress);
+        Config::set('mail.from.name', $fromName);
 
-            $fromAddress = MailFrom::resolve(
-                $cfg?->from_address,
-                env('MAIL_FROM_ADDRESS'),
-                config('mail.from.address')
-            );
-            $fromName = trim((string) env('MAIL_FROM_NAME', config('mail.from.name')));
-            if ($cfg?->from_name) {
-                $fromName = trim($cfg->from_name);
-            }
-
-            // Priority: .env RESEND_API_KEY → DB password (re_…)
-            $apiKey = trim((string) env('RESEND_API_KEY', env('RESEND_KEY', '')));
-            if ($apiKey === '' && $cfg && $cfg->password) {
-                $dbKey = trim($cfg->password);
-                if (str_starts_with($dbKey, 're_')) {
-                    $apiKey = $dbKey;
-                }
-            }
-
-            if ($apiKey !== '') {
-                Config::set('mail.default', 'resend');
-                Config::set('services.resend.key', $apiKey);
-                Config::set('mail.from.address', $fromAddress);
-                Config::set('mail.from.name', $fromName);
-                return;
-            }
-
-            // No API key — use log driver to avoid SMTP timeout errors on shared hosting
-            if (!app()->environment('local')) {
-                Config::set('mail.default', 'log');
-            }
-        } catch (\Exception) {
-            // DB not ready — fall back to .env values
+        if ($apiKey !== '') {
+            Config::set('services.resend.key', $apiKey);
         }
+
+        Mail::alwaysFrom($fromAddress, $fromName);
     }
 }

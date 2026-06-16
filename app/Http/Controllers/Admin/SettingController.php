@@ -3,10 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\EmailSetting;
 use App\Models\PincodeShippingRate;
 use App\Models\Setting;
-use App\Support\MailFrom;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Mail;
@@ -15,16 +13,21 @@ class SettingController extends Controller
 {
     public function index()
     {
-        $settings      = Setting::all()->pluck('value', 'key')->toArray();
-        $emailSetting  = EmailSetting::current();
+        $settings = Setting::all()->pluck('value', 'key')->toArray();
         $shippingRates = PincodeShippingRate::orderBy('match_type')->orderBy('pincode')->get();
 
-        return view('admin.settings.index', compact('settings', 'emailSetting', 'shippingRates'));
-    }
+        $mailConfigured = (bool) config('services.resend.key');
+        $mailFromAddress = config('mail.from.address');
+        $mailFromName = config('mail.from.name');
 
-    // ─────────────────────────────────────────────────
-    // Save general / payment / shipping / store settings
-    // ─────────────────────────────────────────────────
+        return view('admin.settings.index', compact(
+            'settings',
+            'shippingRates',
+            'mailConfigured',
+            'mailFromAddress',
+            'mailFromName'
+        ));
+    }
 
     public function update(Request $request)
     {
@@ -55,7 +58,6 @@ class SettingController extends Controller
             }
         }
 
-        // Bust relevant caches
         $allKeys = array_merge(...array_values($groups));
         $allKeys[] = 'store_name';
         foreach ($allKeys as $key) {
@@ -65,85 +67,31 @@ class SettingController extends Controller
         return redirect()->back()->with('success', 'Settings saved successfully!');
     }
 
-    // ─────────────────────────────────────────────────
-    // Save email_settings row (dedicated table)
-    // ─────────────────────────────────────────────────
-
-    public function updateEmail(Request $request)
-    {
-        $request->validate([
-            'mail_password'     => 'nullable|string|max:255',
-            'mail_from_address' => 'required|email|max:255',
-            'mail_from_name'    => 'nullable|string|max:255',
-        ]);
-
-        $fromDomain = MailFrom::domain($request->input('mail_from_address'));
-
-        if (MailFrom::isBlocked($request->input('mail_from_address'))) {
-            return redirect()->back()
-                ->withErrors([
-                    'mail_from_address' => 'Resend cannot send from personal email domains like @' . $fromDomain . '. Use an address on your verified domain (e.g. support@fourwheels.co.in).',
-                ])
-                ->withInput()
-                ->with('active_tab', 'email');
-        }
-
-        $emailSetting = EmailSetting::current();
-
-        $emailSetting->fill([
-            'mailer'       => 'resend',
-            'host'         => null,
-            'port'         => null,
-            'encryption'   => null,
-            'username'     => $request->input('mail_from_address'),
-            'from_address' => $request->input('mail_from_address'),
-            'from_name'    => $request->input('mail_from_name') ?: Setting::get('store_name') ?: config('app.name'),
-        ]);
-
-        if ($request->filled('mail_password')) {
-            $emailSetting->password = $request->input('mail_password');
-        }
-
-        $emailSetting->is_active = (bool) ($emailSetting->password && $emailSetting->from_address);
-
-        $emailSetting->save();
-
-        Cache::forget('email_settings:active');
-        Cache::forget('email_settings:row');
-
-        return redirect()->back()->with('success', 'Email settings saved successfully!');
-    }
-
-    // ─────────────────────────────────────────────────
-    // Send test email using the saved email_settings
-    // ─────────────────────────────────────────────────
-
     public function testEmail(Request $request)
     {
         $request->validate(['test_email' => 'required|email']);
 
+        if (!config('services.resend.key')) {
+            return response()->json([
+                'success' => false,
+                'message' => 'RESEND_API_KEY is not set in .env. Add your key, set MAIL_MAILER=resend, then run php artisan config:clear.',
+            ]);
+        }
+
+        if (config('mail.default') !== 'resend') {
+            return response()->json([
+                'success' => false,
+                'message' => 'MAIL_MAILER must be "resend" in .env (current: ' . config('mail.default') . ').',
+            ]);
+        }
+
         try {
-            $cfg = EmailSetting::current();
-
-            if (!$cfg->password) {
-                return response()->json([
-                    'success' => false,
-                    'message' => 'Email settings are not configured. Please save your Resend API key first.',
-                ]);
-            }
-
-            // AppServiceProvider already applied DB-driven mail config (Resend).
-            // No local Config::set() needed — just send directly.
             $storeName = Setting::get('store_name') ?: config('app.name');
-
-            $fromAddress = config('mail.from.address');
-            $fromName = config('mail.from.name');
 
             Mail::raw(
                 "This is a test email from {$storeName}.\n\nYour email configuration is working correctly!",
-                function ($message) use ($request, $storeName, $fromAddress, $fromName) {
-                    $message->from($fromAddress, $fromName)
-                            ->to($request->test_email)
+                function ($message) use ($request, $storeName) {
+                    $message->to($request->test_email)
                             ->subject("Test Email — {$storeName}");
                 }
             );
@@ -153,10 +101,9 @@ class SettingController extends Controller
                 'message' => 'Test email sent to ' . $request->test_email . ' successfully!',
             ]);
         } catch (\Exception $e) {
-            $from = config('mail.from.address');
             return response()->json([
                 'success' => false,
-                'message' => $e->getMessage() . ' (From address used: ' . $from . ')',
+                'message' => $e->getMessage() . ' (From: ' . config('mail.from.address') . ')',
             ]);
         }
     }

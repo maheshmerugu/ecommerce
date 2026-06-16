@@ -25,7 +25,7 @@
         <li class="nav-item">
             <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab">
                 <i class="fas fa-envelope mr-1"></i> Email (Resend)
-                @if($emailSetting->is_active)
+                @if($mailConfigured)
                     <span class="badge badge-success ml-1">Active</span>
                 @else
                     <span class="badge badge-secondary ml-1">Not configured</span>
@@ -183,135 +183,112 @@
             </form>
         </div>
 
-        <!-- ─── EMAIL TAB (Resend API) ─── -->
+        <!-- ─── EMAIL TAB (Resend — .env only) ─── -->
         <div class="tab-pane fade" id="email" role="tabpanel">
-            <form method="POST" action="{{ route('admin.settings.update-email') }}">
-                @csrf
-                @method('PUT')
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-envelope mr-2"></i>Email Configuration (Resend)
+                    </h6>
+                    @if($mailConfigured)
+                        <span class="badge badge-success ml-3 px-3 py-2">
+                            <i class="fas fa-check-circle mr-1"></i>Active — {{ $mailFromAddress }}
+                        </span>
+                    @else
+                        <span class="badge badge-secondary ml-3 px-3 py-2">
+                            <i class="fas fa-times-circle mr-1"></i>Not configured
+                        </span>
+                    @endif
+                </div>
+                <div class="card-body">
 
-                <div class="card shadow mb-4">
-                    <div class="card-header py-3 d-flex align-items-center">
-                        <h6 class="m-0 font-weight-bold text-primary">
-                            <i class="fas fa-envelope mr-2"></i>Email Configuration (Resend)
-                        </h6>
-                        @if($emailSetting->is_active)
-                            <span class="badge badge-success ml-3 px-3 py-2">
-                                <i class="fas fa-check-circle mr-1"></i>Active — {{ $emailSetting->from_address }}
-                            </span>
-                        @else
-                            <span class="badge badge-secondary ml-3 px-3 py-2">
-                                <i class="fas fa-times-circle mr-1"></i>Not configured
-                            </span>
-                        @endif
+                    <div class="alert alert-info mb-4">
+                        <h6 class="font-weight-bold"><i class="fas fa-info-circle mr-2"></i>Configured via <code>.env</code> file</h6>
+                        <p class="mb-2 small">Email is sent through the <strong>Resend HTTP API</strong> (required on GoDaddy — SMTP ports are blocked).</p>
+                        <p class="mb-2 small">Edit your <code>.env</code> file on the server, then run <code>php artisan config:clear</code>.</p>
+                        <ol class="mb-0 small">
+                            <li>Sign up at <a href="https://resend.com" target="_blank"><strong>resend.com</strong></a></li>
+                            <li>Verify your domain at <a href="https://resend.com/domains" target="_blank">resend.com/domains</a></li>
+                            <li>Set the variables below in <code>.env</code></li>
+                        </ol>
                     </div>
-                    <div class="card-body">
 
-                        <div class="alert alert-info mb-4">
-                            <h6 class="font-weight-bold"><i class="fas fa-info-circle mr-2"></i>Resend (recommended for GoDaddy / shared hosting)</h6>
-                            <p class="mb-2 small">SMTP ports are blocked on GoDaddy. This site sends all emails via the <strong>Resend HTTP API</strong>.</p>
-                            <ol class="mb-0 small">
-                                <li>Sign up at <a href="https://resend.com" target="_blank"><strong>resend.com</strong></a></li>
-                                <li>Add & verify your domain at <a href="https://resend.com/domains" target="_blank">resend.com/domains</a></li>
-                                <li>Create an API key and paste it below</li>
-                                <li>Set <strong>From Email</strong> to <code>support@fourwheels.co.in</code> (or another address on your verified domain)</li>
-                                <li>For testing <em>before</em> domain verification, use <code>onboarding@resend.dev</code> as From Email</li>
-                            </ol>
-                        </div>
-
-                        <input type="hidden" name="mail_mailer" value="resend">
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">
-                                        Resend API Key <span class="text-danger">*</span>
-                                        @if($emailSetting->password)
-                                            <small class="text-success font-weight-normal ml-2">
-                                                <i class="fas fa-lock mr-1"></i>Saved (leave blank to keep current)
-                                            </small>
+                    <div class="table-responsive mb-4">
+                        <table class="table table-bordered table-sm mb-0">
+                            <thead class="thead-light">
+                                <tr>
+                                    <th width="220">.env variable</th>
+                                    <th>Current value</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td><code>RESEND_API_KEY</code></td>
+                                    <td>
+                                        @if($mailConfigured)
+                                            <span class="text-success"><i class="fas fa-check mr-1"></i>Set</span>
+                                        @else
+                                            <span class="text-danger"><i class="fas fa-times mr-1"></i>Not set</span>
                                         @endif
-                                    </label>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td><code>MAIL_FROM_ADDRESS</code></td>
+                                    <td><code>{{ $mailFromAddress ?: '—' }}</code></td>
+                                </tr>
+                                <tr>
+                                    <td><code>MAIL_FROM_NAME</code></td>
+                                    <td>{{ $mailFromName ?: '—' }}</td>
+                                </tr>
+                                <tr>
+                                    <td><code>MAIL_MAILER</code></td>
+                                    <td><code>resend</code></td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="bg-light border rounded p-3 mb-4">
+                        <h6 class="font-weight-bold small text-muted mb-2">Example .env entries</h6>
+                        <pre class="mb-0 small"><code>MAIL_MAILER=resend
+MAIL_FROM_ADDRESS="support@fourwheels.co.in"
+MAIL_FROM_NAME="${APP_NAME}"
+RESEND_API_KEY=re_your_api_key_here</code></pre>
+                    </div>
+
+                    <p class="small text-muted mb-4">
+                        <strong>From address</strong> must use your verified domain (e.g. <code>@fourwheels.co.in</code>).
+                        Do not use Gmail or other personal email domains.
+                        For testing before domain verification, use <code>onboarding@resend.dev</code>.
+                    </p>
+
+                    <div class="card border-left-primary mb-0">
+                        <div class="card-body py-3">
+                            <h6 class="font-weight-bold mb-3">
+                                <i class="fas fa-paper-plane mr-2 text-primary"></i>Send Test Email
+                            </h6>
+                            <div class="row align-items-end">
+                                <div class="col-md-6">
                                     <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fas fa-key"></i></span>
-                                        </div>
-                                        <input type="password" name="mail_password" id="mail_password" class="form-control"
-                                               placeholder="{{ $emailSetting->password ? 'Leave blank to keep current key' : 're_xxxxxxxxxxxx' }}"
-                                               autocomplete="new-password">
+                                        <input type="email" id="test_email_addr" class="form-control"
+                                               placeholder="recipient@example.com">
                                         <div class="input-group-append">
-                                            <button type="button" class="btn btn-outline-secondary" onclick="toggleMailPass()">
-                                                <i class="fas fa-eye" id="mail-pass-eye"></i>
+                                            <button type="button" class="btn btn-primary" onclick="sendTestEmail()">
+                                                <i class="fas fa-paper-plane mr-1"></i>Send Test
                                             </button>
                                         </div>
                                     </div>
-                                    <small class="text-muted">Starts with <code>re_</code> — from Resend dashboard → API Keys</small>
+                                    <small class="text-muted">Uses the .env settings above.</small>
                                 </div>
-                            </div>
-                        </div>
-
-                        <hr>
-                        <h6 class="font-weight-bold text-muted mb-3">Sender Details (shown to email recipients)</h6>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">From Name</label>
-                                    <input type="text" name="mail_from_name" class="form-control"
-                                           value="{{ old('mail_from_name', $emailSetting->from_name ?: ($settings['store_name'] ?? $storeName)) }}"
-                                           placeholder="Your Store Name">
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">From Email <span class="text-danger">*</span></label>
-                                    <input type="email" name="mail_from_address" class="form-control" required
-                                           value="{{ old('mail_from_address', $emailSetting->from_address ?: $emailSetting->username) }}"
-                                           placeholder="support@fourwheels.co.in">
-                                    <small class="text-muted">
-                                        Must use your <strong>verified domain</strong> on Resend (e.g. <code>@fourwheels.co.in</code>).
-                                        Do <strong>not</strong> use Gmail, Yahoo, or Outlook — Resend will reject them.
-                                    </small>
-                                    @error('mail_from_address')
-                                        <div class="text-danger small mt-1">{{ $message }}</div>
-                                    @enderror
-                                </div>
-                            </div>
-                        </div>
-
-                        <hr>
-                        <div class="card border-left-primary mb-0">
-                            <div class="card-body py-3">
-                                <h6 class="font-weight-bold mb-3">
-                                    <i class="fas fa-paper-plane mr-2 text-primary"></i>Send Test Email
-                                </h6>
-                                <div class="row align-items-end">
-                                    <div class="col-md-6">
-                                        <div class="input-group">
-                                            <input type="email" id="test_email_addr" class="form-control"
-                                                   placeholder="recipient@example.com">
-                                            <div class="input-group-append">
-                                                <button type="button" class="btn btn-primary" onclick="sendTestEmail()">
-                                                    <i class="fas fa-paper-plane mr-1"></i>Send Test
-                                                </button>
-                                            </div>
-                                        </div>
-                                        <small class="text-muted">Save settings first, then verify by sending a test email.</small>
-                                    </div>
-                                    <div class="col-md-6">
-                                        <div id="test-email-result" class="mt-2"></div>
-                                    </div>
+                                <div class="col-md-6">
+                                    <div id="test-email-result" class="mt-2"></div>
                                 </div>
                             </div>
                         </div>
                     </div>
                 </div>
-
-                <div class="mt-3 mb-5">
-                    <button type="submit" class="btn btn-primary btn-lg">
-                        <i class="fas fa-save mr-2"></i>Save Email Settings
-                    </button>
-                </div>
-            </form>
+            </div>
+            <div class="mb-5"></div>
         </div>
 
         <!-- ─── SHIPPING TAB ─── -->
@@ -547,7 +524,7 @@ document.querySelectorAll('input[name="razorpay_mode"]').forEach(function(radio)
     if (tab) tab.click();
 })();
 @endif
-@if(session('active_tab') === 'email' || $errors->has('mail_from_address'))
+@if(session('active_tab') === 'email')
 (function() {
     var tab = document.getElementById('email-tab');
     if (tab) tab.click();
@@ -557,14 +534,6 @@ document.querySelectorAll('input[name="razorpay_mode"]').forEach(function(radio)
 function toggleSecret() {
     var el = document.getElementById('razorpay_key_secret');
     var eye = document.getElementById('secret-eye');
-    el.type = el.type === 'password' ? 'text' : 'password';
-    eye.classList.toggle('fa-eye');
-    eye.classList.toggle('fa-eye-slash');
-}
-
-function toggleMailPass() {
-    var el = document.getElementById('mail_password');
-    var eye = document.getElementById('mail-pass-eye');
     el.type = el.type === 'password' ? 'text' : 'password';
     eye.classList.toggle('fa-eye');
     eye.classList.toggle('fa-eye-slash');

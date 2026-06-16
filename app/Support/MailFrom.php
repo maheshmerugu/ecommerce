@@ -32,13 +32,11 @@ class MailFrom
     }
 
     /**
-     * Pick a safe From address: DB from_address → .env MAIL_FROM_ADDRESS → config default.
-     * Never uses legacy SMTP username (often a Gmail address).
+     * Pick a safe From address from .env, then config default.
      */
-    public static function resolve(?string $dbFromAddress, ?string $envFromAddress = null, ?string $configFromAddress = null): string
+    public static function resolve(?string $envFromAddress = null, ?string $configFromAddress = null): string
     {
         $candidates = array_filter([
-            $dbFromAddress,
             $envFromAddress,
             $configFromAddress,
         ], fn ($v) => is_string($v) && trim($v) !== '');
