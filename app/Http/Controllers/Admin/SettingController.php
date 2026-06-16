@@ -69,39 +69,31 @@ class SettingController extends Controller
     public function updateEmail(Request $request)
     {
         $request->validate([
-            'mail_mailer'       => 'nullable|string|max:20',
-            'mail_host'         => 'required|string|max:255',
-            'mail_port'         => 'required|integer|in:25,465,587,2525',
-            'mail_encryption'   => 'required|in:tls,ssl,none',
-            'mail_username'     => 'required|email|max:255',
             'mail_password'     => 'nullable|string|max:255',
-            'mail_from_address' => 'nullable|email|max:255',
+            'mail_from_address' => 'required|email|max:255',
             'mail_from_name'    => 'nullable|string|max:255',
         ]);
 
         $emailSetting = EmailSetting::current();
 
         $emailSetting->fill([
-            'mailer'       => $request->input('mail_mailer', 'smtp'),
-            'host'         => $request->input('mail_host'),
-            'port'         => (int) $request->input('mail_port'),
-            'encryption'   => $request->input('mail_encryption'),
-            'username'     => $request->input('mail_username'),
-            'from_address' => $request->input('mail_from_address') ?: $request->input('mail_username'),
+            'mailer'       => 'resend',
+            'host'         => null,
+            'port'         => null,
+            'encryption'   => null,
+            'username'     => $request->input('mail_from_address'),
+            'from_address' => $request->input('mail_from_address'),
             'from_name'    => $request->input('mail_from_name') ?: Setting::get('store_name') ?: config('app.name'),
         ]);
 
-        // Only update the password if a new one was submitted
         if ($request->filled('mail_password')) {
             $emailSetting->password = $request->input('mail_password');
         }
 
-        // Mark active only when essential fields are present
-        $emailSetting->is_active = (bool) ($emailSetting->host && $emailSetting->username && $emailSetting->password);
+        $emailSetting->is_active = (bool) ($emailSetting->password && $emailSetting->from_address);
 
         $emailSetting->save();
 
-        // Bust the email config cache so AppServiceProvider picks up new values
         Cache::forget('email_settings:active');
 
         return redirect()->back()->with('success', 'Email settings saved successfully!');

@@ -24,7 +24,7 @@
         </li>
         <li class="nav-item">
             <a class="nav-link" id="email-tab" data-toggle="tab" href="#email" role="tab">
-                <i class="fas fa-envelope mr-1"></i> Email (SMTP)
+                <i class="fas fa-envelope mr-1"></i> Email (Resend)
                 @if($emailSetting->is_active)
                     <span class="badge badge-success ml-1">Active</span>
                 @else
@@ -183,7 +183,7 @@
             </form>
         </div>
 
-        <!-- ─── EMAIL TAB (dedicated email_settings table) ─── -->
+        <!-- ─── EMAIL TAB (Resend API) ─── -->
         <div class="tab-pane fade" id="email" role="tabpanel">
             <form method="POST" action="{{ route('admin.settings.update-email') }}">
                 @csrf
@@ -192,11 +192,11 @@
                 <div class="card shadow mb-4">
                     <div class="card-header py-3 d-flex align-items-center">
                         <h6 class="m-0 font-weight-bold text-primary">
-                            <i class="fas fa-envelope mr-2"></i>Gmail SMTP Configuration
+                            <i class="fas fa-envelope mr-2"></i>Email Configuration (Resend)
                         </h6>
                         @if($emailSetting->is_active)
                             <span class="badge badge-success ml-3 px-3 py-2">
-                                <i class="fas fa-check-circle mr-1"></i>Active — connected as {{ $emailSetting->username }}
+                                <i class="fas fa-check-circle mr-1"></i>Active — {{ $emailSetting->from_address }}
                             </span>
                         @else
                             <span class="badge badge-secondary ml-3 px-3 py-2">
@@ -206,73 +206,23 @@
                     </div>
                     <div class="card-body">
 
-                        <!-- Gmail setup guide -->
                         <div class="alert alert-info mb-4">
-                            <h6 class="font-weight-bold"><i class="fab fa-google mr-2"></i>How to set up Gmail SMTP</h6>
+                            <h6 class="font-weight-bold"><i class="fas fa-info-circle mr-2"></i>Resend (recommended for GoDaddy / shared hosting)</h6>
+                            <p class="mb-2 small">SMTP ports are blocked on GoDaddy. This site sends all emails via the <strong>Resend HTTP API</strong>.</p>
                             <ol class="mb-0 small">
-                                <li>Go to <strong>Google Account → Security</strong></li>
-                                <li>Enable <strong>2-Step Verification</strong> (required for App Passwords)</li>
-                                <li>Visit <a href="https://myaccount.google.com/apppasswords" target="_blank"><strong>myaccount.google.com/apppasswords</strong></a></li>
-                                <li>Select app: <em>Mail</em>, device: <em>Other</em> → type <em>Laravel</em> → click <strong>Generate</strong></li>
-                                <li>Copy the <strong>16-character App Password</strong> (spaces are OK) and paste below</li>
-                                <li>Do <strong>NOT</strong> use your regular Gmail password here</li>
+                                <li>Sign up at <a href="https://resend.com" target="_blank"><strong>resend.com</strong></a></li>
+                                <li>Add & verify your domain at <a href="https://resend.com/domains" target="_blank">resend.com/domains</a></li>
+                                <li>Create an API key and paste it below</li>
                             </ol>
                         </div>
 
-                        <!-- Hidden mailer type -->
-                        <input type="hidden" name="mail_mailer" value="smtp">
+                        <input type="hidden" name="mail_mailer" value="resend">
 
                         <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">SMTP Host</label>
-                                    <input type="text" name="mail_host" class="form-control"
-                                           value="{{ old('mail_host', $emailSetting->host ?: 'smtp.gmail.com') }}"
-                                           placeholder="smtp.gmail.com">
-                                    <small class="text-muted">For Gmail: <code>smtp.gmail.com</code></small>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Port</label>
-                                    <select name="mail_port" class="form-control">
-                                        <option value="587" {{ (old('mail_port', $emailSetting->port) == 587) ? 'selected' : '' }}>587 — TLS (Recommended)</option>
-                                        <option value="465" {{ (old('mail_port', $emailSetting->port) == 465) ? 'selected' : '' }}>465 — SSL</option>
-                                        <option value="25"  {{ (old('mail_port', $emailSetting->port) == 25)  ? 'selected' : '' }}>25 — None</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="col-md-3">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Encryption</label>
-                                    <select name="mail_encryption" class="form-control">
-                                        <option value="tls"  {{ (old('mail_encryption', $emailSetting->encryption) === 'tls')  ? 'selected' : '' }}>TLS (Recommended)</option>
-                                        <option value="ssl"  {{ (old('mail_encryption', $emailSetting->encryption) === 'ssl')  ? 'selected' : '' }}>SSL</option>
-                                        <option value="none" {{ (old('mail_encryption', $emailSetting->encryption) === 'none') ? 'selected' : '' }}>None</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="font-weight-bold">Gmail Address <span class="text-danger">*</span></label>
-                                    <div class="input-group">
-                                        <div class="input-group-prepend">
-                                            <span class="input-group-text"><i class="fab fa-google"></i></span>
-                                        </div>
-                                        <input type="email" name="mail_username" class="form-control"
-                                               value="{{ old('mail_username', $emailSetting->username) }}"
-                                               placeholder="yourname@gmail.com">
-                                    </div>
-                                    <small class="text-muted">Your full Gmail address</small>
-                                </div>
-                            </div>
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label class="font-weight-bold">
-                                        App Password <span class="text-danger">*</span>
+                                        Resend API Key <span class="text-danger">*</span>
                                         @if($emailSetting->password)
                                             <small class="text-success font-weight-normal ml-2">
                                                 <i class="fas fa-lock mr-1"></i>Saved (leave blank to keep current)
@@ -284,7 +234,7 @@
                                             <span class="input-group-text"><i class="fas fa-key"></i></span>
                                         </div>
                                         <input type="password" name="mail_password" id="mail_password" class="form-control"
-                                               placeholder="{{ $emailSetting->password ? 'Leave blank to keep current password' : '16-character App Password' }}"
+                                               placeholder="{{ $emailSetting->password ? 'Leave blank to keep current key' : 're_xxxxxxxxxxxx' }}"
                                                autocomplete="new-password">
                                         <div class="input-group-append">
                                             <button type="button" class="btn btn-outline-secondary" onclick="toggleMailPass()">
@@ -292,9 +242,7 @@
                                             </button>
                                         </div>
                                     </div>
-                                    <small class="text-danger font-weight-bold">
-                                        <i class="fas fa-exclamation-triangle mr-1"></i>Use the Google App Password — NOT your Gmail login password!
-                                    </small>
+                                    <small class="text-muted">Starts with <code>re_</code> — from Resend dashboard → API Keys</small>
                                 </div>
                             </div>
                         </div>
@@ -313,17 +261,16 @@
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label class="font-weight-bold">From Email</label>
-                                    <input type="email" name="mail_from_address" class="form-control"
+                                    <label class="font-weight-bold">From Email <span class="text-danger">*</span></label>
+                                    <input type="email" name="mail_from_address" class="form-control" required
                                            value="{{ old('mail_from_address', $emailSetting->from_address ?: $emailSetting->username) }}"
-                                           placeholder="noreply@yourdomain.com">
-                                    <small class="text-muted">Must match your Gmail address (or a verified alias).</small>
+                                           placeholder="support@fourwheels.co.in">
+                                    <small class="text-muted">Must be a verified domain on Resend.</small>
                                 </div>
                             </div>
                         </div>
 
                         <hr>
-                        <!-- Test Email Section -->
                         <div class="card border-left-primary mb-0">
                             <div class="card-body py-3">
                                 <h6 class="font-weight-bold mb-3">

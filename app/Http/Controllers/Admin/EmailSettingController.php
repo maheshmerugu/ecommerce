@@ -19,11 +19,6 @@ class EmailSettingController extends Controller
     public function update(Request $request)
     {
         $data = $request->validate([
-            'mailer'       => 'required|in:smtp,sendmail,log',
-            'host'         => 'required_if:mailer,smtp|nullable|string|max:255',
-            'port'         => 'required_if:mailer,smtp|nullable|integer',
-            'encryption'   => 'nullable|in:tls,ssl,',
-            'username'     => 'required_if:mailer,smtp|nullable|string|max:255',
             'password'     => 'nullable|string|max:255',
             'from_address' => 'required|email|max:255',
             'from_name'    => 'required|string|max:255',
@@ -32,16 +27,23 @@ class EmailSettingController extends Controller
 
         $setting = EmailSetting::firstOrNew(['id' => 1]);
 
-        // Keep existing password if field left blank
-        if (empty($data['password'])) {
-            unset($data['password']);
+        $setting->fill([
+            'mailer'       => 'resend',
+            'host'         => null,
+            'port'         => null,
+            'encryption'   => null,
+            'username'     => $data['from_address'],
+            'from_address' => $data['from_address'],
+            'from_name'    => $data['from_name'],
+            'is_active'    => $request->boolean('is_active', true),
+        ]);
+
+        if (!empty($data['password'])) {
+            $setting->password = $data['password'];
         }
 
-        $data['is_active'] = $request->boolean('is_active', true);
+        $setting->save();
 
-        $setting->fill($data)->save();
-
-        // Clear cached config so AppServiceProvider picks up new values
         Cache::forget('email_settings:active');
 
         return back()->with('success', 'Email settings saved successfully.');
@@ -51,12 +53,11 @@ class EmailSettingController extends Controller
     {
         $request->validate(['test_email' => 'required|email']);
 
-        // Clear cache to use latest DB settings
         Cache::forget('email_settings:active');
 
         try {
             Mail::raw('This is a test email from ' . config('app.name') . '.', function ($msg) use ($request) {
-                $msg->to($request->test_email)->subject('SMTP Test — ' . config('app.name'));
+                $msg->to($request->test_email)->subject('Resend Test — ' . config('app.name'));
             });
             return back()->with('success', 'Test email sent to ' . $request->test_email . '!');
         } catch (\Exception $e) {
