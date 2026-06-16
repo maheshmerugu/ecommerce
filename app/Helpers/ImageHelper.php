@@ -14,9 +14,8 @@ class ImageHelper
         }
 
         $relative = self::normalizeStoragePath($imagePath);
-        $base     = self::publicBaseUrl();
 
-        return $base . '/storage/' . $relative;
+        return rtrim(self::publicBaseUrl(), '/') . '/storage/' . $relative;
     }
 
     /**
@@ -31,14 +30,12 @@ class ImageHelper
 
     /**
      * Strip legacy / duplicate prefixes from stored paths.
-     * e.g. "public/storage/products/x.jpg" → "products/x.jpg"
      */
     public static function normalizeStoragePath(string $path): string
     {
         $path = str_replace('\\', '/', $path);
         $path = ltrim($path, '/');
 
-        // Remove repeated public/storage prefixes
         while (preg_match('#^(public/)+?(storage/)?#', $path)) {
             $path = preg_replace('#^(public/)+?(storage/)?#', '', $path, 1);
         }
@@ -47,20 +44,24 @@ class ImageHelper
     }
 
     /**
-     * Absolute web root for publicly served assets (the Laravel public/ directory).
+     * Web-accessible base URL for the Laravel public/ directory.
      */
-    private static function publicBaseUrl(): string
+    public static function publicBaseUrl(): string
     {
-        $base = rtrim((string) (config('app.asset_url') ?: config('app.url')), '/');
-
-        // Avoid trailing /public/public
-        $base = preg_replace('#(/public)+$#', '/public', $base);
-
-        // XAMPP subfolder: APP_URL=http://localhost → serve from /ecommerce/public
-        if (in_array($base, ['http://localhost', 'http://127.0.0.1'], true)) {
-            $base .= '/ecommerce/public';
+        if ($assetUrl = config('app.asset_url')) {
+            return rtrim($assetUrl, '/');
         }
 
+        $base = rtrim((string) config('app.url'), '/');
+        $base = preg_replace('#(/public)+$#', '/public', $base);
+
+        // Local XAMPP: project under /ecommerce/public
+        if (in_array($base, ['http://localhost', 'http://127.0.0.1'], true)) {
+            return $base . '/ecommerce/public';
+        }
+
+        // Production cPanel: repo root is docroot (index.php in project root).
+        // Files live in public/storage — URLs stay as /storage/... (see root .htaccess rewrite).
         return $base;
     }
 }

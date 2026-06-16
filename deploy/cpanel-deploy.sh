@@ -94,6 +94,12 @@ echo "Running migrations..."
 echo "Storage link..."
 "$PHP_BIN" "$DEPLOYPATH/artisan" storage:link 2>/dev/null || true
 
+if [ ! -e "$DEPLOYPATH/public/storage" ]; then
+    echo "WARN: public/storage missing — uploads will not be web-accessible"
+else
+    echo "public/storage link OK"
+fi
+
 echo "Clearing all caches (config, route, view, app)..."
 "$PHP_BIN" "$DEPLOYPATH/artisan" config:clear  || true
 "$PHP_BIN" "$DEPLOYPATH/artisan" route:clear   || true
