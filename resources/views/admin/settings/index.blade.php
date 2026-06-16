@@ -213,6 +213,8 @@
                                 <li>Sign up at <a href="https://resend.com" target="_blank"><strong>resend.com</strong></a></li>
                                 <li>Add & verify your domain at <a href="https://resend.com/domains" target="_blank">resend.com/domains</a></li>
                                 <li>Create an API key and paste it below</li>
+                                <li>Set <strong>From Email</strong> to <code>support@fourwheels.co.in</code> (or another address on your verified domain)</li>
+                                <li>For testing <em>before</em> domain verification, use <code>onboarding@resend.dev</code> as From Email</li>
                             </ol>
                         </div>
 
@@ -265,7 +267,13 @@
                                     <input type="email" name="mail_from_address" class="form-control" required
                                            value="{{ old('mail_from_address', $emailSetting->from_address ?: $emailSetting->username) }}"
                                            placeholder="support@fourwheels.co.in">
-                                    <small class="text-muted">Must be a verified domain on Resend.</small>
+                                    <small class="text-muted">
+                                        Must use your <strong>verified domain</strong> on Resend (e.g. <code>@fourwheels.co.in</code>).
+                                        Do <strong>not</strong> use Gmail, Yahoo, or Outlook — Resend will reject them.
+                                    </small>
+                                    @error('mail_from_address')
+                                        <div class="text-danger small mt-1">{{ $message }}</div>
+                                    @enderror
                                 </div>
                             </div>
                         </div>
@@ -536,6 +544,12 @@ document.querySelectorAll('input[name="razorpay_mode"]').forEach(function(radio)
 @if(session('active_tab') === 'shipping' || request()->has('tab') && request('tab') === 'shipping')
 (function() {
     var tab = document.getElementById('shipping-tab');
+    if (tab) tab.click();
+})();
+@endif
+@if(session('active_tab') === 'email' || $errors->has('mail_from_address'))
+(function() {
+    var tab = document.getElementById('email-tab');
     if (tab) tab.click();
 })();
 @endif

@@ -71,10 +71,10 @@ class EmailSetting extends Model
     public static function current(): static
     {
         return static::firstOrNew(['id' => 1], [
-            'mailer'       => 'smtp',
-            'host'         => 'smtp.gmail.com',
-            'port'         => 587,
-            'encryption'   => 'tls',
+            'mailer'       => 'resend',
+            'host'         => null,
+            'port'         => null,
+            'encryption'   => null,
             'username'     => null,
             'password'     => null,
             'from_address' => null,

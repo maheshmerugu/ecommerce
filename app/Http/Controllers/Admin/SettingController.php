@@ -76,6 +76,21 @@ class SettingController extends Controller
             'mail_from_name'    => 'nullable|string|max:255',
         ]);
 
+        $fromDomain = strtolower((string) substr(strrchr($request->input('mail_from_address'), '@'), 1));
+        $blockedFromDomains = [
+            'gmail.com', 'googlemail.com', 'yahoo.com', 'yahoo.co.in', 'hotmail.com',
+            'outlook.com', 'live.com', 'icloud.com', 'me.com', 'protonmail.com', 'zoho.com',
+        ];
+
+        if (in_array($fromDomain, $blockedFromDomains, true)) {
+            return redirect()->back()
+                ->withErrors([
+                    'mail_from_address' => 'Resend cannot send from personal email domains like @' . $fromDomain . '. Use an address on your verified domain (e.g. support@fourwheels.co.in).',
+                ])
+                ->withInput()
+                ->with('active_tab', 'email');
+        }
+
         $emailSetting = EmailSetting::current();
 
         $emailSetting->fill([
@@ -97,6 +112,7 @@ class SettingController extends Controller
         $emailSetting->save();
 
         Cache::forget('email_settings:active');
+        Cache::forget('email_settings:row');
 
         return redirect()->back()->with('success', 'Email settings saved successfully!');
     }

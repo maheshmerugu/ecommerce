@@ -49,8 +49,8 @@ class AppServiceProvider extends ServiceProvider
             $fromAddress = trim((string) env('MAIL_FROM_ADDRESS', config('mail.from.address')));
             $fromName    = trim((string) env('MAIL_FROM_NAME', config('mail.from.name')));
 
-            $cfg = Cache::remember('email_settings:active', 3600, function () {
-                return EmailSetting::where('is_active', true)->first();
+            $cfg = Cache::remember('email_settings:row', 3600, function () {
+                return EmailSetting::find(1);
             });
 
             if ($cfg) {
