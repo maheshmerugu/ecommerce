@@ -56,7 +56,7 @@
                             <th>Payment</th>
                             <th>Status</th>
                             <th>Date</th>
-                            <th width="80">Actions</th>
+                            <th width="140">Actions</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -85,9 +85,29 @@
                             </td>
                             <td><small>{{ $order->created_at->format('d M Y') }}</small></td>
                             <td>
-                                <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-info">
-                                    <i class="fas fa-eye"></i>
-                                </a>
+                                <div class="d-flex gap-1 flex-wrap">
+                                    <a href="{{ route('admin.orders.show', $order) }}" class="btn btn-sm btn-info" title="View">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    @if(in_array($order->status, ['pending', 'processing', 'shipped']))
+                                        <form method="POST" action="{{ route('admin.orders.deliver', $order) }}" class="d-inline"
+                                              onsubmit="return confirm('Mark this order as delivered?')">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-success" title="Mark Delivered">
+                                                <i class="fas fa-check"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if(in_array($order->status, ['pending', 'processing']))
+                                        <form method="POST" action="{{ route('admin.orders.cancel', $order) }}" class="d-inline"
+                                              onsubmit="return confirm('Cancel this order? Stock will be restored and refund will be initiated if payment was made.')">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="btn btn-sm btn-danger" title="Cancel Order">
+                                                <i class="fas fa-times"></i>
+                                            </button>
+                                        </form>
+                                    @endif
+                                </div>
                             </td>
                         </tr>
                         @empty

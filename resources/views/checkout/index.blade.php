@@ -353,7 +353,7 @@
         console.log('Razorpay Key ID:', RAZORPAY_KEY);
 
         function toggleBillingAddress() {
-            const checkbox = document.querySelector('input[name="same_as_shipping"]');
+            const checkbox = document.querySelector('input[name="same_as_shipping"][type="checkbox"]');
             const billingFields = document.getElementById('billing-fields');
             
             if (checkbox.checked) {

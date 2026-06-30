@@ -132,6 +132,37 @@
 
         <!-- Sidebar -->
         <div class="col-md-4">
+            <!-- Quick Actions -->
+            @if(in_array($order->status, ['pending', 'processing', 'shipped']))
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        @if(in_array($order->status, ['pending', 'processing', 'shipped']))
+                            <form method="POST" action="{{ route('admin.orders.deliver', $order) }}"
+                                  onsubmit="return confirm('Mark this order as delivered? An email will be sent to the customer.')">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="btn btn-success w-100 mb-2">
+                                    <i class="fas fa-check-circle mr-2"></i>Mark as Delivered (Success)
+                                </button>
+                            </form>
+                        @endif
+                        @if(in_array($order->status, ['pending', 'processing']))
+                            <form method="POST" action="{{ route('admin.orders.cancel', $order) }}"
+                                  onsubmit="return confirm('Cancel this order? Stock will be restored and refund will be initiated if payment was made.')">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="btn btn-danger w-100">
+                                    <i class="fas fa-times-circle mr-2"></i>Cancel Order & Refund
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                </div>
+            </div>
+            @endif
+
             <!-- Update Status -->
             <div class="card shadow mb-4">
                 <div class="card-header py-3">

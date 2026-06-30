@@ -8,7 +8,7 @@
     </div>
 
     <!-- Stats Cards -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
                 <div class="p-3 rounded-full bg-indigo-600 text-white">
@@ -53,7 +53,35 @@
 
         <div class="bg-white rounded-lg shadow p-6">
             <div class="flex items-center">
-                <div class="p-3 rounded-full bg-red-600 text-white">
+                <div class="p-3 rounded-full bg-green-500 text-white">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Successful Orders</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['success_orders'] }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-red-500 text-white">
+                    <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </div>
+                <div class="ml-4">
+                    <p class="text-sm font-medium text-gray-600">Cancelled Orders</p>
+                    <p class="text-2xl font-semibold text-gray-900">{{ $stats['cancelled_orders'] }}</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="bg-white rounded-lg shadow p-6">
+            <div class="flex items-center">
+                <div class="p-3 rounded-full bg-indigo-600 text-white">
                     <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path>
                     </svg>
@@ -175,12 +203,15 @@
                                     <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Customer</th>
                                     <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Total</th>
                                     <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                                    <th class="text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Actions</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
                                 @foreach($recent_orders as $order)
                                     <tr>
-                                        <td class="py-2 text-sm text-gray-900">#{{ $order->order_number }}</td>
+                                        <td class="py-2 text-sm text-gray-900">
+                                            <a href="{{ route('admin.orders.show', $order) }}" class="text-blue-600 hover:underline">#{{ $order->order_number }}</a>
+                                        </td>
                                         <td class="py-2 text-sm text-gray-900">{{ $order->customer->full_name ?? 'Guest' }}</td>
                                         <td class="py-2 text-sm text-gray-900">{{ format_currency($order->total, 2) }}</td>
                                         <td class="py-2">
@@ -193,6 +224,28 @@
                                             ">
                                                 {{ ucfirst($order->status) }}
                                             </span>
+                                        </td>
+                                        <td class="py-2">
+                                            @if(in_array($order->status, ['pending', 'processing', 'shipped']))
+                                                <div class="flex space-x-1">
+                                                    <form method="POST" action="{{ route('admin.orders.deliver', $order) }}" onsubmit="return confirm('Mark as delivered?')">
+                                                        @csrf @method('PATCH')
+                                                        <button type="submit" class="px-2 py-1 bg-green-100 text-green-700 rounded text-xs hover:bg-green-200" title="Deliver">
+                                                            <i class="fas fa-check"></i>
+                                                        </button>
+                                                    </form>
+                                                    @if(in_array($order->status, ['pending', 'processing']))
+                                                    <form method="POST" action="{{ route('admin.orders.cancel', $order) }}" onsubmit="return confirm('Cancel this order?')">
+                                                        @csrf @method('PATCH')
+                                                        <button type="submit" class="px-2 py-1 bg-red-100 text-red-700 rounded text-xs hover:bg-red-200" title="Cancel">
+                                                            <i class="fas fa-times"></i>
+                                                        </button>
+                                                    </form>
+                                                    @endif
+                                                </div>
+                                            @else
+                                                <span class="text-xs text-gray-400">—</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @endforeach

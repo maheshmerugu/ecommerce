@@ -140,6 +140,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('orders/{order}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::patch('orders/{order}/status', [AdminOrderController::class, 'updateStatus'])->name('orders.update-status');
+        Route::patch('orders/{order}/deliver', [AdminOrderController::class, 'markDelivered'])->name('orders.deliver');
+        Route::patch('orders/{order}/cancel', [AdminOrderController::class, 'cancelOrder'])->name('orders.cancel');
 
         // Customer Management
         Route::get('customers', [AdminCustomerController::class, 'index'])->name('customers.index');

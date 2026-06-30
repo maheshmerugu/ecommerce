@@ -356,20 +356,20 @@ class CheckoutController extends Controller
             'discount_amount' => 0,
             'total' => $cart->total_price + $shippingFee,
             'currency' => 'INR',
-            'billing_address' => json_encode([
+            'billing_address' => [
                 'address' => $sameAsShipping ? $request->shipping_address : $request->billing_address,
                 'city' => $sameAsShipping ? $request->shipping_city : $request->billing_city,
                 'state' => $sameAsShipping ? $request->shipping_state : $request->billing_state,
                 'pincode' => $sameAsShipping ? $request->shipping_pincode : $request->billing_pincode,
                 'country' => 'India'
-            ]),
-            'shipping_address' => json_encode([
+            ],
+            'shipping_address' => [
                 'address' => $request->shipping_address,
                 'city' => $request->shipping_city,
                 'state' => $request->shipping_state,
                 'pincode' => $request->shipping_pincode,
                 'country' => 'India'
-            ]),
+            ],
             'payment_status' => 'pending',
             'payment_method' => 'razorpay'
         ]);
